@@ -1,0 +1,296 @@
+"use client";
+
+import { useEffect, useState, useMemo } from "react";
+import { useParams } from "next/navigation";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
+import { ArrowLeft, ArrowUpRight } from "lucide-react";
+
+type TeamRow = {
+  abbreviation: string;
+  city: string;
+  name: string;
+  slug: string;
+  fullName: string;
+  conference: string;
+  confRank?: number;
+  wins: number;
+  losses: number;
+  winPct?: number;
+  pct?: number;
+  streak: string;
+  l10?: string;
+  primaryColor?: string;
+  color?: string;
+};
+
+type PlayerRow = {
+  id: number;
+  fullName: string;
+  slug: string;
+  teamAbbr: string;
+  pts: number;
+  reb: number;
+  ast: number;
+  gp: number;
+  min: number;
+};
+
+export default function TeamProfilePage() {
+  const params = useParams<{ slug: string }>();
+  const slug = params?.slug ?? "";
+
+  const [teams, setTeams] = useState<TeamRow[]>([]);
+  const [players, setPlayers] = useState<PlayerRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    Promise.all([
+      fetch("/api/teams/with-records").then(r => r.ok ? r.json() : []),
+      fetch("/api/players/with-stats").then(r => r.ok ? r.json() : []),
+    ])
+      .then(([t, p]) => {
+        if (cancelled) return;
+        setTeams(Array.isArray(t) ? t : []);
+        setPlayers(Array.isArray(p) ? p : []);
+      })
+      .catch(e => { if (!cancelled) setError(String(e)); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+
+  const team = useMemo(() => {
+    const s = slug.toLowerCase();
+    return teams.find(t =>
+      t.slug?.toLowerCase() === s ||
+      t.abbreviation?.toLowerCase() === s
+    );
+  }, [teams, slug]);
+
+  const roster = useMemo(() => {
+    if (!team) return [];
+    return players
+      .filter(p => p.teamAbbr === team.abbreviation)
+      .sort((a, b) => b.pts - a.pts);
+  }, [team, players]);
+
+  if (loading) {
+    return <div className="px-6 lg:px-12 py-32 text-center text-[#8A8A93]">Loading team…</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="px-6 lg:px-12 py-20 max-w-3xl mx-auto">
+        <div className="rounded-2xl border border-[#F87171]/30 bg-[#F87171]/10 px-5 py-4 text-sm text-[#F87171]">
+          Failed to load: {error}
+        </div>
+      </div>
+    );
+  }
+
+  if (!team) {
+    return (
+      <div className="px-6 lg:px-12 py-32 text-center max-w-2xl mx-auto">
+        <h1 className="font-[family-name:var(--font-barlow)] font-black text-5xl text-[#F5F5F7] mb-4 tracking-[-0.03em]">
+          Team not found.
+        </h1>
+        <p className="text-base text-[#8A8A93] mb-8">&ldquo;{slug}&rdquo; doesn&apos;t match any team.</p>
+        <Link href="/teams" className="inline-flex items-center gap-2 bg-[#F5F5F7] text-[#0A0A0E] text-sm font-semibold px-6 py-3 rounded-full hover:bg-white transition-all">
+          <ArrowLeft size={14} /> Back to Teams
+        </Link>
+      </div>
+    );
+  }
+
+  const color = team.primaryColor ?? team.color ?? "#D4B560";
+  const total = team.wins + team.losses;
+  const winPct = total > 0 ? ((team.wins / total) * 100).toFixed(1) : "0.0";
+  const streakUp = team.streak?.startsWith("W");
+  const tier = (team.confRank ?? 99) <= 6 ? "Playoffs" : (team.confRank ?? 99) <= 10 ? "Play-in" : "Lottery";
+  const topScorer = roster[0];
+  const topRebounder = [...roster].sort((a, b) => b.reb - a.reb)[0];
+  const topPlaymaker = [...roster].sort((a, b) => b.ast - a.ast)[0];
+
+  return (
+    <div className="pb-24 lg:pb-12">
+
+      {/* HERO with subtle team color wash */}
+      <section className="relative px-6 lg:px-12 pt-16 lg:pt-20 pb-12 overflow-hidden" data-reveal>
+        <div
+          className="absolute inset-0 opacity-[0.06] pointer-events-none"
+          style={{ background: `radial-gradient(ellipse at top left, ${color}, transparent 60%)` }}
+        />
+        <div className="relative max-w-6xl mx-auto">
+
+          {/* Back link */}
+          <Link href="/teams" className="inline-flex items-center gap-1.5 text-xs font-medium text-[#6E6E76] hover:text-[#F5F5F7] mb-8 tracking-wide transition-colors">
+            <ArrowLeft size={12} /> All Teams
+          </Link>
+
+          {/* Eyebrow */}
+          <div className="flex flex-wrap items-center gap-3 mb-6">
+            <span
+              className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em]"
+              style={{ color }}
+            >
+              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: color }} />
+              {team.conference}ern Conference {team.confRank ? `· #${team.confRank}` : ""}
+            </span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76]">
+              · {tier}
+            </span>
+          </div>
+
+          {/* Big team display */}
+          <h1 className="font-[family-name:var(--font-barlow)] font-black text-[clamp(3rem,8vw,7rem)] leading-[0.9] tracking-[-0.045em] text-[#F5F5F7] mb-10">
+            {team.city}<br />
+            <span style={{ color }}>{team.name}</span>
+          </h1>
+
+          {/* Record block */}
+          <div className="flex flex-wrap items-end gap-x-12 gap-y-4">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76] mb-2">Record</p>
+              <p className="font-[family-name:var(--font-barlow)] font-black text-6xl tabular-nums tracking-[-0.04em] text-[#F5F5F7]">
+                {team.wins}<span className="text-[#3A3A42]">–{team.losses}</span>
+              </p>
+              <p className="text-xs text-[#8A8A93] mt-1">{winPct}% win rate</p>
+            </div>
+            {team.streak && (
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76] mb-2">Streak</p>
+                <p className={cn(
+                  "font-[family-name:var(--font-barlow)] font-black text-6xl tabular-nums tracking-[-0.04em]",
+                  streakUp ? "text-[#34D399]" : "text-[#F87171]"
+                )}>
+                  {team.streak}
+                </p>
+                <p className="text-xs text-[#8A8A93] mt-1">{team.l10 ? `${team.l10} last 10` : "current"}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* DIVIDER */}
+      <div className="px-6 lg:px-12">
+        <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      </div>
+
+      {/* TEAM LEADERS */}
+      {roster.length > 0 && (
+        <section className="px-6 lg:px-12 py-16 lg:py-20" data-reveal data-reveal-delay="1">
+          <div className="max-w-6xl mx-auto">
+            <div className="mb-10">
+              <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-2">Team Leaders</p>
+              <h2 className="font-[family-name:var(--font-barlow)] font-black text-4xl lg:text-5xl tracking-[-0.03em] text-[#F5F5F7]">
+                The franchise.
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {topScorer && (
+                <Link href={`/players/${topScorer.slug}`} className="floating-card group block rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6 transition-all duration-500 hover:scale-[1.02]">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] mb-4" style={{ color }}>Top Scorer</p>
+                  <p className="font-[family-name:var(--font-barlow)] font-black text-5xl tabular-nums tracking-[-0.04em] text-[#F5F5F7] mb-2">
+                    {topScorer.pts.toFixed(1)}
+                  </p>
+                  <p className="text-[11px] text-[#8A8A93] mb-4 tracking-wide">PPG · {topScorer.gp} GP</p>
+                  <p className="text-sm font-semibold text-[#F5F5F7] truncate group-hover:text-[#D4B560] transition-colors">{topScorer.fullName}</p>
+                </Link>
+              )}
+              {topRebounder && (
+                <Link href={`/players/${topRebounder.slug}`} className="floating-card group block rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6 transition-all duration-500 hover:scale-[1.02]">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76] mb-4">Top Rebounder</p>
+                  <p className="font-[family-name:var(--font-barlow)] font-black text-5xl tabular-nums tracking-[-0.04em] text-[#F5F5F7] mb-2">
+                    {topRebounder.reb.toFixed(1)}
+                  </p>
+                  <p className="text-[11px] text-[#8A8A93] mb-4 tracking-wide">RPG · {topRebounder.gp} GP</p>
+                  <p className="text-sm font-semibold text-[#F5F5F7] truncate group-hover:text-[#D4B560] transition-colors">{topRebounder.fullName}</p>
+                </Link>
+              )}
+              {topPlaymaker && (
+                <Link href={`/players/${topPlaymaker.slug}`} className="floating-card group block rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6 transition-all duration-500 hover:scale-[1.02]">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76] mb-4">Top Playmaker</p>
+                  <p className="font-[family-name:var(--font-barlow)] font-black text-5xl tabular-nums tracking-[-0.04em] text-[#F5F5F7] mb-2">
+                    {topPlaymaker.ast.toFixed(1)}
+                  </p>
+                  <p className="text-[11px] text-[#8A8A93] mb-4 tracking-wide">APG · {topPlaymaker.gp} GP</p>
+                  <p className="text-sm font-semibold text-[#F5F5F7] truncate group-hover:text-[#D4B560] transition-colors">{topPlaymaker.fullName}</p>
+                </Link>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* DIVIDER */}
+      <div className="px-6 lg:px-12">
+        <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      </div>
+
+      {/* ROSTER */}
+      <section className="px-6 lg:px-12 py-16 lg:py-20" data-reveal data-reveal-delay="2">
+        <div className="max-w-6xl mx-auto">
+
+          <div className="flex items-end justify-between mb-10">
+            <div>
+              <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-2">Roster</p>
+              <h2 className="font-[family-name:var(--font-barlow)] font-black text-4xl lg:text-5xl tracking-[-0.03em] text-[#F5F5F7]">
+                Every player.
+              </h2>
+            </div>
+            <Link href="/players" className="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-[#8A8A93] hover:text-[#F5F5F7] transition-colors">
+              All Players <ArrowUpRight size={14} />
+            </Link>
+          </div>
+
+          {roster.length === 0 ? (
+            <div className="floating-card rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-8 text-sm text-[#8A8A93] text-center">
+              No roster data available for {team.abbreviation}.
+            </div>
+          ) : (
+            <div className="floating-card rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/[0.06]">
+                    <th className="text-left px-6 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">Player</th>
+                    <th className="text-right px-4 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">GP</th>
+                    <th className="text-right px-4 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">MIN</th>
+                    <th className="text-right px-4 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#D4B560]">PPG</th>
+                    <th className="text-right px-4 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">RPG</th>
+                    <th className="text-right px-4 py-4 pr-6 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">APG</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {roster.map(p => (
+                    <tr key={p.id} className="border-b border-white/[0.03] last:border-b-0 group">
+                      <td className="px-6 py-4">
+                        <Link href={`/players/${p.slug}`} className="font-semibold text-[#F5F5F7] group-hover:text-[#D4B560] transition-colors tracking-tight">
+                          {p.fullName}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-4 text-right text-xs text-[#8A8A93] tabular-nums">{p.gp}</td>
+                      <td className="px-4 py-4 text-right text-xs text-[#8A8A93] tabular-nums">{p.min.toFixed(1)}</td>
+                      <td className="px-4 py-4 text-right font-[family-name:var(--font-barlow)] font-bold text-base text-[#D4B560] tabular-nums">{p.pts.toFixed(1)}</td>
+                      <td className="px-4 py-4 text-right font-[family-name:var(--font-barlow)] font-bold text-base text-[#F5F5F7] tabular-nums">{p.reb.toFixed(1)}</td>
+                      <td className="px-4 py-4 pr-6 text-right font-[family-name:var(--font-barlow)] font-bold text-base text-[#F5F5F7] tabular-nums">{p.ast.toFixed(1)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          <p className="text-xs text-[#6E6E76] mt-4 tracking-wide leading-relaxed">
+            Roster shows players from our top-150 scorers list. Some bench players may not appear.
+          </p>
+        </div>
+      </section>
+
+    </div>
+  );
+}
