@@ -62,7 +62,7 @@ export function Sidebar() {
               )}
             >
               {active && (
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-0.5 rounded-full bg-[#D4B560]" />
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-r-full bg-[#D4B560] shadow-[0_0_10px_rgba(212,181,96,0.5)]" />
               )}
               <Icon
                 size={17}

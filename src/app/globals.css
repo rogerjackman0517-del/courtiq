@@ -389,3 +389,87 @@ img {
   pointer-events: none;
   z-index: -1;
 }
+
+
+/* ============================================================
+   POLISH BATCH 2
+   ============================================================ */
+
+/* Table row hover — gold accent border on left */
+.stat-row {
+  position: relative;
+  transition: background-color 200ms ease, padding-left 200ms ease;
+}
+.stat-row::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #D4B560;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+.stat-row:hover::before {
+  opacity: 1;
+}
+
+/* Input field — premium gold focus ring */
+input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: none;
+  box-shadow: 0 0 14px -2px rgba(212, 181, 96, 0.18);
+  border-color: rgba(212, 181, 96, 0.25) !important;
+}
+
+/* Subtle gold corner glow on hero pages */
+.brand-glow {
+  position: relative;
+  overflow: hidden;
+}
+.brand-glow::before {
+  content: "";
+  position: absolute;
+  top: -200px;
+  right: -200px;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(
+    circle,
+    rgba(212, 181, 96, 0.08) 0%,
+    rgba(212, 181, 96, 0) 60%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+.brand-glow > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Section eyebrow with blinking gold dot */
+.eyebrow-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.eyebrow-dot::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #D4B560;
+  animation: pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+/* TopNav scroll-blur effect */
+.topnav-blur {
+  background: rgba(10, 10, 14, 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}

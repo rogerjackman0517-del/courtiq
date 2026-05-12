@@ -98,7 +98,7 @@ export default function PlayersPage() {
   return (
     <div className="pb-24 lg:pb-12 premium-fade-in">
       {/* Hero header */}
-      <section className="px-4 lg:px-12 pt-10 lg:pt-20 pb-8" data-reveal>
+      <section className="brand-glow px-4 lg:px-12 pt-10 lg:pt-20 pb-8" data-reveal>
         <div className="max-w-6xl mx-auto">
           <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-3">
             Database
@@ -180,7 +180,17 @@ export default function PlayersPage() {
                 <tbody>
                   {loading && Array.from({ length: 10 }).map((_, i) => <PlayerRowSkeleton key={`skel-${i}`} />)}
                   {!loading && rows.length === 0 && !error && (
-                    <tr><td colSpan={11} className="px-5 py-16 text-center text-[#6E6E76] text-sm">No players match &ldquo;{query}&rdquo;.</td></tr>
+                    <tr><td colSpan={11} className="px-5 py-16 text-center">
+                      <div className="flex flex-col items-center gap-3">
+                        <svg viewBox="0 0 24 24" className="h-10 w-10 opacity-30" fill="none" stroke="#D4B560" strokeWidth="1.5" strokeLinecap="round">
+                          <circle cx="11" cy="11" r="7" />
+                          <path d="M16.5 16.5 L21 21" />
+                          <line x1="8" y1="11" x2="14" y2="11" />
+                        </svg>
+                        <p className="text-sm text-[#8A8A93] font-medium">No players match &ldquo;{query}&rdquo;</p>
+                        <p className="text-xs text-[#6E6E76]">Try a different name or position</p>
+                      </div>
+                    </td></tr>
                   )}
                   {rows.map((p, i) => (
                     <tr key={p.id} className="border-b border-white/[0.03] last:border-b-0 group">

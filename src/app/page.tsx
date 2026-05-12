@@ -64,7 +64,7 @@ export default function HomePage() {
     <div className="pb-24 lg:pb-12 premium-fade-in">
 
       {/* HERO — Apple-style massive display type */}
-      <section className="relative px-4 lg:px-12 pt-10 lg:pt-24 pb-10 lg:pb-24" data-reveal>
+      <section className="brand-glow relative px-4 lg:px-12 pt-10 lg:pt-24 pb-10 lg:pb-24" data-reveal>
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-12 lg:gap-16 items-center">
             <div>

@@ -129,7 +129,7 @@ export function TopNav() {
   }
 
   return (
-    <header className="sticky top-0 z-30 flex items-center gap-3 px-4 lg:px-6 h-14 border-b border-white/[0.06] glass">
+    <header className="sticky top-0 z-30 flex items-center gap-3 px-4 lg:px-6 h-14 topnav-blur">
       <Link href="/" className="group flex items-center gap-1.5 lg:hidden hover:opacity-80 transition-opacity" aria-label="CourtIQ — Home">
         <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#0A0A0E] border border-[#D4B560]/40">
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="#D4B560" strokeWidth="2.5" strokeLinecap="round">
