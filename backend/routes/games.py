@@ -22,6 +22,11 @@ TRICODE_TO_NBA_ID = {
     "TOR": 1610612761, "UTA": 1610612762, "WAS": 1610612764,
 }
 
+# Normalize ESPN's 2-letter tricodes to canonical 3-letter NBA tricodes
+NORMALIZE_TRICODE = {
+    "GS": "GSW", "LA": "LAC", "NO": "NOP", "NY": "NYK", "SA": "SAS",
+}
+
 
 def _parse_espn_status(comp_status: dict) -> tuple[int, str]:
     """Map ESPN status to our format. Returns (gameStatus, gameStatusText)."""
@@ -74,7 +79,7 @@ def _format_game(event: dict) -> dict:
                             pass
                 break
         return {
-            "teamId": TRICODE_TO_NBA_ID.get((team.get("abbreviation") or "").upper(), 0),
+            "teamId": TRICODE_TO_NBA_ID.get(NORMALIZE_TRICODE.get((team.get("abbreviation") or "").upper(), (team.get("abbreviation") or "").upper()), 0),
             "teamName": team.get("name", ""),
             "teamCity": team.get("location", ""),
             "teamTricode": team.get("abbreviation", ""),
@@ -189,7 +194,8 @@ async def get_game_boxscore(game_id: str) -> dict:
     def fmt_team_header(c: dict) -> dict:
         team = c.get("team", {})
         linescores = c.get("linescores") or []
-        tricode = (team.get("abbreviation") or "").upper()
+        raw = (team.get("abbreviation") or "").upper()
+        tricode = NORMALIZE_TRICODE.get(raw, raw)
         return {
             "teamId": TRICODE_TO_NBA_ID.get(tricode, 0),
             "tricode": tricode,
