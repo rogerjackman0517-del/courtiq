@@ -299,3 +299,93 @@ img {
   animation: shimmer 1.8s linear infinite;
   border-radius: 6px;
 }
+
+
+/* ============================================================
+   PREMIUM AESTHETIC POLISH
+   ============================================================ */
+
+/* Custom scrollbar — thin, gold-tinted, dark theme */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(212, 181, 96, 0.2);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background 200ms ease;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 181, 96, 0.5);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
+}
+
+/* Floating cards — subtle top-left light gradient for depth */
+.floating-card {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0) 50%
+  ),
+  #131318;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.03) inset,
+    0 8px 24px -8px rgba(0, 0, 0, 0.4);
+}
+
+/* Stat-number sheen — gold gradient for hero/leader numbers */
+.stat-gold {
+  background: linear-gradient(135deg, #E8C770 0%, #D4B560 60%, #B89548 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Slow fade-in for first paint — 200ms, eases in */
+@keyframes premiumFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.premium-fade-in {
+  animation: premiumFadeIn 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Number ticker — count-up effect */
+@keyframes tickerIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.ticker-number {
+  display: inline-block;
+  animation: tickerIn 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Soft player headshot rings + glow */
+.player-glow {
+  position: relative;
+}
+.player-glow::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle at center,
+    rgba(212, 181, 96, 0.18) 0%,
+    rgba(212, 181, 96, 0) 70%
+  );
+  pointer-events: none;
+  z-index: -1;
+}

@@ -130,7 +130,7 @@ export default function StandingsPage() {
   }, []);
 
   return (
-    <div className="pb-24 lg:pb-12">
+    <div className="pb-24 lg:pb-12 premium-fade-in">
 
       {/* HERO */}
       <section className="px-6 lg:px-12 pt-16 lg:pt-20 pb-12" data-reveal>

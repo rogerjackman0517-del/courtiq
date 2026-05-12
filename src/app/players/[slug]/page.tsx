@@ -184,7 +184,11 @@ export default function PlayerProfilePage() {
 
           {/* Name display */}
           <div className="flex flex-col lg:flex-row lg:items-end gap-8 mb-8">
-            <PlayerAvatar playerId={player.id} fullName={player.fullName} size="xl" className="ring-2 ring-white/[0.06] shadow-2xl" />
+            <div className="relative inline-block">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#D4B560]/30 via-[#D4B560]/10 to-transparent blur-3xl scale-110" />
+              <div className="absolute inset-[-4px] rounded-full bg-gradient-to-br from-[#D4B560] via-[#D4B560]/40 to-transparent opacity-50 blur-md" />
+              <PlayerAvatar playerId={player.id} fullName={player.fullName} size="xl" className="relative ring-2 ring-[#D4B560]/40 shadow-2xl shadow-[#D4B560]/20" />
+            </div>
             <h1 className="font-[family-name:var(--font-barlow)] font-black text-[clamp(2.25rem,8vw,7rem)] leading-[0.9] tracking-[-0.045em] text-[#F5F5F7]">
               {player.fullName}
             </h1>

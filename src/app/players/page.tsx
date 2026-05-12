@@ -96,7 +96,7 @@ export default function PlayersPage() {
   }
 
   return (
-    <div className="pb-24 lg:pb-12">
+    <div className="pb-24 lg:pb-12 premium-fade-in">
       {/* Hero header */}
       <section className="px-4 lg:px-12 pt-10 lg:pt-20 pb-8" data-reveal>
         <div className="max-w-6xl mx-auto">

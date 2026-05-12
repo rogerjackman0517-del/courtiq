@@ -61,7 +61,7 @@ export default function HomePage() {
   const liveGame = liveGames[0];
 
   return (
-    <div className="pb-24 lg:pb-12">
+    <div className="pb-24 lg:pb-12 premium-fade-in">
 
       {/* HERO — Apple-style massive display type */}
       <section className="relative px-4 lg:px-12 pt-10 lg:pt-24 pb-10 lg:pb-24" data-reveal>
@@ -104,7 +104,7 @@ export default function HomePage() {
           ) : (
             <h1 className="font-[family-name:var(--font-barlow)] font-black text-[clamp(2.5rem,8vw,7rem)] leading-[0.95] tracking-[-0.04em] text-[#F5F5F7] mb-10">
               {ptsLeader.fullName.split(" ")[0]} is averaging<br />
-              <span className="text-[#D4B560]">{ptsLeader.pts.toFixed(1)} points</span><br />
+              <span className="stat-gold ticker-number">{ptsLeader.pts.toFixed(1)} points</span><br />
               a game.
             </h1>
           )}
@@ -139,12 +139,13 @@ export default function HomePage() {
             <div className="hidden lg:block">
               {ptsLeader ? (
                 <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#D4B560]/20 to-transparent blur-3xl" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#D4B560]/30 via-[#D4B560]/10 to-transparent blur-3xl scale-110" />
+                  <div className="absolute inset-[-4px] rounded-full bg-gradient-to-br from-[#D4B560] via-[#D4B560]/40 to-transparent opacity-60 blur-md" />
                   <PlayerAvatar
                     playerId={ptsLeader.id}
                     fullName={ptsLeader.fullName}
                     size="xl"
-                    className="relative !h-80 !w-80 ring-4 ring-white/[0.06] shadow-2xl"
+                    className="relative !h-80 !w-80 ring-2 ring-[#D4B560]/40 shadow-2xl"
                   />
                 </div>
               ) : (
