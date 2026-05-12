@@ -110,7 +110,7 @@ export default function TeamProfilePage() {
             </div>
           </div>
         </section>
-        <div className="px-6 lg:px-12">
+        <div className="px-4 lg:px-12">
           <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
         </div>
         <section className="px-6 lg:px-12 py-16">
@@ -198,7 +198,7 @@ export default function TeamProfilePage() {
           {/* Big team display */}
           <div className="flex flex-col lg:flex-row lg:items-center gap-8 mb-10">
             <TeamLogo teamId={team.id} abbreviation={team.abbreviation} primaryColor={color} size="xl" className="h-32 w-32 shrink-0" />
-            <h1 className="font-[family-name:var(--font-barlow)] font-black text-[clamp(3rem,8vw,7rem)] leading-[0.9] tracking-[-0.045em] text-[#F5F5F7]">
+            <h1 className="font-[family-name:var(--font-barlow)] font-black text-[clamp(2.25rem,8vw,7rem)] leading-[0.9] tracking-[-0.045em] text-[#F5F5F7]">
               {team.city}<br />
               <span style={{ color }}>{team.name}</span>
             </h1>
@@ -230,13 +230,13 @@ export default function TeamProfilePage() {
       </section>
 
       {/* DIVIDER */}
-      <div className="px-6 lg:px-12">
+      <div className="px-4 lg:px-12">
         <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       </div>
 
       {/* TEAM LEADERS */}
       {roster.length > 0 && (
-        <section className="px-6 lg:px-12 py-16 lg:py-20" data-reveal data-reveal-delay="1">
+        <section className="px-4 lg:px-12 py-10 lg:py-20" data-reveal data-reveal-delay="1">
           <div className="max-w-6xl mx-auto">
             <div className="mb-10">
               <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-2">Team Leaders</p>
@@ -282,12 +282,12 @@ export default function TeamProfilePage() {
       )}
 
       {/* DIVIDER */}
-      <div className="px-6 lg:px-12">
+      <div className="px-4 lg:px-12">
         <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       </div>
 
       {/* ROSTER */}
-      <section className="px-6 lg:px-12 py-16 lg:py-20" data-reveal data-reveal-delay="2">
+      <section className="px-4 lg:px-12 py-10 lg:py-20" data-reveal data-reveal-delay="2">
         <div className="max-w-6xl mx-auto">
 
           <div className="flex items-end justify-between mb-10">

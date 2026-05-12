@@ -96,13 +96,13 @@ export default function DraftPage() {
       </section>
 
       {/* DIVIDER */}
-      <div className="px-6 lg:px-12">
+      <div className="px-4 lg:px-12">
         <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       </div>
 
       {/* TOP 3 spotlight */}
       {!loading && top3.length === 3 && (
-        <section className="px-6 lg:px-12 py-16 lg:py-20" data-reveal data-reveal-delay="1">
+        <section className="px-4 lg:px-12 py-10 lg:py-20" data-reveal data-reveal-delay="1">
           <div className="max-w-6xl mx-auto">
             <div className="mb-10">
               <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#D4B560] mb-2">Top 3</p>
@@ -139,12 +139,12 @@ export default function DraftPage() {
       )}
 
       {/* DIVIDER */}
-      <div className="px-6 lg:px-12">
+      <div className="px-4 lg:px-12">
         <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       </div>
 
       {/* FULL DRAFT */}
-      <section className="px-6 lg:px-12 py-12 lg:py-16" data-reveal data-reveal-delay="2">
+      <section className="px-4 lg:px-12 py-8 lg:py-16" data-reveal data-reveal-delay="2">
         <div className="max-w-6xl mx-auto">
 
           <div className="mb-10">

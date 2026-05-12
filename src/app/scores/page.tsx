@@ -234,11 +234,11 @@ export default function ScoresPage() {
       </section>
 
       {/* DIVIDER */}
-      <div className="px-6 lg:px-12">
+      <div className="px-4 lg:px-12">
         <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       </div>
 
-      <section className="px-6 lg:px-12 py-12 lg:py-16" data-reveal data-reveal-delay="1">
+      <section className="px-4 lg:px-12 py-8 lg:py-16" data-reveal data-reveal-delay="1">
         <div className="max-w-6xl mx-auto">
 
           {/* Tabs */}

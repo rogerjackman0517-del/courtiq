@@ -98,7 +98,7 @@ export default function PlayersPage() {
   return (
     <div className="pb-24 lg:pb-12">
       {/* Hero header */}
-      <section className="px-6 lg:px-12 pt-16 lg:pt-20 pb-10" data-reveal>
+      <section className="px-4 lg:px-12 pt-10 lg:pt-20 pb-8" data-reveal>
         <div className="max-w-6xl mx-auto">
           <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-3">
             Database
@@ -113,7 +113,7 @@ export default function PlayersPage() {
         </div>
       </section>
 
-      <section className="px-6 lg:px-12" data-reveal data-reveal-delay="1">
+      <section className="px-4 lg:px-12" data-reveal data-reveal-delay="1">
         <div className="max-w-6xl mx-auto">
 
           {/* Search */}

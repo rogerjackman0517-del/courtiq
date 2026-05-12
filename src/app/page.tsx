@@ -64,7 +64,7 @@ export default function HomePage() {
     <div className="pb-24 lg:pb-12">
 
       {/* HERO — Apple-style massive display type */}
-      <section className="relative px-6 lg:px-12 pt-16 lg:pt-24 pb-16 lg:pb-24" data-reveal>
+      <section className="relative px-4 lg:px-12 pt-10 lg:pt-24 pb-10 lg:pb-24" data-reveal>
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-12 lg:gap-16 items-center">
             <div>
@@ -96,13 +96,13 @@ export default function HomePage() {
               <Skeleton className="h-[clamp(3rem,8vw,7rem)] w-2/5" />
             </div>
           ) : liveGame ? (
-            <h1 className="font-[family-name:var(--font-barlow)] font-black text-[clamp(3rem,8vw,7rem)] leading-[0.95] tracking-[-0.04em] text-[#F5F5F7] mb-10">
+            <h1 className="font-[family-name:var(--font-barlow)] font-black text-[clamp(2.5rem,8vw,7rem)] leading-[0.95] tracking-[-0.04em] text-[#F5F5F7] mb-10">
               {liveGame.awayTeam.teamCity}<br />
               vs {liveGame.homeTeam.teamCity}<br />
               <span className="text-[#D4B560]">{liveGame.awayTeam.score}–{liveGame.homeTeam.score}</span>
             </h1>
           ) : (
-            <h1 className="font-[family-name:var(--font-barlow)] font-black text-[clamp(3rem,8vw,7rem)] leading-[0.95] tracking-[-0.04em] text-[#F5F5F7] mb-10">
+            <h1 className="font-[family-name:var(--font-barlow)] font-black text-[clamp(2.5rem,8vw,7rem)] leading-[0.95] tracking-[-0.04em] text-[#F5F5F7] mb-10">
               {ptsLeader.fullName.split(" ")[0]} is averaging<br />
               <span className="text-[#D4B560]">{ptsLeader.pts.toFixed(1)} points</span><br />
               a game.
@@ -162,7 +162,7 @@ export default function HomePage() {
 
       {/* TODAY'S GAMES */}
       {games.length > 0 && (
-        <section className="px-6 lg:px-12 py-16 lg:py-20" data-reveal data-reveal-delay="1">
+        <section className="px-4 lg:px-12 py-10 lg:py-20" data-reveal data-reveal-delay="1">
           <div className="max-w-6xl mx-auto">
             <div className="flex items-end justify-between mb-10">
               <div>
@@ -241,7 +241,7 @@ export default function HomePage() {
       </div>
 
       {/* LEAGUE PULSE — bigger numbers, more space */}
-      <section className="px-6 lg:px-12 py-16 lg:py-20" data-reveal data-reveal-delay="2">
+      <section className="px-4 lg:px-12 py-10 lg:py-20" data-reveal data-reveal-delay="2">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-end justify-between mb-10">
             <div>
@@ -330,7 +330,7 @@ export default function HomePage() {
       </div>
 
       {/* TOP SCORERS + NEWS */}
-      <section className="px-6 lg:px-12 py-16 lg:py-20" data-reveal data-reveal-delay="3">
+      <section className="px-4 lg:px-12 py-10 lg:py-20" data-reveal data-reveal-delay="3">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-10">
 
           {/* Top scorers */}

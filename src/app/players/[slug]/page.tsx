@@ -109,10 +109,10 @@ export default function PlayerProfilePage() {
             <Skeleton className="h-4 w-80" />
           </div>
         </section>
-        <div className="px-6 lg:px-12">
+        <div className="px-4 lg:px-12">
           <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
         </div>
-        <section className="px-6 lg:px-12 py-16 lg:py-20">
+        <section className="px-4 lg:px-12 py-10 lg:py-20">
           <div className="max-w-6xl mx-auto">
             <Skeleton className="h-3 w-20 mb-2" />
             <Skeleton className="h-12 w-64 mb-10" />
@@ -185,7 +185,7 @@ export default function PlayerProfilePage() {
           {/* Name display */}
           <div className="flex flex-col lg:flex-row lg:items-end gap-8 mb-8">
             <PlayerAvatar playerId={player.id} fullName={player.fullName} size="xl" className="ring-2 ring-white/[0.06] shadow-2xl" />
-            <h1 className="font-[family-name:var(--font-barlow)] font-black text-[clamp(3rem,8vw,7rem)] leading-[0.9] tracking-[-0.045em] text-[#F5F5F7]">
+            <h1 className="font-[family-name:var(--font-barlow)] font-black text-[clamp(2.25rem,8vw,7rem)] leading-[0.9] tracking-[-0.045em] text-[#F5F5F7]">
               {player.fullName}
             </h1>
           </div>
@@ -202,12 +202,12 @@ export default function PlayerProfilePage() {
       </section>
 
       {/* DIVIDER */}
-      <div className="px-6 lg:px-12">
+      <div className="px-4 lg:px-12">
         <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       </div>
 
       {/* PER GAME */}
-      <section className="px-6 lg:px-12 py-16 lg:py-20" data-reveal data-reveal-delay="1">
+      <section className="px-4 lg:px-12 py-10 lg:py-20" data-reveal data-reveal-delay="1">
         <div className="max-w-6xl mx-auto">
 
           <div className="mb-10">
@@ -228,12 +228,12 @@ export default function PlayerProfilePage() {
       </section>
 
       {/* DIVIDER */}
-      <div className="px-6 lg:px-12">
+      <div className="px-4 lg:px-12">
         <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       </div>
 
       {/* SHOOTING + RADAR */}
-      <section className="px-6 lg:px-12 py-16 lg:py-20" data-reveal data-reveal-delay="2">
+      <section className="px-4 lg:px-12 py-10 lg:py-20" data-reveal data-reveal-delay="2">
         <div className="max-w-6xl mx-auto">
 
           <div className="mb-10">
@@ -302,7 +302,7 @@ export default function PlayerProfilePage() {
       </section>
 
       {/* Note */}
-      <section className="px-6 lg:px-12">
+      <section className="px-4 lg:px-12">
         <div className="max-w-6xl mx-auto rounded-2xl bg-[#1C1C24]/50 px-6 py-4 text-xs text-[#6E6E76] tracking-wide leading-relaxed">
           Stats verified from NBA.com via nba_api. Game log, shot chart, and advanced metrics coming soon.
         </div>

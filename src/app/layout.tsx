@@ -49,7 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {/* Main content */}
             <div className="flex flex-1 flex-col min-w-0 lg:ml-60">
               <TopNav />
-              <main className="flex-1 overflow-auto">
+              <main className="flex-1 overflow-auto pb-20 lg:pb-0">
                 {children}
                 <Footer />
               </main>

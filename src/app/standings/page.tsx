@@ -170,7 +170,7 @@ export default function StandingsPage() {
       )}
 
       {loading && (
-        <section className="px-6 lg:px-12 py-12 lg:py-16">
+        <section className="px-4 lg:px-12 py-8 lg:py-16">
           <div className="max-w-6xl mx-auto">
             <div className="floating-card rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] overflow-hidden">
               <table className="w-full text-sm"><tbody>
@@ -184,12 +184,12 @@ export default function StandingsPage() {
       {!loading && !error && (
         <>
           {/* DIVIDER */}
-          <div className="px-6 lg:px-12">
+          <div className="px-4 lg:px-12">
             <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
           </div>
 
           {/* EAST */}
-          <section className="px-6 lg:px-12 py-12 lg:py-16" data-reveal data-reveal-delay="1">
+          <section className="px-4 lg:px-12 py-8 lg:py-16" data-reveal data-reveal-delay="1">
             <div className="max-w-6xl mx-auto">
               <div className="mb-8">
                 <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#5B8DEF] mb-2">
@@ -204,12 +204,12 @@ export default function StandingsPage() {
           </section>
 
           {/* DIVIDER */}
-          <div className="px-6 lg:px-12">
+          <div className="px-4 lg:px-12">
             <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
           </div>
 
           {/* WEST */}
-          <section className="px-6 lg:px-12 py-12 lg:py-16" data-reveal data-reveal-delay="2">
+          <section className="px-4 lg:px-12 py-8 lg:py-16" data-reveal data-reveal-delay="2">
             <div className="max-w-6xl mx-auto">
               <div className="mb-8">
                 <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#D4B560] mb-2">

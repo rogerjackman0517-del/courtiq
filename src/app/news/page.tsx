@@ -141,7 +141,7 @@ export default function NewsPage() {
       </section>
 
       {/* DIVIDER */}
-      <div className="px-6 lg:px-12">
+      <div className="px-4 lg:px-12">
         <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       </div>
 
@@ -154,7 +154,7 @@ export default function NewsPage() {
       )}
 
       {loading && (
-        <section className="px-6 lg:px-12 py-12 lg:py-16">
+        <section className="px-4 lg:px-12 py-8 lg:py-16">
           <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-4">
               <NewsCardSkeleton featured />
@@ -171,7 +171,7 @@ export default function NewsPage() {
       )}
 
       {!loading && items.length > 0 && (
-        <section className="px-6 lg:px-12 py-12 lg:py-16" data-reveal data-reveal-delay="1">
+        <section className="px-4 lg:px-12 py-8 lg:py-16" data-reveal data-reveal-delay="1">
           <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
 
             {/* Main feed */}

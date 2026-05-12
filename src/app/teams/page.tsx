@@ -134,7 +134,7 @@ export default function TeamsPage() {
       )}
 
       {loading && (
-        <section className="px-6 lg:px-12 py-16 lg:py-20">
+        <section className="px-4 lg:px-12 py-10 lg:py-20">
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.from({ length: 15 }).map((_, i) => <TeamCardSkeleton key={`team-skel-${i}`} />)}
@@ -146,12 +146,12 @@ export default function TeamsPage() {
       {!loading && !error && (
         <>
           {/* DIVIDER */}
-          <div className="px-6 lg:px-12">
+          <div className="px-4 lg:px-12">
             <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
           </div>
 
           {/* EAST */}
-          <section className="px-6 lg:px-12 py-16 lg:py-20" data-reveal data-reveal-delay="1">
+          <section className="px-4 lg:px-12 py-10 lg:py-20" data-reveal data-reveal-delay="1">
             <div className="max-w-6xl mx-auto">
               <div className="mb-10">
                 <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#5B8DEF] mb-2">
@@ -168,12 +168,12 @@ export default function TeamsPage() {
           </section>
 
           {/* DIVIDER */}
-          <div className="px-6 lg:px-12">
+          <div className="px-4 lg:px-12">
             <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
           </div>
 
           {/* WEST */}
-          <section className="px-6 lg:px-12 py-16 lg:py-20" data-reveal data-reveal-delay="2">
+          <section className="px-4 lg:px-12 py-10 lg:py-20" data-reveal data-reveal-delay="2">
             <div className="max-w-6xl mx-auto">
               <div className="mb-10">
                 <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#D4B560] mb-2">
