@@ -66,6 +66,8 @@ export default function HomePage() {
       {/* HERO — Apple-style massive display type */}
       <section className="relative px-6 lg:px-12 pt-16 lg:pt-24 pb-16 lg:pb-24" data-reveal>
         <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-12 lg:gap-16 items-center">
+            <div>
 
           {/* Eyebrow */}
           <div className="flex items-center gap-2 mb-8">
@@ -132,6 +134,23 @@ export default function HomePage() {
             >
               All Stat Leaders →
             </Link>
+            </div>
+            </div>
+            <div className="hidden lg:block">
+              {ptsLeader ? (
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#D4B560]/20 to-transparent blur-3xl" />
+                  <PlayerAvatar
+                    playerId={ptsLeader.id}
+                    fullName={ptsLeader.fullName}
+                    size="xl"
+                    className="relative !h-80 !w-80 ring-4 ring-white/[0.06] shadow-2xl"
+                  />
+                </div>
+              ) : (
+                <Skeleton className="h-80 w-80 rounded-full" />
+              )}
+            </div>
           </div>
         </div>
       </section>
