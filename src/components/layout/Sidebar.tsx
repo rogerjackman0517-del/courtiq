@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Home, Calendar, Users, Shield, BarChart2,
-  TrendingUp, Trophy, Newspaper, Star, Settings, Sparkles
+  TrendingUp, Trophy, Newspaper, Star, Settings, Sparkles, ArrowLeftRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +15,7 @@ const navItems = [
   { href: "/teams",     label: "Teams",       icon: Shield },
   { href: "/standings", label: "Standings",   icon: Trophy },
   { href: "/stats",     label: "Stat Leaders",icon: BarChart2 },
+  { href: "/compare",   label: "Compare",     icon: ArrowLeftRight },
   { href: "/analytics", label: "Analytics",   icon: TrendingUp, premium: true },
   { href: "/fantasy",   label: "Fantasy",     icon: Star, premium: true },
   { href: "/draft",     label: "Draft",       icon: Users },
