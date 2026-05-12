@@ -19,12 +19,21 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://courtiq-mocha.vercel.app"),
   title: { default: "CourtIQ — NBA Analytics", template: "%s | CourtIQ" },
-  description: "Premium NBA analytics, stats, and insights for fans, bettors, and fantasy players.",
+  description: "Real-time NBA stats, scores, and league insights. Built for fans who love the numbers.",
   keywords: ["NBA", "basketball", "stats", "analytics", "fantasy", "props"],
   openGraph: {
+    title: "CourtIQ — NBA Analytics",
+    description: "Real-time NBA stats, scores, and league insights.",
     siteName: "CourtIQ",
     type: "website",
+    url: "https://courtiq-mocha.vercel.app",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CourtIQ — NBA Analytics",
+    description: "Real-time NBA stats, scores, and league insights.",
   },
 };
 
