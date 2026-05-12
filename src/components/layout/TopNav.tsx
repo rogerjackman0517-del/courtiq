@@ -137,7 +137,7 @@ export function TopNav() {
             <circle cx="12" cy="12" r="2" fill="#D4B560" stroke="none" />
           </svg>
         </div>
-        <span className="font-[family-name:var(--font-barlow)] font-bold text-lg text-[#F0F0F0] group-hover:text-[#D4B560] transition-colors">
+        <span className="font-[family-name:var(--font-barlow)] font-bold text-lg tracking-[-0.04em] text-[#F0F0F0] group-hover:text-[#D4B560] transition-colors">
           Court<span className="text-[#D4B560]">IQ</span>
         </span>
       </Link>

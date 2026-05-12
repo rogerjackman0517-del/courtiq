@@ -41,7 +41,7 @@ function SortHeader({
       className={cn(
         "inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.15em] transition-colors",
         align === "right" && "ml-auto",
-        active ? "text-[#D4B560]" : "text-[#6E6E76] hover:text-[#F5F5F7]"
+        active ? "text-[#D4B560] [text-shadow:0_0_12px_rgba(212,181,96,0.4)]" : "text-[#6E6E76] hover:text-[#F5F5F7]"
       )}
     >
       {label}
@@ -193,7 +193,7 @@ export default function PlayersPage() {
                     </td></tr>
                   )}
                   {rows.map((p, i) => (
-                    <tr key={p.id} className="border-b border-white/[0.03] last:border-b-0 group">
+                    <tr key={p.id} className="stat-row border-b border-white/[0.03] last:border-b-0 group hover:bg-white/[0.02]">
                       <td className="px-5 py-3.5 text-[#6E6E76] text-xs tabular-nums">{i + 1}</td>
                       <td className="px-5 py-3.5">
                         <Link href={`/players/${p.slug}`} className="flex items-center gap-3 group/name">

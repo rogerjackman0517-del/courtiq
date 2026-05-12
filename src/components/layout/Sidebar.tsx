@@ -41,7 +41,7 @@ export function Sidebar() {
             <circle cx="12" cy="12" r="2" fill="#D4B560" stroke="none" />
           </svg>
         </div>
-        <span className="font-[family-name:var(--font-barlow)] font-bold text-xl tracking-tight text-[#F5F5F7] group-hover:text-[#D4B560] transition-colors">
+        <span className="font-[family-name:var(--font-barlow)] font-bold text-xl tracking-[-0.04em] text-[#F5F5F7] group-hover:text-[#D4B560] transition-colors">
           Court<span className="text-[#D4B560]">IQ</span>
         </span>
       </Link>

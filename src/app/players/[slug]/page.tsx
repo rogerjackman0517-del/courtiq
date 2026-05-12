@@ -305,6 +305,32 @@ export default function PlayerProfilePage() {
         </div>
       </section>
 
+      {/* Compare CTA */}
+      <section className="px-4 lg:px-12 pb-8 lg:pb-12">
+        <div className="max-w-6xl mx-auto">
+          <div className="floating-card no-jiggle rounded-3xl p-6 lg:p-10 flex flex-col lg:flex-row lg:items-center gap-6 lg:gap-8">
+            <div className="flex-1">
+              <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#D4B560] mb-2">
+                Head to head
+              </p>
+              <h2 className="font-[family-name:var(--font-barlow)] font-black text-2xl lg:text-3xl tracking-tight text-[#F5F5F7] mb-2">
+                Compare {player.fullName.split(" ")[0]} with another player
+              </h2>
+              <p className="text-sm text-[#8A8A93] max-w-md">
+                See how {player.fullName.split(" ")[0]} stacks up against any active NBA player — stats, percentages, and a side-by-side radar.
+              </p>
+            </div>
+            <Link
+              href={`/compare?a=${player.slug}`}
+              className="group inline-flex items-center gap-2 bg-[#F5F5F7] text-[#0A0A0E] text-sm font-semibold tracking-tight px-6 py-3 rounded-full hover:bg-white transition-all duration-300 self-start lg:self-auto whitespace-nowrap"
+            >
+              Start comparison
+              <ArrowUpRight size={14} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Note */}
       <section className="px-4 lg:px-12">
         <div className="max-w-6xl mx-auto rounded-2xl bg-[#1C1C24]/50 px-6 py-4 text-xs text-[#6E6E76] tracking-wide leading-relaxed">

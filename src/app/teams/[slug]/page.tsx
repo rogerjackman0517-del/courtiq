@@ -169,7 +169,23 @@ export default function TeamProfilePage() {
     <div className="pb-24 lg:pb-12">
 
       {/* HERO with subtle team color wash */}
-      <section className="relative px-6 lg:px-12 pt-16 lg:pt-20 pb-12 overflow-hidden" data-reveal>
+      <section
+        className="relative px-6 lg:px-12 pt-16 lg:pt-20 pb-12 overflow-hidden"
+        data-reveal
+      >
+        {/* Team color radial glow background */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-30"
+          style={{
+            background: `radial-gradient(circle at 80% 20%, ${color}40 0%, transparent 50%)`,
+          }}
+        />
+        <div
+          className="absolute inset-0 pointer-events-none opacity-20"
+          style={{
+            background: `radial-gradient(circle at 20% 80%, ${color}30 0%, transparent 60%)`,
+          }}
+        />
         <div
           className="absolute inset-0 opacity-[0.06] pointer-events-none"
           style={{ background: `radial-gradient(ellipse at top left, ${color}, transparent 60%)` }}

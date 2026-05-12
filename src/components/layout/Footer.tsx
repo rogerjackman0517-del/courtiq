@@ -15,7 +15,7 @@ export function Footer() {
                   <circle cx="12" cy="12" r="2" fill="#D4B560" stroke="none" />
                 </svg>
               </div>
-              <span className="font-[family-name:var(--font-barlow)] font-bold text-xl tracking-tight text-[#F5F5F7]">
+              <span className="font-[family-name:var(--font-barlow)] font-bold text-xl tracking-[-0.04em] text-[#F5F5F7]">
                 Court<span className="text-[#D4B560]">IQ</span>
               </span>
             </Link>

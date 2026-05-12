@@ -49,7 +49,7 @@ export function PlayerAvatar({
     <div
       className={cn(
         w,
-        "shrink-0 rounded-full overflow-hidden bg-gradient-to-b from-[#1C1C24] to-[#0A0A0E] border border-white/[0.05]",
+        "shrink-0 relative rounded-full overflow-hidden bg-gradient-to-b from-[#1C1C24] to-[#0A0A0E] border border-white/[0.05]",
         className
       )}
     >
@@ -60,6 +60,13 @@ export function PlayerAvatar({
         className="w-full h-full object-cover object-top"
         onError={() => setFailed(true)}
         loading="lazy"
+      />
+      {/* Radial vignette to blend photo edges into the dark theme */}
+      <div
+        className="absolute inset-0 pointer-events-none rounded-full"
+        style={{
+          background: "radial-gradient(circle at center, transparent 55%, rgba(10,10,14,0.4) 90%, rgba(10,10,14,0.7) 100%)",
+        }}
       />
     </div>
   );
