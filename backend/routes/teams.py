@@ -144,3 +144,94 @@ async def get_team_info(team_id: int, season: str = Query(CURRENT_SEASON)):
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+
+# 2026 NBA Playoff status (manually updated as series progress)
+# "alive" = still playing or advanced. "out-r1/r2" = eliminated in that round.
+# "missed" = didn't make the playoffs at all.
+PLAYOFF_STATUS_2026 = {
+    # Still alive — Conference Semis or beyond
+    "NYK": "alive",  # Knicks, advanced to ECF
+    "CLE": "alive",  # Cavs, leading Pistons 3-1
+    "SAS": "alive",  # Spurs vs Wolves, series 2-2
+    "MIN": "alive",  # Wolves vs Spurs, series 2-2
+    "OKC": "alive",  # Thunder, beat Lakers
+
+    # Eliminated round 2
+    "PHI": "out-r2",  # Swept by Knicks
+    "LAL": "out-r2",  # Eliminated by Thunder
+    "DET": "out-r2",  # On verge vs Cavs (3-1 down)
+
+    # Eliminated round 1 (best guesses based on standings)
+    "BOS": "out-r1", "MIA": "out-r1", "MIL": "out-r1", "ORL": "out-r1",
+    "IND": "out-r1", "ATL": "out-r1", "CHI": "out-r1",
+    "DEN": "out-r1", "DAL": "out-r1", "GSW": "out-r1", "PHX": "out-r1",
+    "MEM": "out-r1", "HOU": "out-r1", "LAC": "out-r1",
+
+    # Missed playoffs
+    "CHA": "missed", "WAS": "missed", "TOR": "missed", "BKN": "missed",
+    "POR": "missed", "SAC": "missed", "UTA": "missed", "NOP": "missed",
+}
+
+PLAYOFF_PENALTY = {
+    "alive": 0,
+    "out-r2": -8,
+    "out-r1": -16,
+    "missed": -25,
+}
+
+PLAYOFF_LABEL = {
+    "alive": "Alive",
+    "out-r2": "Out · Round 2",
+    "out-r1": "Out · Round 1",
+    "missed": "Missed playoffs",
+}
+
+
+@router.get("/power-rankings")
+async def get_power_rankings(season: str = "2025-26") -> list[dict]:
+    """
+    Compute algorithmic team power rankings.
+    Score = 60% win% + 40% last-10 win%, scaled to 100, then adjusted by playoff status.
+    Returns teams sorted by power score, with rank.
+    """
+    cache_key = f"power-rankings:{season}:v2"
+    cached = await cache_get(cache_key)
+    if cached:
+        return cached
+
+    # Reuse the with-records data
+    teams = await get_teams_with_records(season=season)
+
+    def parse_l10(l10: str) -> float:
+        """Parse '7-3' format into win pct."""
+        try:
+            w, l = map(int, l10.split("-"))
+            total = w + l
+            return w / total if total > 0 else 0
+        except (ValueError, AttributeError):
+            return 0
+
+    ranked = []
+    for t in teams:
+        win_pct = t.get("winPct", 0) or 0
+        l10_pct = parse_l10(t.get("l10", ""))
+        abbr = (t.get("abbreviation") or "").upper()
+        playoff_status = PLAYOFF_STATUS_2026.get(abbr, "missed")
+        base_power = (win_pct * 0.6 + l10_pct * 0.4) * 100
+        power = base_power + PLAYOFF_PENALTY[playoff_status]
+        ranked.append({
+            **t,
+            "power": round(power, 1),
+            "l10Pct": round(l10_pct, 3),
+            "playoffStatus": playoff_status,
+            "playoffLabel": PLAYOFF_LABEL[playoff_status],
+        })
+
+    ranked.sort(key=lambda x: x["power"], reverse=True)
+    for i, t in enumerate(ranked, start=1):
+        t["rank"] = i
+
+    await cache_set(cache_key, ranked, ttl=600)
+    return ranked
