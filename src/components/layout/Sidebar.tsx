@@ -26,15 +26,23 @@ export function Sidebar() {
 
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-60 z-40 hidden lg:flex flex-col bg-[#0A0A0E]">
-      {/* Logo — cleaner, more refined */}
-      <div className="flex items-center gap-2.5 px-6 py-6">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#D4B560] to-[#B8954A] shadow-lg shadow-[#D4B560]/20">
-          <span className="font-[family-name:var(--font-barlow)] font-black text-black text-sm tracking-tight">IQ</span>
+      {/* Logo — clickable home button with custom mark */}
+      <Link
+        href="/"
+        className="group flex items-center gap-2.5 px-6 py-6 transition-opacity hover:opacity-80"
+        aria-label="CourtIQ — Home"
+      >
+        <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-[#0A0A0E] border border-[#D4B560]/40 group-hover:border-[#D4B560]/80 shadow-lg shadow-[#D4B560]/10 group-hover:shadow-[#D4B560]/30 transition-all">
+          {/* B monogram — open C ring + focal dot */}
+          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="#D4B560" strokeWidth="2.5" strokeLinecap="round">
+            <path d="M17 4 A9 9 0 1 0 17 20" />
+            <circle cx="12" cy="12" r="2" fill="#D4B560" stroke="none" />
+          </svg>
         </div>
-        <span className="font-[family-name:var(--font-barlow)] font-bold text-xl tracking-tight text-[#F5F5F7]">
+        <span className="font-[family-name:var(--font-barlow)] font-bold text-xl tracking-tight text-[#F5F5F7] group-hover:text-[#D4B560] transition-colors">
           Court<span className="text-[#D4B560]">IQ</span>
         </span>
-      </div>
+      </Link>
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto px-3 space-y-0.5">

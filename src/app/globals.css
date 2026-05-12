@@ -111,12 +111,29 @@ main, [data-fade] {
 }
 
 a, button {
-  transition: all var(--duration-base) var(--ease-out);
+  transition: transform var(--duration-base) var(--ease-out),
+              color var(--duration-base) var(--ease-out),
+              background-color var(--duration-base) var(--ease-out),
+              border-color var(--duration-base) var(--ease-out),
+              opacity var(--duration-base) var(--ease-out),
+              box-shadow var(--duration-base) var(--ease-out);
 }
 
-/* Buttons get a subtle press effect */
+/* Hover: subtle lift + slight zoom for interactive elements */
+button:hover, a:hover {
+  transform: scale(1.06);
+}
+
+/* Press: snap inward for tactile feedback */
 button:active, a:active {
-  transform: scale(0.98);
+  transform: scale(0.92);
+  transition-duration: 80ms;
+}
+
+/* Opt-out: table rows, large cards, and floating-card already have their own hover */
+tr:hover, .floating-card:hover, .no-jiggle:hover,
+tr:active, .floating-card:active, .no-jiggle:active {
+  transform: none;
 }
 
 /* Focus states — soft glow, no harsh outlines */

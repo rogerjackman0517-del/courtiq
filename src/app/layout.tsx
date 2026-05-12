@@ -5,6 +5,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopNav } from "@/components/layout/TopNav";
 import { MobileNav } from "@/components/layout/MobileNav";
+import { Footer } from "@/components/layout/Footer";
 
 const barlowCondensed = Barlow_Condensed({
   variable: "--font-barlow",
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <TopNav />
               <main className="flex-1 overflow-auto">
                 {children}
+                <Footer />
               </main>
             </div>
           </div>

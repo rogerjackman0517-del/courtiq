@@ -130,12 +130,15 @@ export function TopNav() {
 
   return (
     <header className="sticky top-0 z-30 flex items-center gap-3 px-4 lg:px-6 h-14 border-b border-white/[0.06] glass">
-      <Link href="/" className="flex items-center gap-1.5 lg:hidden">
-        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#C8A84B]">
-          <span className="font-[family-name:var(--font-barlow)] font-black text-black text-xs">IQ</span>
+      <Link href="/" className="group flex items-center gap-1.5 lg:hidden hover:opacity-80 transition-opacity" aria-label="CourtIQ — Home">
+        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#0A0A0E] border border-[#D4B560]/40">
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="#D4B560" strokeWidth="2.5" strokeLinecap="round">
+            <path d="M17 4 A9 9 0 1 0 17 20" />
+            <circle cx="12" cy="12" r="2" fill="#D4B560" stroke="none" />
+          </svg>
         </div>
-        <span className="font-[family-name:var(--font-barlow)] font-bold text-lg text-[#F0F0F0]">
-          Court<span className="text-[#C8A84B]">IQ</span>
+        <span className="font-[family-name:var(--font-barlow)] font-bold text-lg text-[#F0F0F0] group-hover:text-[#D4B560] transition-colors">
+          Court<span className="text-[#D4B560]">IQ</span>
         </span>
       </Link>
 
