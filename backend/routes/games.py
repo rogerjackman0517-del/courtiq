@@ -161,7 +161,107 @@ async def get_today_scores():
         }
 
 
+
+
+ESPN_SUMMARY_URL = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/summary"
+
+
 @router.get("/{game_id}/boxscore")
-async def get_boxscore(game_id: str):
-    """Boxscore not implemented for ESPN fallback yet."""
-    return {"detail": "Boxscore not available for ESPN data source"}
+async def get_game_boxscore(game_id: str) -> dict:
+    """Fetch full boxscore for a game (player stats, quarter scoring, leaders)."""
+    cache_key = f"boxscore:{game_id}"
+    cached = await cache_get(cache_key)
+    if cached:
+        return cached
+
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            r = await client.get(ESPN_SUMMARY_URL, params={"event": game_id})
+            r.raise_for_status()
+            data = r.json()
+    except httpx.HTTPError as e:
+        raise HTTPException(status_code=502, detail=f"ESPN fetch failed: {e}")
+
+    header = data.get("header", {})
+    comp = (header.get("competitions") or [{}])[0]
+    competitors = comp.get("competitors", [])
+
+    def fmt_team_header(c: dict) -> dict:
+        team = c.get("team", {})
+        linescores = c.get("linescores") or []
+        tricode = (team.get("abbreviation") or "").upper()
+        return {
+            "teamId": TRICODE_TO_NBA_ID.get(tricode, 0),
+            "tricode": tricode,
+            "city": team.get("location", ""),
+            "name": team.get("name", ""),
+            "displayName": team.get("displayName", ""),
+            "score": int(c.get("score") or 0),
+            "homeAway": c.get("homeAway", ""),
+            "winner": bool(c.get("winner", False)),
+            "linescores": [ls.get("displayValue", "") for ls in linescores],
+        }
+
+    home = next((c for c in competitors if c.get("homeAway") == "home"), {})
+    away = next((c for c in competitors if c.get("homeAway") == "away"), {})
+
+    # Player boxscore
+    boxscore = data.get("boxscore", {})
+    players_by_team = boxscore.get("players", [])
+
+    def fmt_player_stats(team_block: dict) -> dict:
+        team_info = team_block.get("team", {})
+        tricode = (team_info.get("abbreviation") or "").upper()
+        stats_groups = team_block.get("statistics", [])
+        labels = []
+        athletes = []
+        if stats_groups:
+            g = stats_groups[0]
+            labels = g.get("labels", [])
+            for a in g.get("athletes", []):
+                ath = a.get("athlete", {})
+                athletes.append({
+                    "id": int(ath.get("id") or 0),
+                    "name": ath.get("displayName", ""),
+                    "shortName": ath.get("shortName", ""),
+                    "position": (ath.get("position") or {}).get("abbreviation", ""),
+                    "jersey": ath.get("jersey", ""),
+                    "starter": bool(a.get("starter", False)),
+                    "didNotPlay": bool(a.get("didNotPlay", False)),
+                    "stats": a.get("stats", []),
+                })
+        return {
+            "tricode": tricode,
+            "labels": labels,
+            "athletes": athletes,
+        }
+
+    away_players = next((fmt_player_stats(t) for t in players_by_team if (t.get("team", {}).get("abbreviation") or "").upper() == away.get("team", {}).get("abbreviation", "").upper()), None)
+    home_players = next((fmt_player_stats(t) for t in players_by_team if (t.get("team", {}).get("abbreviation") or "").upper() == home.get("team", {}).get("abbreviation", "").upper()), None)
+
+    # Status
+    status = comp.get("status", {})
+    state = status.get("type", {}).get("state", "")
+    status_text = status.get("type", {}).get("shortDetail", "")
+
+    result = {
+        "gameId": game_id,
+        "status": {
+            "state": state,
+            "text": status_text,
+            "completed": state == "post",
+        },
+        "date": comp.get("date", ""),
+        "seriesText": (
+            comp["series"][0].get("summary", "")
+            if isinstance(comp.get("series"), list) and comp["series"]
+            else (comp.get("series") or {}).get("summary", "") if isinstance(comp.get("series"), dict) else ""
+        ),
+        "venue": (comp.get("venue") or {}).get("fullName", ""),
+        "homeTeam": fmt_team_header(home),
+        "awayTeam": fmt_team_header(away),
+        "homePlayers": home_players,
+        "awayPlayers": away_players,
+    }
+    await cache_set(cache_key, result, ttl=120)
+    return result

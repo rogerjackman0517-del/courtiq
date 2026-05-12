@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { GameCardSkeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
@@ -55,7 +56,10 @@ function GameCard({ game }: { game: LiveGame }) {
   const homeWinning = game.homeTeam.score > game.awayTeam.score;
 
   return (
-    <div className="floating-card group rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6 transition-all duration-500 hover:scale-[1.01]">
+    <Link
+      href={`/scores/${game.gameId}`}
+      className="floating-card no-jiggle group block rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6 transition-all duration-500 hover:scale-[1.01]"
+    >
       {/* Status header */}
       <div className="flex items-center justify-between mb-6">
         {status === "live" ? (
@@ -160,7 +164,7 @@ function GameCard({ game }: { game: LiveGame }) {
           {game.gameLabel}
         </div>
       )}
-    </div>
+    </Link>
   );
 }
 
