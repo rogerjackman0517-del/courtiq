@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { TeamLogo } from "@/components/teams/TeamLogo";
+import { GameCardSkeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
 
 type GameTeam = {
@@ -271,7 +272,9 @@ export default function ScoresPage() {
           )}
 
           {loading && (
-            <div className="text-center py-16 text-[#8A8A93]">Loading games…</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Array.from({ length: 4 }).map((_, i) => <GameCardSkeleton key={"game-skel-" + i} />)}
+            </div>
           )}
 
           {!loading && !error && filtered.length === 0 && (

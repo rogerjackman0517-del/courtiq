@@ -5,6 +5,7 @@ import Link from "next/link";
 import { PlayerAvatar } from "@/components/players/PlayerAvatar";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { ArrowUpRight, Flame, Radio, Sparkles, TrendingUp, Trophy, Zap } from "lucide-react";
+import { StatCardSkeleton, Skeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
 
 type PlayerRow = {
@@ -36,6 +37,7 @@ export default function HomePage() {
   const [players, setPlayers] = useState<PlayerRow[]>([]);
   const [teams, setTeams] = useState<TeamRow[]>([]);
   const [games, setGames] = useState<LiveGame[]>([]);
+  const [gamesLoaded, setGamesLoaded] = useState(false);
   const [news, setNews] = useState<NewsItem[]>([]);
 
   useEffect(() => {
@@ -44,7 +46,7 @@ export default function HomePage() {
     fetch("/api/games/today").then(r => r.ok ? r.json() : null).then(d => {
       const g = d?.scoreboard?.games;
       if (Array.isArray(g)) setGames(g);
-    }).catch(() => {});
+    }).catch(() => {}).finally(() => setGamesLoaded(true));
     fetch("/api/news").then(r => r.ok ? r.json() : []).then(d => Array.isArray(d) && setNews(d)).catch(() => {});
   }, []);
 
@@ -85,21 +87,23 @@ export default function HomePage() {
           </div>
 
           {/* Main display */}
-          {liveGame ? (
+          {(!ptsLeader || !gamesLoaded) ? (
+            <div className="mb-10 space-y-3">
+              <Skeleton className="h-[clamp(3rem,8vw,7rem)] w-3/4" />
+              <Skeleton className="h-[clamp(3rem,8vw,7rem)] w-1/2" />
+              <Skeleton className="h-[clamp(3rem,8vw,7rem)] w-2/5" />
+            </div>
+          ) : liveGame ? (
             <h1 className="font-[family-name:var(--font-barlow)] font-black text-[clamp(3rem,8vw,7rem)] leading-[0.95] tracking-[-0.04em] text-[#F5F5F7] mb-10">
               {liveGame.awayTeam.teamCity}<br />
               vs {liveGame.homeTeam.teamCity}<br />
               <span className="text-[#D4B560]">{liveGame.awayTeam.score}–{liveGame.homeTeam.score}</span>
             </h1>
-          ) : ptsLeader ? (
+          ) : (
             <h1 className="font-[family-name:var(--font-barlow)] font-black text-[clamp(3rem,8vw,7rem)] leading-[0.95] tracking-[-0.04em] text-[#F5F5F7] mb-10">
               {ptsLeader.fullName.split(" ")[0]} is averaging<br />
               <span className="text-[#D4B560]">{ptsLeader.pts.toFixed(1)} points</span><br />
               a game.
-            </h1>
-          ) : (
-            <h1 className="font-[family-name:var(--font-barlow)] font-black text-[clamp(3rem,8vw,7rem)] leading-[0.95] tracking-[-0.04em] text-[#F5F5F7] mb-10">
-              Loading the season&apos;s top stories.
             </h1>
           )}
 
@@ -232,6 +236,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {players.length === 0 && Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={"pulse-skel-" + i} />)}
             {ptsLeader && (
               <Link href={`/players/${ptsLeader.slug}`} className="floating-card group block rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-[#D4B560]/10">
                 <div className="flex items-center gap-1.5 mb-6">
@@ -326,6 +331,17 @@ export default function HomePage() {
             </div>
 
             <div className="floating-card rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] overflow-hidden">
+              {players.length === 0 && Array.from({ length: 6 }).map((_, i) => (
+                <div key={"top-skel-" + i} className={cn("flex items-center gap-4 px-6 py-4", i !== 5 && "border-b border-white/[0.04]")}>
+                  <Skeleton className="h-7 w-6" />
+                  <Skeleton className="h-8 w-8 rounded-full" />
+                  <div className="flex-1 space-y-1.5">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-3 w-12" />
+                  </div>
+                  <Skeleton className="h-7 w-10" />
+                </div>
+              ))}
               {players.slice(0, 6).map((p, i) => (
                 <Link
                   key={p.id}

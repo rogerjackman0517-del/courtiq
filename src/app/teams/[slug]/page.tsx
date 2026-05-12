@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
@@ -80,7 +81,55 @@ export default function TeamProfilePage() {
   }, [team, players]);
 
   if (loading) {
-    return <div className="px-6 lg:px-12 py-32 text-center text-[#8A8A93]">Loading team…</div>;
+    return (
+      <div className="pb-24 lg:pb-12">
+        <section className="px-6 lg:px-12 pt-16 lg:pt-20 pb-12">
+          <div className="max-w-6xl mx-auto">
+            <Skeleton className="h-3 w-24 mb-8" />
+            <div className="flex items-center gap-3 mb-6">
+              <Skeleton className="h-3 w-40" />
+            </div>
+            <div className="flex flex-col lg:flex-row lg:items-center gap-8 mb-10">
+              <Skeleton className="h-32 w-32 rounded-2xl" />
+              <div className="space-y-4 flex-1">
+                <Skeleton className="h-[clamp(3rem,8vw,7rem)] w-2/3" />
+                <Skeleton className="h-[clamp(3rem,8vw,7rem)] w-1/2" />
+              </div>
+            </div>
+            <div className="flex flex-wrap items-end gap-x-12 gap-y-4">
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-16" />
+                <Skeleton className="h-14 w-32" />
+                <Skeleton className="h-3 w-24" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-16" />
+                <Skeleton className="h-14 w-20" />
+                <Skeleton className="h-3 w-20" />
+              </div>
+            </div>
+          </div>
+        </section>
+        <div className="px-6 lg:px-12">
+          <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        </div>
+        <section className="px-6 lg:px-12 py-16">
+          <div className="max-w-6xl mx-auto">
+            <Skeleton className="h-3 w-20 mb-2" />
+            <Skeleton className="h-12 w-56 mb-10" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={"tl-stat-" + i} className="rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6 space-y-3">
+                  <Skeleton className="h-3 w-16" />
+                  <Skeleton className="h-12 w-24" />
+                  <Skeleton className="h-3 w-20" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </div>
+    );
   }
 
   if (error) {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { PlayerRowSkeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { PlayerAvatar } from "@/components/players/PlayerAvatar";
@@ -188,9 +189,7 @@ export default function StatsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {loading && (
-                    <tr><td colSpan={4 + COLS.length} className="px-5 py-16 text-center text-[#6E6E76] text-sm">Loading…</td></tr>
-                  )}
+                  {loading && Array.from({ length: 10 }).map((_, i) => <PlayerRowSkeleton key={"stat-skel-" + i} />)}
                   {!loading && rows.length === 0 && !error && (
                     <tr><td colSpan={4 + COLS.length} className="px-5 py-16 text-center text-[#6E6E76] text-sm">No players found.</td></tr>
                   )}

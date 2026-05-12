@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
 import { PlayerAvatar } from "@/components/players/PlayerAvatar";
 import { TeamLogo } from "@/components/teams/TeamLogo";
@@ -93,7 +94,40 @@ export default function PlayerProfilePage() {
   }, [player, allPlayers]);
 
   if (loading) {
-    return <div className="px-6 lg:px-12 py-32 text-center text-[#8A8A93]">Loading player…</div>;
+    return (
+      <div className="pb-24 lg:pb-12">
+        <section className="px-6 lg:px-12 pt-16 lg:pt-20 pb-12">
+          <div className="max-w-6xl mx-auto">
+            <Skeleton className="h-3 w-24 mb-8" />
+            <Skeleton className="h-3 w-32 mb-6" />
+            <div className="flex flex-col lg:flex-row lg:items-end gap-8 mb-8">
+              <Skeleton className="h-32 w-32 rounded-full" />
+              <div className="space-y-4 flex-1">
+                <Skeleton className="h-[clamp(3rem,8vw,7rem)] w-3/4" />
+              </div>
+            </div>
+            <Skeleton className="h-4 w-80" />
+          </div>
+        </section>
+        <div className="px-6 lg:px-12">
+          <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        </div>
+        <section className="px-6 lg:px-12 py-16 lg:py-20">
+          <div className="max-w-6xl mx-auto">
+            <Skeleton className="h-3 w-20 mb-2" />
+            <Skeleton className="h-12 w-64 mb-10" />
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={"pp-stat-" + i} className="rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6 space-y-3">
+                  <Skeleton className="h-3 w-16" />
+                  <Skeleton className="h-12 w-20" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </div>
+    );
   }
 
   if (error) {

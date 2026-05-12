@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { TeamLogo } from "@/components/teams/TeamLogo";
+import { StandingsRowSkeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
 
 type TeamRow = {
@@ -169,7 +170,15 @@ export default function StandingsPage() {
       )}
 
       {loading && (
-        <div className="px-6 lg:px-12 py-16 text-center text-[#8A8A93]">Loading standings…</div>
+        <section className="px-6 lg:px-12 py-12 lg:py-16">
+          <div className="max-w-6xl mx-auto">
+            <div className="floating-card rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] overflow-hidden">
+              <table className="w-full text-sm"><tbody>
+                {Array.from({ length: 15 }).map((_, i) => <StandingsRowSkeleton key={"st-skel-" + i} />)}
+              </tbody></table>
+            </div>
+          </div>
+        </section>
       )}
 
       {!loading && !error && (

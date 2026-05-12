@@ -3,6 +3,7 @@
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { TeamCardSkeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
 
 type TeamRow = {
@@ -133,7 +134,13 @@ export default function TeamsPage() {
       )}
 
       {loading && (
-        <div className="px-6 lg:px-12 py-16 text-center text-[#8A8A93]">Loading team data…</div>
+        <section className="px-6 lg:px-12 py-16 lg:py-20">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 15 }).map((_, i) => <TeamCardSkeleton key={`team-skel-${i}`} />)}
+            </div>
+          </div>
+        </section>
       )}
 
       {!loading && !error && (

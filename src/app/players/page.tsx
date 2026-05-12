@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { PlayerAvatar } from "@/components/players/PlayerAvatar";
 import { TeamLogo } from "@/components/teams/TeamLogo";
+import { PlayerRowSkeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
 import { Search, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 
@@ -177,9 +178,7 @@ export default function PlayersPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {loading && (
-                    <tr><td colSpan={11} className="px-5 py-16 text-center text-[#6E6E76] text-sm">Loading the league…</td></tr>
-                  )}
+                  {loading && Array.from({ length: 10 }).map((_, i) => <PlayerRowSkeleton key={`skel-${i}`} />)}
                   {!loading && rows.length === 0 && !error && (
                     <tr><td colSpan={11} className="px-5 py-16 text-center text-[#6E6E76] text-sm">No players match &ldquo;{query}&rdquo;.</td></tr>
                   )}

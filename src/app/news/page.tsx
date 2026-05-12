@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ArrowUpRight, AlertCircle } from "lucide-react";
+import { NewsCardSkeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
 
 type NewsItem = {
@@ -153,7 +154,16 @@ export default function NewsPage() {
       )}
 
       {loading && (
-        <div className="px-6 lg:px-12 py-16 text-center text-[#8A8A93]">Loading headlines…</div>
+        <section className="px-6 lg:px-12 py-12 lg:py-16">
+          <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-4">
+              <NewsCardSkeleton featured />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Array.from({ length: 6 }).map((_, i) => <NewsCardSkeleton key={"news-skel-" + i} />)}
+              </div>
+            </div>
+          </div>
+        </section>
       )}
 
       {!loading && items.length === 0 && !error && (
