@@ -145,7 +145,7 @@ export default function BoxscorePage({
             >
               <TeamLogo
                 teamId={data.awayTeam.teamId}
-                abbr={data.awayTeam.tricode}
+                abbreviation={data.awayTeam.tricode}
                 size="xl"
                 className="group-hover:scale-105 transition-transform"
               />
@@ -187,7 +187,7 @@ export default function BoxscorePage({
             >
               <TeamLogo
                 teamId={data.homeTeam.teamId}
-                abbr={data.homeTeam.tricode}
+                abbreviation={data.homeTeam.tricode}
                 size="xl"
                 className="group-hover:scale-105 transition-transform"
               />
@@ -248,7 +248,7 @@ export default function BoxscorePage({
                   {[data.awayTeam, data.homeTeam].map((team) => (
                     <tr key={team.tricode} className="border-b border-white/[0.04] last:border-0">
                       <td className="px-4 lg:px-6 py-3 flex items-center gap-2">
-                        <TeamLogo teamId={team.teamId} abbr={team.tricode} size="xs" />
+                        <TeamLogo teamId={team.teamId} abbreviation={team.tricode} size="xs" />
                         <span className="text-[#F5F5F7] font-medium">{team.tricode}</span>
                       </td>
                       {team.linescores.map((q, i) => (
@@ -286,7 +286,7 @@ export default function BoxscorePage({
                   activeTeam === "away" ? "bg-white text-[#0A0A0E]" : "text-[#8A8A93] hover:text-[#F5F5F7]"
                 }`}
               >
-                <TeamLogo teamId={data.awayTeam.teamId} abbr={data.awayTeam.tricode} size="xs" />
+                <TeamLogo teamId={data.awayTeam.teamId} abbreviation={data.awayTeam.tricode} size="xs" />
                 {data.awayTeam.tricode}
               </button>
               <button
@@ -295,7 +295,7 @@ export default function BoxscorePage({
                   activeTeam === "home" ? "bg-white text-[#0A0A0E]" : "text-[#8A8A93] hover:text-[#F5F5F7]"
                 }`}
               >
-                <TeamLogo teamId={data.homeTeam.teamId} abbr={data.homeTeam.tricode} size="xs" />
+                <TeamLogo teamId={data.homeTeam.teamId} abbreviation={data.homeTeam.tricode} size="xs" />
                 {data.homeTeam.tricode}
               </button>
             </div>
