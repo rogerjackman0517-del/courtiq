@@ -8,6 +8,7 @@ import { TeamLogo } from "@/components/teams/TeamLogo";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 
 type TeamRow = {
+  id: number;
   abbreviation: string;
   city: string;
   name: string;
