@@ -8,16 +8,18 @@ router = APIRouter(prefix="/games", tags=["games"])
 
 ESPN_SCOREBOARD_URL = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard"
 
-# Map ESPN team IDs to NBA team IDs (used for cdn.nba.com logo URLs)
-ESPN_TO_NBA_ID = {
-    "1": 1610612737, "2": 1610612738, "3": 1610612740, "4": 1610612741,
-    "5": 1610612739, "6": 1610612742, "7": 1610612743, "8": 1610612765,
-    "9": 1610612744, "10": 1610612745, "11": 1610612754, "12": 1610612746,
-    "13": 1610612747, "14": 1610612763, "15": 1610612748, "16": 1610612749,
-    "17": 1610612750, "18": 1610612751, "19": 1610612752, "20": 1610612753,
-    "21": 1610612755, "22": 1610612756, "23": 1610612757, "24": 1610612758,
-    "25": 1610612760, "26": 1610612759, "27": 1610612761, "28": 1610612762,
-    "29": 1610612764, "30": 1610612766,
+# Map NBA tricodes to canonical NBA team IDs (for cdn.nba.com logo URLs)
+TRICODE_TO_NBA_ID = {
+    "ATL": 1610612737, "BOS": 1610612738, "BKN": 1610612751, "CHA": 1610612766,
+    "CHI": 1610612741, "CLE": 1610612739, "DAL": 1610612742, "DEN": 1610612743,
+    "DET": 1610612765, "GSW": 1610612744, "GS":  1610612744,
+    "HOU": 1610612745, "IND": 1610612754, "LAC": 1610612746, "LA":  1610612746,
+    "LAL": 1610612747, "MEM": 1610612763, "MIA": 1610612748, "MIL": 1610612749,
+    "MIN": 1610612750, "NOP": 1610612740, "NO":  1610612740,
+    "NYK": 1610612752, "NY":  1610612752,
+    "OKC": 1610612760, "ORL": 1610612753, "PHI": 1610612755, "PHX": 1610612756,
+    "POR": 1610612757, "SAC": 1610612758, "SAS": 1610612759, "SA":  1610612759,
+    "TOR": 1610612761, "UTA": 1610612762, "WAS": 1610612764,
 }
 
 
@@ -72,7 +74,7 @@ def _format_game(event: dict) -> dict:
                             pass
                 break
         return {
-            "teamId": ESPN_TO_NBA_ID.get(str(team.get("id", "")), 0),
+            "teamId": TRICODE_TO_NBA_ID.get((team.get("abbreviation") or "").upper(), 0),
             "teamName": team.get("name", ""),
             "teamCity": team.get("location", ""),
             "teamTricode": team.get("abbreviation", ""),
