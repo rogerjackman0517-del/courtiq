@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { TeamLogo } from "@/components/teams/TeamLogo";
 import { cn } from "@/lib/utils";
 
 type TeamRow = {
@@ -75,16 +76,7 @@ function StandingsTable({ teams, conference, accent }: { teams: TeamRow[]; confe
                 </td>
                 <td className="px-5 py-4">
                   <Link href={`/teams/${team.slug}`} className="flex items-center gap-3 transition-colors">
-                    <div
-                      className="h-7 w-7 rounded-lg flex items-center justify-center text-[9px] font-black"
-                      style={{
-                        backgroundColor: team.primaryColor + "22",
-                        border: `1px solid ${team.primaryColor}44`,
-                        color: team.primaryColor,
-                      }}
-                    >
-                      {team.abbreviation}
-                    </div>
+                    <TeamLogo teamId={team.id} abbreviation={team.abbreviation} primaryColor={team.primaryColor} size="sm" />
                     <span className="font-semibold text-[#F5F5F7] text-sm tracking-tight group-hover:text-[#D4B560] transition-colors">
                       {team.city} {team.name}
                     </span>

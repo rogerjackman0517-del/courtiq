@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { TeamLogo } from "@/components/teams/TeamLogo";
 import { cn } from "@/lib/utils";
 
 type DraftPick = {
@@ -12,6 +13,17 @@ type DraftPick = {
   teamAbbr: string;
   origin: string;
   originType: string;
+};
+
+const _TEAM_IDS: Record<string, number> = {
+  ATL: 1610612737, BOS: 1610612738, BKN: 1610612751, CHA: 1610612766,
+  CHI: 1610612741, CLE: 1610612739, DAL: 1610612742, DEN: 1610612743,
+  DET: 1610612765, GSW: 1610612744, HOU: 1610612745, IND: 1610612754,
+  LAC: 1610612746, LAL: 1610612747, MEM: 1610612763, MIA: 1610612748,
+  MIL: 1610612749, MIN: 1610612750, NOP: 1610612740, NYK: 1610612752,
+  OKC: 1610612760, ORL: 1610612753, PHI: 1610612755, PHX: 1610612756,
+  POR: 1610612757, SAC: 1610612758, SAS: 1610612759, TOR: 1610612761,
+  UTA: 1610612762, WAS: 1610612764,
 };
 
 const _TEAM_COLORS: Record<string, string> = {
@@ -112,16 +124,7 @@ export default function DraftPage() {
                       <span className="font-[family-name:var(--font-barlow)] font-black text-7xl tabular-nums tracking-[-0.04em] text-[#D4B560]">
                         #{p.pick}
                       </span>
-                      <div
-                        className="h-12 w-12 rounded-2xl flex items-center justify-center text-xs font-black"
-                        style={{
-                          backgroundColor: color + "22",
-                          border: `1px solid ${color}44`,
-                          color,
-                        }}
-                      >
-                        {p.teamAbbr}
-                      </div>
+                      <TeamLogo teamId={_TEAM_IDS[p.teamAbbr]} abbreviation={p.teamAbbr} primaryColor={color} size="md" />
                     </div>
                     <p className="font-[family-name:var(--font-barlow)] font-bold text-2xl text-[#F5F5F7] tracking-tight leading-tight mb-2 group-hover:text-[#D4B560] transition-colors">
                       {p.playerName}
@@ -203,16 +206,7 @@ export default function DraftPage() {
                         </td>
                         <td className="px-4 py-4">
                           <Link href={`/teams/${p.teamAbbr.toLowerCase()}`} className="flex items-center gap-2 transition-colors">
-                            <div
-                              className="h-7 w-7 rounded-lg flex items-center justify-center text-[9px] font-black"
-                              style={{
-                                backgroundColor: color + "22",
-                                border: `1px solid ${color}44`,
-                                color,
-                              }}
-                            >
-                              {p.teamAbbr}
-                            </div>
+                            <TeamLogo teamId={_TEAM_IDS[p.teamAbbr]} abbreviation={p.teamAbbr} primaryColor={color} size="sm" />
                           </Link>
                         </td>
                         <td className="px-4 py-4 font-semibold text-[#F5F5F7] tracking-tight">{p.playerName}</td>

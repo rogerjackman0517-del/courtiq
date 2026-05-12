@@ -2,6 +2,8 @@
 
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
+import { PlayerAvatar } from "@/components/players/PlayerAvatar";
+import { TeamLogo } from "@/components/teams/TeamLogo";
 import { cn } from "@/lib/utils";
 import { Search, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 
@@ -13,6 +15,7 @@ type PlayerRow = {
   fullName: string;
   slug: string;
   teamAbbr: string;
+  teamId?: number;
   position: string;
   pts: number;
   reb: number;
@@ -184,13 +187,15 @@ export default function PlayersPage() {
                     <tr key={p.id} className="border-b border-white/[0.03] last:border-b-0 group">
                       <td className="px-5 py-3.5 text-[#6E6E76] text-xs tabular-nums">{i + 1}</td>
                       <td className="px-5 py-3.5">
-                        <Link href={`/players/${p.slug}`} className="font-semibold text-[#F5F5F7] group-hover:text-[#D4B560] tracking-tight transition-colors">
-                          {p.fullName}
+                        <Link href={`/players/${p.slug}`} className="flex items-center gap-3 group/name">
+                          <PlayerAvatar playerId={p.id} fullName={p.fullName} size="sm" />
+                          <span className="font-semibold text-[#F5F5F7] group-hover:text-[#D4B560] tracking-tight transition-colors">{p.fullName}</span>
                         </Link>
                       </td>
                       <td className="px-5 py-3.5">
-                        <Link href={`/teams/${p.teamAbbr.toLowerCase()}`} className="text-xs font-bold text-[#8A8A93] hover:text-[#D4B560] tracking-wide transition-colors">
-                          {p.teamAbbr}
+                        <Link href={`/teams/${p.teamAbbr.toLowerCase()}`} className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity">
+                          <TeamLogo teamId={p.teamId} abbreviation={p.teamAbbr} size="xs" />
+                          <span className="text-xs font-bold text-[#8A8A93] tracking-wide">{p.teamAbbr}</span>
                         </Link>
                       </td>
                       <td className="px-5 py-3.5 text-right text-[#8A8A93] text-xs tabular-nums">{p.gp}</td>

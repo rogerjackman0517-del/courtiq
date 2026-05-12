@@ -2,11 +2,13 @@
 
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
+import { PlayerAvatar } from "@/components/players/PlayerAvatar";
+import { TeamLogo } from "@/components/teams/TeamLogo";
 import { ArrowUpRight, Flame, Radio, Sparkles, TrendingUp, Trophy, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type PlayerRow = {
-  id: number; fullName: string; slug: string; teamAbbr: string;
+  id: number; fullName: string; slug: string; teamAbbr: string; teamId?: number;
   pts: number; reb: number; ast: number; stl: number; blk: number;
   fgPct: number; fg3Pct: number; ftPct: number; min: number; gp: number;
 };
@@ -241,8 +243,7 @@ export default function HomePage() {
                 </p>
                 <p className="text-[11px] text-[#8A8A93] mb-6 tracking-wide">PPG · {ptsLeader.gp} GP</p>
                 <div>
-                  <p className="text-sm font-semibold text-[#F5F5F7] tracking-tight truncate">{ptsLeader.fullName}</p>
-                  <p className="text-xs text-[#8A8A93]">{ptsLeader.teamAbbr}</p>
+                  <div className="flex items-center gap-2.5"><PlayerAvatar playerId={ptsLeader.id} fullName={ptsLeader.fullName} size="sm" /><div className="min-w-0"><p className="text-sm font-semibold text-[#F5F5F7] tracking-tight truncate">{ptsLeader.fullName}</p><p className="text-xs text-[#8A8A93]">{ptsLeader.teamAbbr}</p></div></div>
                 </div>
               </Link>
             )}
@@ -257,8 +258,7 @@ export default function HomePage() {
                 </p>
                 <p className="text-[11px] text-[#8A8A93] mb-6 tracking-wide">APG · {astLeader.gp} GP</p>
                 <div>
-                  <p className="text-sm font-semibold text-[#F5F5F7] tracking-tight truncate">{astLeader.fullName}</p>
-                  <p className="text-xs text-[#8A8A93]">{astLeader.teamAbbr}</p>
+                  <div className="flex items-center gap-2.5"><PlayerAvatar playerId={astLeader.id} fullName={astLeader.fullName} size="sm" /><div className="min-w-0"><p className="text-sm font-semibold text-[#F5F5F7] tracking-tight truncate">{astLeader.fullName}</p><p className="text-xs text-[#8A8A93]">{astLeader.teamAbbr}</p></div></div>
                 </div>
               </Link>
             )}
@@ -341,9 +341,13 @@ export default function HomePage() {
                   )}>
                     {i + 1}
                   </span>
+                  <PlayerAvatar playerId={p.id} fullName={p.fullName} size="sm" />
                   <div className="flex-1 min-w-0">
                     <p className="text-base font-semibold text-[#F5F5F7] tracking-tight truncate group-hover:text-[#D4B560] transition-colors">{p.fullName}</p>
-                    <p className="text-xs text-[#8A8A93] mt-0.5">{p.teamAbbr}</p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <TeamLogo teamId={p.teamId} abbreviation={p.teamAbbr} size="xs" />
+                      <span className="text-xs text-[#8A8A93]">{p.teamAbbr}</span>
+                    </div>
                   </div>
                   <div className="text-right">
                     <p className="font-[family-name:var(--font-barlow)] font-black text-2xl tabular-nums text-[#F5F5F7] tracking-tight">{p.pts.toFixed(1)}</p>

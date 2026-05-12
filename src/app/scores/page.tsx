@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { TeamLogo } from "@/components/teams/TeamLogo";
 import { cn } from "@/lib/utils";
 
 type GameTeam = {
@@ -86,6 +87,7 @@ function GameCard({ game }: { game: LiveGame }) {
             ) : (
               <span className="w-3" />
             )}
+            <TeamLogo teamId={game.awayTeam.teamId} abbreviation={game.awayTeam.teamTricode} size="md" />
             <div className="min-w-0">
               <p className={cn("text-xs font-bold tracking-wide", awayWinning ? "text-[#F5F5F7]" : "text-[#6E6E76]")}>
                 {game.awayTeam.teamTricode}
@@ -112,6 +114,7 @@ function GameCard({ game }: { game: LiveGame }) {
             ) : (
               <span className="w-3" />
             )}
+            <TeamLogo teamId={game.homeTeam.teamId} abbreviation={game.homeTeam.teamTricode} size="md" />
             <div className="min-w-0">
               <p className={cn("text-xs font-bold tracking-wide", homeWinning ? "text-[#F5F5F7]" : "text-[#6E6E76]")}>
                 {game.homeTeam.teamTricode}

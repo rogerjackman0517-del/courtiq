@@ -4,6 +4,8 @@ import { useEffect, useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { PlayerAvatar } from "@/components/players/PlayerAvatar";
+import { TeamLogo } from "@/components/teams/TeamLogo";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { PlayerRadar } from "@/components/charts/PlayerRadar";
 
@@ -12,6 +14,7 @@ type PlayerRow = {
   fullName: string;
   slug: string;
   teamAbbr: string;
+  teamId?: number;
   position: string;
   pts: number;
   reb: number;
@@ -133,12 +136,10 @@ export default function PlayerProfilePage() {
 
           {/* Eyebrow with team + rank */}
           <div className="flex flex-wrap items-center gap-3 mb-6">
-            <Link
-              href={`/teams/${player.teamAbbr.toLowerCase()}`}
-              className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#D4B560] hover:opacity-80 transition-opacity"
-            >
-              {player.teamAbbr}
-              <ArrowUpRight size={10} />
+            <Link href={`/teams/${player.teamAbbr.toLowerCase()}`} className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <TeamLogo teamId={player.teamId} abbreviation={player.teamAbbr} size="xs" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D4B560]">{player.teamAbbr}</span>
+              <ArrowUpRight size={10} className="text-[#D4B560]" />
             </Link>
             {scoringRank !== null && scoringRank > 0 && scoringRank <= 50 && (
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76]">
@@ -148,9 +149,12 @@ export default function PlayerProfilePage() {
           </div>
 
           {/* Name display */}
-          <h1 className="font-[family-name:var(--font-barlow)] font-black text-[clamp(3rem,8vw,7rem)] leading-[0.9] tracking-[-0.045em] text-[#F5F5F7] mb-8">
-            {player.fullName}
-          </h1>
+          <div className="flex flex-col lg:flex-row lg:items-end gap-8 mb-8">
+            <PlayerAvatar playerId={player.id} fullName={player.fullName} size="xl" className="ring-2 ring-white/[0.06] shadow-2xl" />
+            <h1 className="font-[family-name:var(--font-barlow)] font-black text-[clamp(3rem,8vw,7rem)] leading-[0.9] tracking-[-0.045em] text-[#F5F5F7]">
+              {player.fullName}
+            </h1>
+          </div>
 
           {/* Meta */}
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-[#8A8A93]">

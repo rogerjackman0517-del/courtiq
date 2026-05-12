@@ -8,6 +8,18 @@ router = APIRouter(prefix="/games", tags=["games"])
 
 ESPN_SCOREBOARD_URL = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard"
 
+# Map ESPN team IDs to NBA team IDs (used for cdn.nba.com logo URLs)
+ESPN_TO_NBA_ID = {
+    "1": 1610612737, "2": 1610612738, "3": 1610612740, "4": 1610612741,
+    "5": 1610612739, "6": 1610612742, "7": 1610612743, "8": 1610612765,
+    "9": 1610612744, "10": 1610612745, "11": 1610612754, "12": 1610612746,
+    "13": 1610612747, "14": 1610612763, "15": 1610612748, "16": 1610612749,
+    "17": 1610612750, "18": 1610612751, "19": 1610612752, "20": 1610612753,
+    "21": 1610612755, "22": 1610612756, "23": 1610612757, "24": 1610612758,
+    "25": 1610612760, "26": 1610612759, "27": 1610612761, "28": 1610612762,
+    "29": 1610612764, "30": 1610612766,
+}
+
 
 def _parse_espn_status(comp_status: dict) -> tuple[int, str]:
     """Map ESPN status to our format. Returns (gameStatus, gameStatusText)."""
@@ -48,7 +60,6 @@ def _format_game(event: dict) -> dict:
                     athlete = leaders_list[0].get("athlete", {})
                     leader_name = athlete.get("displayName", "")
                     stats_str = leaders_list[0].get("displayValue", "")
-                    # Try parse "X PTS, Y REB, Z AST"
                     for part in stats_str.split(","):
                         part = part.strip()
                         try:
@@ -61,7 +72,7 @@ def _format_game(event: dict) -> dict:
                             pass
                 break
         return {
-            "teamId": int(team.get("id", 0) or 0),
+            "teamId": ESPN_TO_NBA_ID.get(str(team.get("id", "")), 0),
             "teamName": team.get("name", ""),
             "teamCity": team.get("location", ""),
             "teamTricode": team.get("abbreviation", ""),

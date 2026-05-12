@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { TeamLogo } from "@/components/teams/TeamLogo";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 
 type TeamRow = {
@@ -145,10 +146,13 @@ export default function TeamProfilePage() {
           </div>
 
           {/* Big team display */}
-          <h1 className="font-[family-name:var(--font-barlow)] font-black text-[clamp(3rem,8vw,7rem)] leading-[0.9] tracking-[-0.045em] text-[#F5F5F7] mb-10">
-            {team.city}<br />
-            <span style={{ color }}>{team.name}</span>
-          </h1>
+          <div className="flex flex-col lg:flex-row lg:items-center gap-8 mb-10">
+            <TeamLogo teamId={team.id} abbreviation={team.abbreviation} primaryColor={color} size="xl" className="h-32 w-32 shrink-0" />
+            <h1 className="font-[family-name:var(--font-barlow)] font-black text-[clamp(3rem,8vw,7rem)] leading-[0.9] tracking-[-0.045em] text-[#F5F5F7]">
+              {team.city}<br />
+              <span style={{ color }}>{team.name}</span>
+            </h1>
+          </div>
 
           {/* Record block */}
           <div className="flex flex-wrap items-end gap-x-12 gap-y-4">

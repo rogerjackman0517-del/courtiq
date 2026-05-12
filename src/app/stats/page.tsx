@@ -3,6 +3,8 @@
 import { useEffect, useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { PlayerAvatar } from "@/components/players/PlayerAvatar";
+import { TeamLogo } from "@/components/teams/TeamLogo";
 import { Search, X } from "lucide-react";
 
 type PlayerRow = {
@@ -10,6 +12,7 @@ type PlayerRow = {
   fullName: string;
   slug: string;
   teamAbbr: string;
+  teamId?: number;
   pts: number;
   reb: number;
   ast: number;
@@ -202,13 +205,15 @@ export default function StatsPage() {
                         </span>
                       </td>
                       <td className="px-5 py-3.5">
-                        <Link href={`/players/${p.slug}`} className="font-semibold text-[#F5F5F7] group-hover:text-[#D4B560] tracking-tight transition-colors">
-                          {p.fullName}
+                        <Link href={`/players/${p.slug}`} className="flex items-center gap-3 group/name">
+                          <PlayerAvatar playerId={p.id} fullName={p.fullName} size="sm" />
+                          <span className="font-semibold text-[#F5F5F7] group-hover:text-[#D4B560] tracking-tight transition-colors">{p.fullName}</span>
                         </Link>
                       </td>
                       <td className="px-5 py-3.5">
-                        <Link href={`/teams/${p.teamAbbr.toLowerCase()}`} className="text-xs font-bold text-[#8A8A93] hover:text-[#D4B560] tracking-wide transition-colors">
-                          {p.teamAbbr}
+                        <Link href={`/teams/${p.teamAbbr.toLowerCase()}`} className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity">
+                          <TeamLogo teamId={p.teamId} abbreviation={p.teamAbbr} size="xs" />
+                          <span className="text-xs font-bold text-[#8A8A93] tracking-wide">{p.teamAbbr}</span>
                         </Link>
                       </td>
                       <td className="px-3 py-3.5 text-right text-xs text-[#8A8A93] tabular-nums">{p.gp}</td>

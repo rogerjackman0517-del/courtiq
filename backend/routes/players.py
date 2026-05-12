@@ -58,6 +58,7 @@ async def get_players_with_stats(season: str = Query(CURRENT_SEASON)):
             "id": pid,
             "fullName": r.get("PLAYER"),
             "slug": "".join(c for c in unicodedata.normalize("NFD", (r.get("PLAYER") or "")) if unicodedata.category(c) != "Mn").lower().replace(" ", "-").replace(".", "").replace("'", ""),
+            "teamId": int(r.get("TEAM_ID") or 0),
             "teamAbbr": _TEAM_BY_ID.get(r.get("TEAM_ID"), r.get("TEAM") or ""),
             "position": "—",  # not in leaders endpoint
             "pts": float(r.get("PTS") or 0),

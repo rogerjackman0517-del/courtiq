@@ -1,5 +1,6 @@
 "use client";
 
+import { TeamLogo } from "@/components/teams/TeamLogo";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -35,16 +36,7 @@ function TeamCard({ team }: { team: TeamRow }) {
       {/* Top — team badge + record */}
       <div className="flex items-start justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div
-            className="h-12 w-12 rounded-2xl flex items-center justify-center text-xs font-black tracking-tight"
-            style={{
-              backgroundColor: team.primaryColor + "22",
-              border: `1px solid ${team.primaryColor}44`,
-              color: team.primaryColor,
-            }}
-          >
-            {team.abbreviation}
-          </div>
+          <TeamLogo teamId={team.id} abbreviation={team.abbreviation} primaryColor={team.primaryColor} size="md" />
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76] mb-0.5">
               #{team.confRank} {team.conference}
