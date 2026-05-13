@@ -5,6 +5,7 @@ import Link from "next/link";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { GameCardSkeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 type GameTeam = {
   teamId: number;
@@ -169,16 +170,21 @@ function GameCard({ game }: { game: LiveGame }) {
 }
 
 export default function ScoresPage() {
+  const todayStr = new Date().toISOString().slice(0, 10);
   const [tab, setTab] = useState<Tab>("All");
   const [games, setGames] = useState<LiveGame[]>([]);
   const [gameDate, setGameDate] = useState<string>("");
+  const [selectedDate, setSelectedDate] = useState<string>(todayStr);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fetch("/api/games/today")
+    const url = selectedDate === todayStr
+      ? "/api/games/today"
+      : `/api/games/today?date=${selectedDate}`;
+    fetch(url)
       .then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`))
       .then(data => {
         if (cancelled) return;
@@ -194,7 +200,23 @@ export default function ScoresPage() {
       .catch(e => { if (!cancelled) setError(String(e)); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDate]);
+
+  // Date nav helpers
+  const shiftDate = (deltaDays: number) => {
+    const d = new Date(selectedDate + "T12:00:00");
+    d.setDate(d.getDate() + deltaDays);
+    setSelectedDate(d.toISOString().slice(0, 10));
+  };
+  const dateLabel = (() => {
+    if (selectedDate === todayStr) return "Today";
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    if (selectedDate === yesterday) return "Yesterday";
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+    if (selectedDate === tomorrow) return "Tomorrow";
+    return new Date(selectedDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  })();
 
   const filtered = games.filter(g => {
     if (tab === "Live") return statusBucket(g) === "live";
@@ -246,6 +268,23 @@ export default function ScoresPage() {
         <div className="max-w-6xl mx-auto">
 
           {/* Tabs */}
+          <div className="flex items-center gap-3 mb-6 flex-wrap">
+            <button type="button" onClick={() => shiftDate(-1)} className="no-jiggle flex items-center gap-1.5 text-xs font-medium text-[#8A8A93] hover:text-[#F5F5F7] px-3 py-2 rounded-full bg-white/[0.04] hover:bg-white/[0.06] transition-colors">
+              <ChevronLeft size={14} /> Previous
+            </button>
+            <div className="px-4 py-2 rounded-full bg-[#1C1C24] border border-white/[0.06]">
+              <span className="text-sm font-bold tracking-tight text-[#F5F5F7]">{dateLabel}</span>
+            </div>
+            <button type="button" onClick={() => shiftDate(1)} className="no-jiggle flex items-center gap-1.5 text-xs font-medium text-[#8A8A93] hover:text-[#F5F5F7] px-3 py-2 rounded-full bg-white/[0.04] hover:bg-white/[0.06] transition-colors">
+              Next <ChevronRight size={14} />
+            </button>
+            {selectedDate !== todayStr && (
+              <button type="button" onClick={() => setSelectedDate(todayStr)} className="no-jiggle text-xs font-medium text-[#D4B560] hover:text-[#E8C770] px-3 py-2 transition-colors">
+                Back to today
+              </button>
+            )}
+          </div>
+
           <div className="inline-flex items-center gap-1 bg-[#1C1C24] border border-white/[0.05] rounded-full p-1 mb-10">
             {TABS.map(t => (
               <button

@@ -57,6 +57,7 @@ export default function BoxscorePage({
   const [data, setData] = useState<Boxscore | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeTeam, setActiveTeam] = useState<"away" | "home">("away");
+  const [playerSlugByName, setPlayerSlugByName] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetch(`/api/games/${gameId}/boxscore`)
@@ -64,6 +65,21 @@ export default function BoxscorePage({
       .then(setData)
       .catch(() => setError("Couldn't load this game."));
   }, [gameId]);
+
+  // Build name → slug lookup from player database so boxscore names link to profiles
+  useEffect(() => {
+    fetch("/api/players/with-stats")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((arr: Array<{ fullName: string; slug: string }>) => {
+        if (!Array.isArray(arr)) return;
+        const map: Record<string, string> = {};
+        arr.forEach((p) => {
+          map[p.fullName.toLowerCase()] = p.slug;
+        });
+        setPlayerSlugByName(map);
+      })
+      .catch(() => {});
+  }, []);
 
   if (error) {
     return (
@@ -326,10 +342,17 @@ export default function BoxscorePage({
                         .map((p) => (
                           <tr key={p.id} className="border-b border-white/[0.04] last:border-0 hover:bg-white/[0.02] transition-colors">
                             <td className="px-4 lg:px-6 py-3 sticky left-0 bg-[#131318]">
-                              <div className="flex items-center gap-2 min-w-[180px]">
-                                <PlayerAvatar playerId={p.id} fullName={p.name} size="sm" />
+                              <Link
+                                href={
+                                  playerSlugByName[p.name.toLowerCase()]
+                                    ? `/players/${playerSlugByName[p.name.toLowerCase()]}`
+                                    : `/players?q=${encodeURIComponent(p.name)}`
+                                }
+                                className="flex items-center gap-2 min-w-[180px] group no-jiggle"
+                              >
+                                <PlayerAvatar playerId={p.id} fullName={p.name} size="sm" source="espn" />
                                 <div>
-                                  <p className="text-[#F5F5F7] font-medium leading-tight">
+                                  <p className="text-[#F5F5F7] font-medium leading-tight group-hover:text-[#D4B560] transition-colors">
                                     {p.shortName || p.name}
                                   </p>
                                   <p className="text-[10px] text-[#6E6E76]">
@@ -337,7 +360,7 @@ export default function BoxscorePage({
                                     {p.position}
                                   </p>
                                 </div>
-                              </div>
+                              </Link>
                             </td>
                             {p.stats.map((s, i) => (
                               <td

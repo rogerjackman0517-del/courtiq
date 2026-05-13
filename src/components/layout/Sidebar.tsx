@@ -4,13 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Home, Calendar, Users, Shield, BarChart2,
-  TrendingUp, Trophy, Newspaper, Star, Settings, Sparkles, ArrowLeftRight, Flame
+  TrendingUp, Trophy, Newspaper, Star, Settings, Sparkles, ArrowLeftRight, Flame, RadioTower
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/",          label: "Home",        icon: Home },
   { href: "/scores",    label: "Scores",      icon: Calendar },
+  { href: "/live",      label: "Live",        icon: RadioTower },
   { href: "/players",   label: "Players",     icon: Users },
   { href: "/teams",     label: "Teams",       icon: Shield },
   { href: "/standings", label: "Standings",   icon: Trophy },

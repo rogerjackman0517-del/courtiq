@@ -21,11 +21,13 @@ export function PlayerAvatar({
   fullName,
   size = "md",
   className,
+  source = "nba",
 }: {
   playerId: number;
   fullName: string;
   size?: Size;
   className?: string;
+  source?: "nba" | "espn";
 }) {
   const [failed, setFailed] = useState(false);
   const { w, text } = SIZES[size];
@@ -55,7 +57,7 @@ export function PlayerAvatar({
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${playerId}.png`}
+        src={source === "espn" ? `https://a.espncdn.com/i/headshots/nba/players/full/${playerId}.png` : `https://cdn.nba.com/headshots/nba/latest/1040x760/${playerId}.png`}
         alt={fullName}
         className="w-full h-full object-cover object-top"
         onError={() => setFailed(true)}

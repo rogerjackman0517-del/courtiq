@@ -1,4 +1,5 @@
 import httpx
+from typing import Optional
 from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException
 from cache import cache_get, cache_set
@@ -82,7 +83,7 @@ def _format_game(event: dict) -> dict:
             "teamId": TRICODE_TO_NBA_ID.get(NORMALIZE_TRICODE.get((team.get("abbreviation") or "").upper(), (team.get("abbreviation") or "").upper()), 0),
             "teamName": team.get("name", ""),
             "teamCity": team.get("location", ""),
-            "teamTricode": team.get("abbreviation", ""),
+            "teamTricode": NORMALIZE_TRICODE.get((team.get("abbreviation") or "").upper(), (team.get("abbreviation") or "").upper()),
             "wins": wins,
             "losses": losses,
             "score": int(c.get("score", 0) or 0),
@@ -123,17 +124,24 @@ def _format_game(event: dict) -> dict:
 
 
 @router.get("/today")
-async def get_today_scores():
-    """Live scores via ESPN's public scoreboard API. Cached 30s."""
-    cache_key = "games:today:espn"
+async def get_today_scores(date: Optional[str] = None):
+    """Live scores via ESPN's public scoreboard API. Cached 30s.
+    Optional `date` param in YYYY-MM-DD format fetches a specific day."""
+    use_date = date or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    cache_key = f"games:scoreboard:espn:{use_date}"
     hit = await cache_get(cache_key)
     if hit:
         return hit
 
     try:
+        # ESPN's API uses YYYYMMDD format (no hyphens)
+        espn_date = use_date.replace("-", "")
+        params = {"dates": espn_date} if date else {}
+
         async with httpx.AsyncClient(timeout=10) as client:
             resp = await client.get(
                 ESPN_SCOREBOARD_URL,
+                params=params,
                 headers={"User-Agent": "Mozilla/5.0 CourtIQ/1.0"},
             )
             resp.raise_for_status()
@@ -145,7 +153,7 @@ async def get_today_scores():
         out = {
             "meta": {"version": 1, "code": 200, "request": "", "time": ""},
             "scoreboard": {
-                "gameDate": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+                "gameDate": use_date,
                 "leagueId": "00",
                 "leagueName": "National Basketball Association",
                 "games": games,

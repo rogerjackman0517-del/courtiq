@@ -56,6 +56,104 @@ export default function HomePage() {
   const hottest = useMemo(() => [...teams]
     .filter(t => t.streak?.startsWith("W"))
     .sort((a, b) => parseInt(b.streak.slice(1)) - parseInt(a.streak.slice(1)) || (b.wins / Math.max(1, b.wins + b.losses)) - (a.wins / Math.max(1, a.wins + a.losses)))[0], [teams]);
+  const rebLeader = useMemo(() => [...players].sort((a, b) => b.reb - a.reb)[0], [players]);
+  const tripleThreat = useMemo(() =>
+    [...players]
+      .map(p => ({ p, score: p.pts * 1 + p.reb * 1.2 + p.ast * 1.5 }))
+      .sort((a, b) => b.score - a.score)[0]?.p,
+    [players]
+  );
+
+  // Stat of the Day rotates daily based on date (deterministic per day)
+  const statOfDay = useMemo(() => {
+    if (!ptsLeader || !astLeader || !rebLeader || !hottest) return null;
+    const now = new Date();
+    const start = new Date(now.getFullYear(), 0, 0);
+    const dayOfYear = Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+    type Story = {
+      kind: string;
+      eyebrow: string;
+      firstName: string;
+      headline: string;
+      bigValue: string;
+      suffix: string;
+      subhead: string;
+      ctaHref: string;
+      photoId: number;
+      photoName: string;
+      isTeam?: boolean;
+      teamLogoId?: number;
+      teamAbbr?: string;
+    };
+    const stories: Story[] = [
+      {
+        kind: "pts",
+        eyebrow: "Stat of the Day",
+        firstName: ptsLeader.fullName.split(" ")[0],
+        headline: "is averaging",
+        bigValue: ptsLeader.pts.toFixed(1) + " points",
+        suffix: "a game.",
+        subhead: "Across " + ptsLeader.gp + " games. " + (ptsLeader.fgPct * 100).toFixed(1) + "% from the field, " + ptsLeader.reb.toFixed(1) + " rebounds, " + ptsLeader.ast.toFixed(1) + " assists.",
+        ctaHref: "/players/" + ptsLeader.slug,
+        photoId: ptsLeader.id,
+        photoName: ptsLeader.fullName,
+      },
+      {
+        kind: "ast",
+        eyebrow: "Floor General",
+        firstName: astLeader.fullName.split(" ")[0],
+        headline: "is dishing",
+        bigValue: astLeader.ast.toFixed(1) + " assists",
+        suffix: "a night.",
+        subhead: "Across " + astLeader.gp + " games. " + astLeader.pts.toFixed(1) + " points, " + astLeader.reb.toFixed(1) + " rebounds per game.",
+        ctaHref: "/players/" + astLeader.slug,
+        photoId: astLeader.id,
+        photoName: astLeader.fullName,
+      },
+      {
+        kind: "reb",
+        eyebrow: "On the Glass",
+        firstName: rebLeader.fullName.split(" ")[0],
+        headline: "is grabbing",
+        bigValue: rebLeader.reb.toFixed(1) + " boards",
+        suffix: "a game.",
+        subhead: "Across " + rebLeader.gp + " games. " + rebLeader.pts.toFixed(1) + " points, " + rebLeader.ast.toFixed(1) + " assists per game.",
+        ctaHref: "/players/" + rebLeader.slug,
+        photoId: rebLeader.id,
+        photoName: rebLeader.fullName,
+      },
+      {
+        kind: "team",
+        eyebrow: "Hottest Team",
+        firstName: "The " + hottest.name,
+        headline: "are",
+        bigValue: hottest.streak + " hot",
+        suffix: "and rising.",
+        subhead: hottest.wins + "-" + hottest.losses + " this season. Last 10: " + hottest.l10 + ". Climbing the conference.",
+        ctaHref: "/teams/" + hottest.slug,
+        photoId: 0,
+        photoName: hottest.fullName,
+        isTeam: true,
+        teamLogoId: hottest.id,
+        teamAbbr: hottest.abbreviation,
+      },
+    ];
+    if (tripleThreat) {
+      stories.push({
+        kind: "triple",
+        eyebrow: "Doing it All",
+        firstName: tripleThreat.fullName.split(" ")[0],
+        headline: "is averaging",
+        bigValue: tripleThreat.pts.toFixed(1) + " / " + tripleThreat.reb.toFixed(1) + " / " + tripleThreat.ast.toFixed(1),
+        suffix: "every night.",
+        subhead: "Across " + tripleThreat.gp + " games. Filling up every column on the box score.",
+        ctaHref: "/players/" + tripleThreat.slug,
+        photoId: tripleThreat.id,
+        photoName: tripleThreat.fullName,
+      });
+    }
+    return stories[dayOfYear % stories.length];
+  }, [ptsLeader, astLeader, rebLeader, tripleThreat, hottest]);
 
   const liveGames = games.filter(g => g.gameStatus === 2);
   const liveGame = liveGames[0];
@@ -83,13 +181,13 @@ export default function HomePage() {
               </>
             ) : (
               <span className="text-xs font-medium tracking-[0.2em] uppercase text-[#D4B560]">
-                Stat of the Day
+                {statOfDay?.eyebrow ?? "Stat of the Day"}
               </span>
             )}
           </div>
 
           {/* Main display */}
-          {(!ptsLeader || !gamesLoaded) ? (
+          {(!statOfDay || !gamesLoaded) ? (
             <div className="mb-10 space-y-3">
               <Skeleton className="h-[clamp(3rem,8vw,7rem)] w-3/4" />
               <Skeleton className="h-[clamp(3rem,8vw,7rem)] w-1/2" />
@@ -101,31 +199,29 @@ export default function HomePage() {
               vs {liveGame.homeTeam.teamCity}<br />
               <span className="text-[#D4B560]">{liveGame.awayTeam.score}–{liveGame.homeTeam.score}</span>
             </h1>
-          ) : (
+          ) : statOfDay ? (
             <h1 className="font-[family-name:var(--font-barlow)] font-black text-[clamp(2.5rem,8vw,7rem)] leading-[0.95] tracking-[-0.04em] text-[#F5F5F7] mb-10">
-              {ptsLeader.fullName.split(" ")[0]} is averaging<br />
-              <span className="stat-gold ticker-number">{ptsLeader.pts.toFixed(1)} points</span><br />
-              a game.
+              {statOfDay.firstName} {statOfDay.headline}<br />
+              <span className="stat-gold ticker-number">{statOfDay.bigValue}</span><br />
+              {statOfDay.suffix}
             </h1>
-          )}
+          ) : null}
 
           {/* Subhead */}
           <p className="text-lg lg:text-xl text-[#8A8A93] max-w-2xl mb-12 leading-relaxed">
             {liveGame
               ? `${liveGame.seriesText || "Watch the action unfold in real time."}`
-              : ptsLeader
-                ? `Across ${ptsLeader.gp} games. ${(ptsLeader.fgPct * 100).toFixed(1)}% from the field, ${ptsLeader.reb.toFixed(1)} rebounds, ${ptsLeader.ast.toFixed(1)} assists.`
-                : "Real-time stats, scores, and league insights."
+              : statOfDay?.subhead ?? "Real-time stats, scores, and league insights."
             }
           </p>
 
           {/* CTAs */}
           <div className="flex flex-wrap items-center gap-3">
             <Link
-              href={liveGame ? "/scores" : ptsLeader ? `/players/${ptsLeader.slug}` : "/players"}
+              href={liveGame ? "/scores" : statOfDay?.ctaHref ?? "/players"}
               className="group inline-flex items-center gap-2 bg-[#F5F5F7] text-[#0A0A0E] text-sm font-semibold tracking-tight px-6 py-3 rounded-full hover:bg-white transition-all duration-300"
             >
-              {liveGame ? "View Live Scores" : "View Profile"}
+              {liveGame ? "View Live Scores" : statOfDay?.kind === "team" ? "View Team" : "View Profile"}
               <ArrowUpRight size={16} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </Link>
             <Link
@@ -137,16 +233,22 @@ export default function HomePage() {
             </div>
             </div>
             <div className="hidden lg:block">
-              {ptsLeader ? (
+              {statOfDay ? (
                 <div className="relative">
                   <div className="absolute inset-0 bg-gradient-to-br from-[#D4B560]/30 via-[#D4B560]/10 to-transparent blur-3xl scale-110" />
                   <div className="absolute inset-[-4px] rounded-full bg-gradient-to-br from-[#D4B560] via-[#D4B560]/40 to-transparent opacity-60 blur-md" />
-                  <PlayerAvatar
-                    playerId={ptsLeader.id}
-                    fullName={ptsLeader.fullName}
-                    size="xl"
-                    className="relative !h-80 !w-80 ring-2 ring-[#D4B560]/40 shadow-2xl"
-                  />
+                  {statOfDay.isTeam && statOfDay.teamLogoId ? (
+                    <div className="relative !h-80 !w-80 rounded-full ring-2 ring-[#D4B560]/40 shadow-2xl bg-[#0A0A0E] flex items-center justify-center overflow-hidden">
+                      <TeamLogo teamId={statOfDay.teamLogoId} abbreviation={statOfDay.teamAbbr ?? ""} size="xl" className="!h-56 !w-56" />
+                    </div>
+                  ) : (
+                    <PlayerAvatar
+                      playerId={statOfDay.photoId}
+                      fullName={statOfDay.photoName}
+                      size="xl"
+                      className="relative !h-80 !w-80 ring-2 ring-[#D4B560]/40 shadow-2xl"
+                    />
+                  )}
                 </div>
               ) : (
                 <Skeleton className="h-80 w-80 rounded-full" />
