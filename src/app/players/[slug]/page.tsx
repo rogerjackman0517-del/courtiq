@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
 import { PlayerAvatar } from "@/components/players/PlayerAvatar";
 import { ShotChart } from "@/components/players/ShotChart";
+import { RankBadges } from "@/components/players/RankBadges";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { PlayerRadar } from "@/components/charts/PlayerRadar";
@@ -196,13 +197,16 @@ export default function PlayerProfilePage() {
           </div>
 
           {/* Meta */}
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-[#8A8A93]">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-[#8A8A93] mb-6">
             <span>{player.gp} games played</span>
             <span className="text-[#3A3A42]">·</span>
             <span>{player.min.toFixed(1)} minutes per game</span>
             <span className="text-[#3A3A42]">·</span>
             <span>2025-26 Regular Season</span>
           </div>
+
+          {/* Rank badges */}
+          <RankBadges player={player} allPlayers={allPlayers} />
         </div>
       </section>
 
