@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Search, X, ArrowLeftRight } from "lucide-react";
+import { Search, X, ArrowLeftRight, Sparkles } from "lucide-react";
 import { PlayerAvatar } from "@/components/players/PlayerAvatar";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -40,6 +40,57 @@ const STAT_ROWS: { key: keyof Player; label: string; fmt: (n: number) => string;
   { key: "min", label: "Minutes", fmt: (n) => n.toFixed(1), higherIsBetter: true },
   { key: "gp", label: "Games", fmt: (n) => String(n), higherIsBetter: true },
 ];
+
+function generateVerdict(a: Player, b: Player): string[] {
+  const aLast = a.fullName.split(" ").pop() || a.fullName;
+  const bLast = b.fullName.split(" ").pop() || b.fullName;
+  let aPts = 0, bPts = 0;
+  STAT_ROWS.forEach((row) => {
+    const av = a[row.key] as number;
+    const bv = b[row.key] as number;
+    if (av > bv) aPts++;
+    else if (bv > av) bPts++;
+  });
+  const scoringEdge = a.pts - b.pts;
+  const efficiencyEdge = a.fgPct - b.fgPct;
+  const playmakingEdge = a.ast - b.ast;
+  const reboundEdge = a.reb - b.reb;
+  const defenseEdge = (a.stl + a.blk) - (b.stl + b.blk);
+  const threeEdge = a.fg3Pct - b.fg3Pct;
+  const sentences: string[] = [];
+  if (aPts > bPts + 2) {
+    sentences.push(`${aLast} edges out ${bLast} across the board, winning in ${aPts} of ${STAT_ROWS.length} categories.`);
+  } else if (bPts > aPts + 2) {
+    sentences.push(`${bLast} has the upper hand on ${aLast}, leading in ${bPts} of ${STAT_ROWS.length} categories.`);
+  } else {
+    sentences.push(`${aLast} and ${bLast} are evenly matched — ${aPts} categories to ${bPts}.`);
+  }
+  if (Math.abs(scoringEdge) >= 3) {
+    const scorer = scoringEdge > 0 ? aLast : bLast;
+    const margin = Math.abs(scoringEdge).toFixed(1);
+    let line = `${scorer} brings the scoring punch with a ${margin}-point edge per game`;
+    if (Math.abs(efficiencyEdge) >= 0.03) {
+      const efficient = efficiencyEdge > 0 ? aLast : bLast;
+      if (efficient === scorer) line += `, and does it more efficiently from the field`;
+      else line += `, but ${efficient} is more efficient from the floor`;
+    }
+    sentences.push(line + ".");
+  } else if (Math.abs(efficiencyEdge) >= 0.04) {
+    const efficient = efficiencyEdge > 0 ? aLast : bLast;
+    sentences.push(`${efficient} shoots significantly better from the field (${((efficiencyEdge > 0 ? a.fgPct : b.fgPct) * 100).toFixed(1)}% vs ${((efficiencyEdge > 0 ? b.fgPct : a.fgPct) * 100).toFixed(1)}%).`);
+  }
+  const diffs = [
+    { val: Math.abs(playmakingEdge), winner: playmakingEdge > 0 ? aLast : bLast, value: Math.abs(playmakingEdge).toFixed(1), unit: "more assists", kind: "ast" },
+    { val: Math.abs(reboundEdge), winner: reboundEdge > 0 ? aLast : bLast, value: Math.abs(reboundEdge).toFixed(1), unit: "more boards", kind: "reb" },
+    { val: Math.abs(defenseEdge), winner: defenseEdge > 0 ? aLast : bLast, value: Math.abs(defenseEdge).toFixed(1), unit: "more stocks (stl+blk)", kind: "def" },
+    { val: Math.abs(threeEdge) * 100, winner: threeEdge > 0 ? aLast : bLast, value: (Math.abs(threeEdge) * 100).toFixed(1) + "%", unit: "better from three", kind: "three" },
+  ].sort((x, y) => y.val - x.val);
+  const top = diffs[0];
+  if (top.val >= (top.kind === "three" ? 4 : 1)) {
+    sentences.push(`${top.winner} adds ${top.value} ${top.unit} per night.`);
+  }
+  return sentences;
+}
 
 // Radar chart axes (normalized 0-1)
 const RADAR_AXES: { key: keyof Player; label: string; max: number }[] = [
@@ -408,6 +459,34 @@ export default function ComparePage() {
                         <p className="text-sm text-[#8A8A93]">
                           {bAdv.length > 0 ? `Wins in ${bAdv.join(", ")}` : "No category leads"}
                         </p>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Smart verdict */}
+                {(() => {
+                  const lines = generateVerdict(playerA, playerB);
+                  return (
+                    <div className="floating-card no-jiggle rounded-3xl p-6 lg:p-8 mb-8 relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-br from-[#D4B560]/[0.04] to-transparent pointer-events-none" />
+                      <div className="relative">
+                        <div className="flex items-center gap-2 mb-4">
+                          <Sparkles size={14} className="text-[#D4B560]" />
+                          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#D4B560]">
+                            The verdict
+                          </p>
+                        </div>
+                        <div className="space-y-2">
+                          {lines.map((line, i) => (
+                            <p
+                              key={i}
+                              className={`text-base lg:text-lg leading-relaxed ${i === 0 ? "text-[#F5F5F7] font-medium" : "text-[#8A8A93]"}`}
+                            >
+                              {line}
+                            </p>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   );

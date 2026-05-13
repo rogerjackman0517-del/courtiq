@@ -151,27 +151,46 @@ async def get_team_info(team_id: int, season: str = Query(CURRENT_SEASON)):
 # "alive" = still playing or advanced. "out-r1/r2" = eliminated in that round.
 # "missed" = didn't make the playoffs at all.
 PLAYOFF_STATUS_2026 = {
-    # Still alive — Conference Semis or beyond
-    "NYK": "alive",  # Knicks, advanced to ECF
-    "CLE": "alive",  # Cavs, leading Pistons 3-1
-    "SAS": "alive",  # Spurs vs Wolves, series 2-2
-    "MIN": "alive",  # Wolves vs Spurs, series 2-2
-    "OKC": "alive",  # Thunder, beat Lakers
+    # Conference Semifinals — STILL ALIVE
+    "OKC": "alive",  # Thunder swept Suns R1, beat Lakers R2
+    "SAS": "alive",  # Spurs vs Wolves, series tied 2-2
+    "MIN": "alive",  # Wolves vs Spurs, series tied 2-2
+    "NYK": "alive",  # Knicks swept Sixers in R2
+    "CLE": "alive",  # Cavs vs Pistons, series tied 2-2
+    "DET": "alive",  # Pistons vs Cavs, series tied 2-2
 
     # Eliminated round 2
-    "PHI": "out-r2",  # Swept by Knicks
     "LAL": "out-r2",  # Eliminated by Thunder
-    "DET": "out-r2",  # On verge vs Cavs (3-1 down)
+    "PHI": "out-r2",  # Swept by Knicks (after upsetting Celtics R1)
 
-    # Eliminated round 1 (best guesses based on standings)
-    "BOS": "out-r1", "MIA": "out-r1", "MIL": "out-r1", "ORL": "out-r1",
-    "IND": "out-r1", "ATL": "out-r1", "CHI": "out-r1",
-    "DEN": "out-r1", "DAL": "out-r1", "GSW": "out-r1", "PHX": "out-r1",
-    "MEM": "out-r1", "HOU": "out-r1", "LAC": "out-r1",
+    # Eliminated round 1
+    "PHX": "out-r1",  # Swept by Thunder
+    "POR": "out-r1",  # Lost to Spurs in 5
+    "DEN": "out-r1",  # Lost to Timberwolves
+    "HOU": "out-r1",  # Lost to Lakers in 6
+    "BOS": "out-r1",  # Lost to Sixers in 7 (3-1 collapse)
+    "ATL": "out-r1",  # Lost to Knicks in 6
+    "ORL": "out-r1",  # Lost to Pistons in 7 (3-1 collapse)
+    "TOR": "out-r1",  # Lost to Cavaliers in 7
 
-    # Missed playoffs
-    "CHA": "missed", "WAS": "missed", "TOR": "missed", "BKN": "missed",
-    "POR": "missed", "SAC": "missed", "UTA": "missed", "NOP": "missed",
+    # Eliminated in play-in
+    "MIA": "out-r1",  # Lost play-in to Hornets in OT
+    "GSW": "out-r1",  # Lost play-in to Clippers
+    "GS":  "out-r1",  # Lost play-in to Clippers
+
+    # Missed playoffs entirely
+    "CHA": "missed",  # Knocked out in play-in 7-10 game
+    "LAC": "missed",  # Lost play-in
+    "DAL": "missed",
+    "MEM": "missed",
+    "WAS": "missed",
+    "BKN": "missed",
+    "UTA": "missed",
+    "NOP": "missed",
+    "MIL": "missed",
+    "IND": "missed",
+    "SAC": "missed",
+    "CHI": "missed",
 }
 
 PLAYOFF_PENALTY = {
@@ -196,7 +215,7 @@ async def get_power_rankings(season: str = "2025-26") -> list[dict]:
     Score = 60% win% + 40% last-10 win%, scaled to 100, then adjusted by playoff status.
     Returns teams sorted by power score, with rank.
     """
-    cache_key = f"power-rankings:{season}:v2"
+    cache_key = f"power-rankings:{season}:v3"
     cached = await cache_get(cache_key)
     if cached:
         return cached
