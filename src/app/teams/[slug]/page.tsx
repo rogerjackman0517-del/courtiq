@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
 import { TeamLogo } from "@/components/teams/TeamLogo";
+import { PlayerAvatar } from "@/components/players/PlayerAvatar";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 
 type TeamRow = {
@@ -117,7 +118,7 @@ export default function TeamProfilePage() {
           <div className="max-w-6xl mx-auto">
             <Skeleton className="h-3 w-20 mb-2" />
             <Skeleton className="h-12 w-56 mb-10" />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {Array.from({ length: 3 }).map((_, i) => (
                 <div key={"tl-stat-" + i} className="rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6 space-y-3">
                   <Skeleton className="h-3 w-16" />
@@ -164,6 +165,7 @@ export default function TeamProfilePage() {
   const topScorer = roster[0];
   const topRebounder = [...roster].sort((a, b) => b.reb - a.reb)[0];
   const topPlaymaker = [...roster].sort((a, b) => b.ast - a.ast)[0];
+  const topBlocker = [...roster].sort((a, b) => b.blk - a.blk)[0];
 
   return (
     <div className="pb-24 lg:pb-12">
@@ -261,35 +263,57 @@ export default function TeamProfilePage() {
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {topScorer && (
-                <Link href={`/players/${topScorer.slug}`} className="floating-card group block rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6 transition-all duration-500 hover:scale-[1.02]">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] mb-4" style={{ color }}>Top Scorer</p>
-                  <p className="font-[family-name:var(--font-barlow)] font-black text-5xl tabular-nums tracking-[-0.04em] text-[#F5F5F7] mb-2">
+                <Link href={`/players/${topScorer.slug}`} className="floating-card no-jiggle group block rounded-3xl p-5 transition-transform hover:scale-[1.02]">
+                  <div className="flex items-start justify-between mb-3">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color }}>Top Scorer</p>
+                    <PlayerAvatar playerId={topScorer.id} fullName={topScorer.fullName} size="md" className="ring-2 ring-[#D4B560]/30" />
+                  </div>
+                  <p className="font-[family-name:var(--font-barlow)] font-black text-5xl tabular-nums tracking-[-0.04em] stat-gold mb-1">
                     {topScorer.pts.toFixed(1)}
                   </p>
-                  <p className="text-[11px] text-[#8A8A93] mb-4 tracking-wide">PPG · {topScorer.gp} GP</p>
+                  <p className="text-[11px] text-[#8A8A93] mb-3 tracking-wide">PPG · {topScorer.gp} GP</p>
                   <p className="text-sm font-semibold text-[#F5F5F7] truncate group-hover:text-[#D4B560] transition-colors">{topScorer.fullName}</p>
                 </Link>
               )}
               {topRebounder && (
-                <Link href={`/players/${topRebounder.slug}`} className="floating-card group block rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6 transition-all duration-500 hover:scale-[1.02]">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76] mb-4">Top Rebounder</p>
-                  <p className="font-[family-name:var(--font-barlow)] font-black text-5xl tabular-nums tracking-[-0.04em] text-[#F5F5F7] mb-2">
+                <Link href={`/players/${topRebounder.slug}`} className="floating-card no-jiggle group block rounded-3xl p-5 transition-transform hover:scale-[1.02]">
+                  <div className="flex items-start justify-between mb-3">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76]">Top Rebounder</p>
+                    <PlayerAvatar playerId={topRebounder.id} fullName={topRebounder.fullName} size="md" className="ring-2 ring-white/[0.06]" />
+                  </div>
+                  <p className="font-[family-name:var(--font-barlow)] font-black text-5xl tabular-nums tracking-[-0.04em] text-[#F5F5F7] mb-1">
                     {topRebounder.reb.toFixed(1)}
                   </p>
-                  <p className="text-[11px] text-[#8A8A93] mb-4 tracking-wide">RPG · {topRebounder.gp} GP</p>
+                  <p className="text-[11px] text-[#8A8A93] mb-3 tracking-wide">RPG · {topRebounder.gp} GP</p>
                   <p className="text-sm font-semibold text-[#F5F5F7] truncate group-hover:text-[#D4B560] transition-colors">{topRebounder.fullName}</p>
                 </Link>
               )}
               {topPlaymaker && (
-                <Link href={`/players/${topPlaymaker.slug}`} className="floating-card group block rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6 transition-all duration-500 hover:scale-[1.02]">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76] mb-4">Top Playmaker</p>
-                  <p className="font-[family-name:var(--font-barlow)] font-black text-5xl tabular-nums tracking-[-0.04em] text-[#F5F5F7] mb-2">
+                <Link href={`/players/${topPlaymaker.slug}`} className="floating-card no-jiggle group block rounded-3xl p-5 transition-transform hover:scale-[1.02]">
+                  <div className="flex items-start justify-between mb-3">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76]">Top Playmaker</p>
+                    <PlayerAvatar playerId={topPlaymaker.id} fullName={topPlaymaker.fullName} size="md" className="ring-2 ring-white/[0.06]" />
+                  </div>
+                  <p className="font-[family-name:var(--font-barlow)] font-black text-5xl tabular-nums tracking-[-0.04em] text-[#F5F5F7] mb-1">
                     {topPlaymaker.ast.toFixed(1)}
                   </p>
-                  <p className="text-[11px] text-[#8A8A93] mb-4 tracking-wide">APG · {topPlaymaker.gp} GP</p>
+                  <p className="text-[11px] text-[#8A8A93] mb-3 tracking-wide">APG · {topPlaymaker.gp} GP</p>
                   <p className="text-sm font-semibold text-[#F5F5F7] truncate group-hover:text-[#D4B560] transition-colors">{topPlaymaker.fullName}</p>
+                </Link>
+              )}
+              {topBlocker && topBlocker.blk > 0 && (
+                <Link href={`/players/${topBlocker.slug}`} className="floating-card no-jiggle group block rounded-3xl p-5 transition-transform hover:scale-[1.02]">
+                  <div className="flex items-start justify-between mb-3">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76]">Rim Protector</p>
+                    <PlayerAvatar playerId={topBlocker.id} fullName={topBlocker.fullName} size="md" className="ring-2 ring-white/[0.06]" />
+                  </div>
+                  <p className="font-[family-name:var(--font-barlow)] font-black text-5xl tabular-nums tracking-[-0.04em] text-[#F5F5F7] mb-1">
+                    {topBlocker.blk.toFixed(1)}
+                  </p>
+                  <p className="text-[11px] text-[#8A8A93] mb-3 tracking-wide">BPG · {topBlocker.gp} GP</p>
+                  <p className="text-sm font-semibold text-[#F5F5F7] truncate group-hover:text-[#D4B560] transition-colors">{topBlocker.fullName}</p>
                 </Link>
               )}
             </div>
