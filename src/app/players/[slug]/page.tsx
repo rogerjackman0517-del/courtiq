@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
 import { PlayerAvatar } from "@/components/players/PlayerAvatar";
+import { ShotChart } from "@/components/players/ShotChart";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { PlayerRadar } from "@/components/charts/PlayerRadar";
@@ -302,6 +303,19 @@ export default function PlayerProfilePage() {
             </div>
 
           </div>
+        </div>
+      </section>
+
+      {/* SHOT CHART */}
+      <section className="px-4 lg:px-12 pb-10 lg:pb-16" data-reveal data-reveal-delay="3">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-10">
+            <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-2">Court Map</p>
+            <h2 className="font-[family-name:var(--font-barlow)] font-black text-4xl lg:text-5xl tracking-[-0.03em] text-[#F5F5F7]">
+              Shot zones.
+            </h2>
+          </div>
+          <ShotChart player={player} />
         </div>
       </section>
 
