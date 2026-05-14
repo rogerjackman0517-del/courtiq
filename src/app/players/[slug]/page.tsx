@@ -32,6 +32,12 @@ type PlayerRow = {
   gp: number;
 };
 
+type TeamMeta = {
+  abbreviation: string;
+  primaryColor: string;
+  fullName: string;
+};
+
 function StatBlock({ label, value, sub, accent }: { label: string; value: string; sub: string; accent?: boolean }) {
   return (
     <div className={cn(
@@ -57,18 +63,22 @@ export default function PlayerProfilePage() {
   const slug = params?.slug ?? "";
 
   const [allPlayers, setAllPlayers] = useState<PlayerRow[]>([]);
+  const [teams, setTeams] = useState<TeamMeta[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fetch("/api/players/with-stats")
-      .then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`))
-      .then(data => {
+    Promise.all([
+      fetch("/api/players/with-stats").then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`)),
+      fetch("/api/teams/with-records").then(r => r.ok ? r.json() : []),
+    ])
+      .then(([playerData, teamData]) => {
         if (cancelled) return;
-        if (Array.isArray(data)) { setAllPlayers(data); setError(null); }
+        if (Array.isArray(playerData)) { setAllPlayers(playerData); setError(null); }
         else { setError("Unexpected response"); }
+        if (Array.isArray(teamData)) setTeams(teamData);
       })
       .catch(e => { if (!cancelled) setError(String(e)); })
       .finally(() => { if (!cancelled) setLoading(false); });
@@ -76,6 +86,11 @@ export default function PlayerProfilePage() {
   }, []);
 
   const player = useMemo(() => allPlayers.find(p => p.slug === slug), [allPlayers, slug]);
+  const playerTeam = useMemo(
+    () => (player ? teams.find(t => t.abbreviation === player.teamAbbr) : undefined),
+    [player, teams]
+  );
+  const teamColor = playerTeam?.primaryColor ?? "#D4B560";
 
   const radarData = useMemo(() => {
     if (!player) return [];
@@ -162,52 +177,138 @@ export default function PlayerProfilePage() {
   return (
     <div className="pb-24 lg:pb-12">
 
-      {/* HERO */}
-      <section className="px-6 lg:px-12 pt-16 lg:pt-20 pb-12" data-reveal>
-        <div className="max-w-6xl mx-auto">
+      {/* HERO — cinematic */}
+      <section className="relative overflow-hidden pt-10 lg:pt-16 pb-12 lg:pb-20" data-reveal>
+        {/* Background team-color wash */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background: `radial-gradient(ellipse 70% 55% at 75% 45%, ${teamColor}38 0%, transparent 65%)`,
+          }}
+        />
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.07]"
+          style={{
+            background: `linear-gradient(135deg, ${teamColor} 0%, transparent 50%)`,
+          }}
+        />
+        {/* Watermark last name */}
+        <div className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center select-none overflow-hidden">
+          <span
+            className="font-[family-name:var(--font-barlow)] font-black text-[18vw] lg:text-[15vw] leading-none tracking-[-0.06em] opacity-[0.04] whitespace-nowrap"
+            style={{ color: teamColor }}
+          >
+            {(player.fullName.split(" ").pop() || "").toUpperCase()}
+          </span>
+        </div>
 
+        <div className="relative max-w-6xl mx-auto px-4 lg:px-12">
           {/* Back link */}
           <Link href="/players" className="inline-flex items-center gap-1.5 text-xs font-medium text-[#6E6E76] hover:text-[#F5F5F7] mb-8 tracking-wide transition-colors">
             <ArrowLeft size={12} /> All Players
           </Link>
 
-          {/* Eyebrow with team + rank */}
-          <div className="flex flex-wrap items-center gap-3 mb-6">
-            <Link href={`/teams/${player.teamAbbr.toLowerCase()}`} className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <TeamLogo teamId={player.teamId} abbreviation={player.teamAbbr} size="xs" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D4B560]">{player.teamAbbr}</span>
-              <ArrowUpRight size={10} className="text-[#D4B560]" />
-            </Link>
-            {scoringRank !== null && scoringRank > 0 && scoringRank <= 50 && (
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76]">
-                · #{scoringRank} in Scoring
-              </span>
-            )}
-          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-8 lg:gap-14 items-center">
+            {/* LEFT: name + meta + quick stats */}
+            <div>
+              {/* Team badge */}
+              <Link
+                href={`/teams/${player.teamAbbr.toLowerCase()}`}
+                className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm mb-6 hover:bg-white/[0.06] transition-colors"
+              >
+                <TeamLogo teamId={player.teamId} abbreviation={player.teamAbbr} size="xs" />
+                <span className="text-[11px] font-bold uppercase tracking-[0.15em]" style={{ color: teamColor }}>
+                  {playerTeam?.fullName || player.teamAbbr}
+                </span>
+                <ArrowUpRight size={11} style={{ color: teamColor }} />
+              </Link>
 
-          {/* Name display */}
-          <div className="flex flex-col lg:flex-row lg:items-end gap-8 mb-8">
-            <div className="relative inline-block">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#D4B560]/30 via-[#D4B560]/10 to-transparent blur-3xl scale-110" />
-              <div className="absolute inset-[-4px] rounded-full bg-gradient-to-br from-[#D4B560] via-[#D4B560]/40 to-transparent opacity-50 blur-md" />
-              <PlayerAvatar playerId={player.id} fullName={player.fullName} size="xl" className="relative ring-2 ring-[#D4B560]/40 shadow-2xl shadow-[#D4B560]/20" />
+              {/* Name — split into two lines */}
+              {(() => {
+                const parts = player.fullName.split(" ");
+                const first = parts[0];
+                const last = parts.slice(1).join(" ");
+                return (
+                  <h1 className="font-[family-name:var(--font-barlow)] font-black leading-[0.85] tracking-[-0.045em] mb-6">
+                    <span className="block text-[clamp(2.5rem,9vw,6rem)] text-[#F5F5F7]">{first}</span>
+                    <span className="block text-[clamp(2.5rem,9vw,6rem)]" style={{ color: teamColor }}>
+                      {last}
+                    </span>
+                  </h1>
+                );
+              })()}
+
+              {/* Meta line */}
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-[#8A8A93] mb-8">
+                {player.position && (
+                  <span className="font-medium text-[#F5F5F7]">{player.position}</span>
+                )}
+                {player.position && <span className="text-[#3A3A42]">·</span>}
+                <span>{player.gp} GP</span>
+                <span className="text-[#3A3A42]">·</span>
+                <span>{player.min.toFixed(1)} MPG</span>
+                {scoringRank !== null && scoringRank > 0 && scoringRank <= 50 && (
+                  <>
+                    <span className="text-[#3A3A42]">·</span>
+                    <span className="text-[#D4B560] font-medium">#{scoringRank} in scoring</span>
+                  </>
+                )}
+              </div>
+
+              {/* Quick KPIs */}
+              <div className="grid grid-cols-3 gap-4 lg:gap-6 max-w-md">
+                {[
+                  { label: "PPG", value: player.pts },
+                  { label: "RPG", value: player.reb },
+                  { label: "APG", value: player.ast },
+                ].map(({ label, value }) => (
+                  <div key={label}>
+                    <p className="font-[family-name:var(--font-barlow)] font-black text-4xl lg:text-5xl tabular-nums tracking-[-0.04em] text-[#F5F5F7]">
+                      {value.toFixed(1)}
+                    </p>
+                    <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#6E6E76] mt-1">
+                      {label}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
-            <h1 className="font-[family-name:var(--font-barlow)] font-black text-[clamp(2.25rem,8vw,7rem)] leading-[0.9] tracking-[-0.045em] text-[#F5F5F7]">
-              {player.fullName}
-            </h1>
-          </div>
 
-          {/* Meta */}
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-[#8A8A93] mb-6">
-            <span>{player.gp} games played</span>
-            <span className="text-[#3A3A42]">·</span>
-            <span>{player.min.toFixed(1)} minutes per game</span>
-            <span className="text-[#3A3A42]">·</span>
-            <span>2025-26 Regular Season</span>
+            {/* RIGHT: cinematic headshot */}
+            <div className="flex justify-center lg:justify-end">
+              <div className="relative h-64 w-64 lg:h-80 lg:w-80">
+                {/* Big team-color halo */}
+                <div
+                  className="pointer-events-none absolute inset-[-30%] rounded-full blur-3xl"
+                  style={{
+                    background: `radial-gradient(circle, ${teamColor}66 0%, ${teamColor}1A 35%, transparent 70%)`,
+                  }}
+                />
+                {/* Sharper inner glow */}
+                <div
+                  className="pointer-events-none absolute inset-[-10px] rounded-full opacity-70 blur-md"
+                  style={{
+                    background: `linear-gradient(135deg, ${teamColor} 0%, transparent 70%)`,
+                  }}
+                />
+                <PlayerAvatar
+                  playerId={player.id}
+                  fullName={player.fullName}
+                  size="xl"
+                  className="relative !h-64 !w-64 lg:!h-80 lg:!w-80 shadow-2xl"
+                />
+                <div
+                  className="pointer-events-none absolute inset-0 rounded-full"
+                  style={{ boxShadow: `inset 0 0 0 2px ${teamColor}80, 0 30px 60px -20px ${teamColor}40` }}
+                />
+              </div>
+            </div>
           </div>
 
           {/* Rank badges */}
-          <RankBadges player={player} allPlayers={allPlayers} />
+          <div className="mt-10">
+            <RankBadges player={player} allPlayers={allPlayers} />
+          </div>
         </div>
       </section>
 

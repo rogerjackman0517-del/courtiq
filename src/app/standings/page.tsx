@@ -2,9 +2,24 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { ArrowUp, ArrowDown, Flame, Snowflake } from "lucide-react";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { StandingsRowSkeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
+
+function parseStreakLen(s: string | undefined): { dir: "W" | "L" | null; n: number } {
+  if (!s) return { dir: null, n: 0 };
+  const m = s.match(/^([WL])(\d+)$/);
+  if (!m) return { dir: null, n: 0 };
+  return { dir: m[1] as "W" | "L", n: parseInt(m[2], 10) };
+}
+
+function parseL10(s: string | undefined): { wins: number; losses: number } | null {
+  if (!s) return null;
+  const m = s.match(/^(\d+)-(\d+)$/);
+  if (!m) return null;
+  return { wins: parseInt(m[1], 10), losses: parseInt(m[2], 10) };
+}
 
 type TeamRow = {
   id: number;
@@ -23,18 +38,35 @@ type TeamRow = {
   primaryColor: string;
 };
 
-function StandingsTable({ teams, conference, accent }: { teams: TeamRow[]; conference: "East" | "West"; accent: string }) {
+function StandingsTable({ teams, conference }: { teams: TeamRow[]; conference: "East" | "West" }) {
   const sorted = teams
     .filter(t => t.conference === conference)
     .sort((a, b) => b.winPct - a.winPct);
 
   const leaderWins = sorted[0]?.wins ?? 0;
   const leaderLosses = sorted[0]?.losses ?? 0;
+  const maxPct = sorted[0]?.winPct ?? 1;
+  const minPct = sorted[sorted.length - 1]?.winPct ?? 0;
+  const pctRange = Math.max(0.001, maxPct - minPct);
 
   function gamesBehind(team: TeamRow): string {
     if (team === sorted[0]) return "—";
     const gb = ((leaderWins - team.wins) + (team.losses - leaderLosses)) / 2;
     return gb === 0 ? "—" : gb.toFixed(1);
+  }
+
+  // Win% heatmap tint: hotter (gold) at top, cooler (red) at bottom.
+  function heatmapStyle(winPct: number): React.CSSProperties {
+    const t = (winPct - minPct) / pctRange; // 0..1
+    if (t > 0.6) {
+      const a = 0.04 + (t - 0.6) * 0.24;
+      return { background: `linear-gradient(90deg, rgba(212,181,96,${a.toFixed(3)}) 0%, transparent 60%)` };
+    }
+    if (t < 0.35) {
+      const a = 0.04 + (0.35 - t) * 0.18;
+      return { background: `linear-gradient(90deg, rgba(248,113,113,${a.toFixed(3)}) 0%, transparent 60%)` };
+    }
+    return {};
   }
 
   return (
@@ -56,13 +88,25 @@ function StandingsTable({ teams, conference, accent }: { teams: TeamRow[]; confe
           {sorted.map((team, i) => {
             const isPlayoff = i < 6;
             const isPlayIn = i >= 6 && i < 10;
-            const streakUp = team.streak?.startsWith("W");
+            const { dir: streakDir, n: streakN } = parseStreakLen(team.streak);
+            const blazing = streakDir === "W" && streakN >= 4;
+            const cold = streakDir === "L" && streakN >= 4;
+            const l10 = parseL10(team.l10);
+            // Trend: compare L10 win rate to season win rate
+            const l10Pct = l10 ? l10.wins / Math.max(1, l10.wins + l10.losses) : null;
+            const trending = l10Pct !== null ? l10Pct - team.winPct : 0;
+            const trendUp = trending > 0.1;
+            const trendDown = trending < -0.1;
             return (
-              <tr key={team.id} className={cn(
-                "border-b border-white/[0.03] last:border-b-0 group",
-                i === 5 && "border-b border-b-[#34D399]/20",
-                i === 9 && "border-b border-b-[#F87171]/20",
-              )}>
+              <tr
+                key={team.id}
+                className={cn(
+                  "border-b border-white/[0.03] last:border-b-0 group relative",
+                  i === 5 && "border-b border-b-[#34D399]/20",
+                  i === 9 && "border-b border-b-[#F87171]/20",
+                )}
+                style={heatmapStyle(team.winPct)}
+              >
                 <td className="px-5 py-4">
                   <span
                     className={cn(
@@ -81,19 +125,31 @@ function StandingsTable({ teams, conference, accent }: { teams: TeamRow[]; confe
                     <span className="font-semibold text-[#F5F5F7] text-sm tracking-tight group-hover:text-[#D4B560] transition-colors">
                       {team.city} {team.name}
                     </span>
+                    {blazing && (
+                      <Flame size={11} className="text-[#F59E0B]" aria-label="Hot streak" />
+                    )}
+                    {cold && (
+                      <Snowflake size={11} className="text-[#5B8DEF]" aria-label="Cold streak" />
+                    )}
                   </Link>
                 </td>
                 <td className="px-3 py-4 text-right font-[family-name:var(--font-barlow)] font-bold text-base text-[#F5F5F7] tabular-nums">{team.wins}</td>
                 <td className="px-3 py-4 text-right font-[family-name:var(--font-barlow)] font-bold text-base text-[#6E6E76] tabular-nums">{team.losses}</td>
                 <td className="px-3 py-4 text-right text-[#F5F5F7] text-xs font-semibold tabular-nums">{team.winPct.toFixed(3)}</td>
                 <td className="px-3 py-4 text-right text-[#8A8A93] text-xs tabular-nums">{gamesBehind(team)}</td>
-                <td className="px-3 py-4 text-right text-[#8A8A93] text-xs tabular-nums">{team.l10 || "—"}</td>
+                <td className="px-3 py-4 text-right text-xs tabular-nums">
+                  <span className="inline-flex items-center gap-1 text-[#8A8A93]">
+                    {team.l10 || "—"}
+                    {trendUp && <ArrowUp size={10} className="text-[#34D399]" />}
+                    {trendDown && <ArrowDown size={10} className="text-[#F87171]" />}
+                  </span>
+                </td>
                 <td className="px-3 py-4 pr-6 text-right text-xs tabular-nums">
                   <span className={cn(
                     "inline-block px-2 py-0.5 rounded-full font-bold",
-                    streakUp
+                    streakDir === "W"
                       ? "bg-[#34D399]/10 text-[#34D399]"
-                      : team.streak?.startsWith("L")
+                      : streakDir === "L"
                         ? "bg-[#F87171]/10 text-[#F87171]"
                         : "text-[#6E6E76]"
                   )}>
@@ -157,6 +213,12 @@ export default function StandingsPage() {
             <span className="inline-flex items-center gap-1.5 text-[11px] tracking-wide text-[#8A8A93]">
               <span className="h-2 w-2 rounded-full bg-[#6E6E76]" /> Lottery
             </span>
+            <span className="inline-flex items-center gap-1.5 text-[11px] tracking-wide text-[#8A8A93]">
+              <Flame size={11} className="text-[#F59E0B]" /> Hot streak (W4+)
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-[11px] tracking-wide text-[#8A8A93]">
+              <Snowflake size={11} className="text-[#5B8DEF]" /> Cold streak (L4+)
+            </span>
           </div>
         </div>
       </section>
@@ -199,7 +261,7 @@ export default function StandingsPage() {
                   The East.
                 </h2>
               </div>
-              <StandingsTable teams={teams} conference="East" accent="#5B8DEF" />
+              <StandingsTable teams={teams} conference="East" />
             </div>
           </section>
 
@@ -219,7 +281,7 @@ export default function StandingsPage() {
                   The West.
                 </h2>
               </div>
-              <StandingsTable teams={teams} conference="West" accent="#D4B560" />
+              <StandingsTable teams={teams} conference="West" />
             </div>
           </section>
         </>

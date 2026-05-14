@@ -159,8 +159,175 @@ export default function HomePage() {
   const liveGames = games.filter(g => g.gameStatus === 2);
   const liveGame = liveGames[0];
 
+  // Featured game: live > final > upcoming
+  const featuredGame = useMemo(() => {
+    if (games.length === 0) return null;
+    return (
+      games.find(g => g.gameStatus === 2) ||
+      games.find(g => g.gameStatus === 3) ||
+      games[0]
+    );
+  }, [games]);
+
+  const teamLookup = useMemo(() => {
+    const map: Record<string, { color: string; id?: number }> = {};
+    teams.forEach(t => {
+      map[t.abbreviation] = { color: t.primaryColor ?? "#D4B560", id: t.id };
+    });
+    return map;
+  }, [teams]);
+
   return (
     <div className="pb-24 lg:pb-12 premium-fade-in">
+
+      {/* FEATURED GAME — scoreboard-style with team color gradients */}
+      {featuredGame && (
+        <section className="px-4 lg:px-12 pt-6 lg:pt-10" data-reveal>
+          <div className="max-w-6xl mx-auto">
+            {(() => {
+              const g = featuredGame;
+              const isLive = g.gameStatus === 2;
+              const isFinal = g.gameStatus === 3;
+              const awayInfo = teamLookup[g.awayTeam.teamTricode];
+              const homeInfo = teamLookup[g.homeTeam.teamTricode];
+              const awayColor = awayInfo?.color ?? "#5B8DEF";
+              const homeColor = homeInfo?.color ?? "#D4B560";
+              const awayWin = g.awayTeam.score > g.homeTeam.score;
+              const homeWin = g.homeTeam.score > g.awayTeam.score;
+              const statusLabel = isLive ? g.gameStatusText : isFinal ? "Final" : g.gameStatusText;
+              return (
+                <Link
+                  href={isLive || isFinal ? `/scores/${g.gameId}` : "/scores"}
+                  className="floating-card group relative overflow-hidden rounded-3xl block"
+                >
+                  {/* Team color gradient backdrop */}
+                  <div
+                    className="absolute inset-0 opacity-90"
+                    style={{
+                      background: `linear-gradient(115deg, ${awayColor}55 0%, ${awayColor}18 35%, #0A0A0E 50%, ${homeColor}18 65%, ${homeColor}55 100%)`,
+                    }}
+                  />
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background: "radial-gradient(ellipse 60% 80% at 50% 100%, rgba(0,0,0,0.55) 0%, transparent 70%)",
+                    }}
+                  />
+                  {/* Diagonal mid-line */}
+                  <div
+                    className="absolute top-0 bottom-0 left-1/2 w-px"
+                    style={{
+                      background: "linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.12) 50%, transparent 100%)",
+                    }}
+                  />
+
+                  <div className="relative px-6 lg:px-12 py-8 lg:py-12">
+                    {/* Status pill */}
+                    <div className="flex items-center justify-between mb-6 lg:mb-8">
+                      <div className="flex items-center gap-2">
+                        {isLive && (
+                          <span className="relative flex h-2 w-2">
+                            <span className="absolute inline-flex h-full w-full rounded-full bg-[#34D399] opacity-75 animate-pulse" />
+                            <span className="relative inline-flex h-2 w-2 rounded-full bg-[#34D399]" />
+                          </span>
+                        )}
+                        <span className={cn(
+                          "text-[10px] font-bold tracking-[0.2em] uppercase",
+                          isLive ? "text-[#34D399]" : isFinal ? "text-[#F5F5F7]" : "text-[#D4B560]"
+                        )}>
+                          {isLive ? `Live · ${statusLabel}` : isFinal ? "Final" : `Upcoming · ${statusLabel}`}
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-medium tracking-wider uppercase text-[#8A8A93]">
+                        Featured matchup
+                      </span>
+                    </div>
+
+                    {/* Scoreboard grid */}
+                    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 lg:gap-10">
+                      {/* AWAY */}
+                      <div className="flex flex-col items-start lg:items-center gap-3 lg:gap-4">
+                        <TeamLogo
+                          teamId={awayInfo?.id}
+                          abbreviation={g.awayTeam.teamTricode}
+                          primaryColor={awayColor}
+                          size="xl"
+                        />
+                        <div className="text-left lg:text-center">
+                          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#8A8A93]">
+                            {g.awayTeam.teamCity}
+                          </p>
+                          <p className="font-[family-name:var(--font-barlow)] font-black text-2xl lg:text-3xl tracking-tight text-[#F5F5F7]">
+                            {g.awayTeam.teamName}
+                          </p>
+                          <p className="text-[11px] text-[#8A8A93] mt-0.5">
+                            {g.awayTeam.wins}-{g.awayTeam.losses}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* SCORE */}
+                      <div className="flex items-center gap-3 lg:gap-6">
+                        <span
+                          className={cn(
+                            "font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-8xl tabular-nums tracking-[-0.05em]",
+                            isLive || isFinal
+                              ? awayWin ? "text-[#F5F5F7]" : "text-[#6E6E76]"
+                              : "text-[#3A3A42]"
+                          )}
+                        >
+                          {isLive || isFinal ? g.awayTeam.score : "—"}
+                        </span>
+                        <span className="text-2xl lg:text-3xl font-[family-name:var(--font-barlow)] font-black text-[#3A3A42]">
+                          ·
+                        </span>
+                        <span
+                          className={cn(
+                            "font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-8xl tabular-nums tracking-[-0.05em]",
+                            isLive || isFinal
+                              ? homeWin ? "text-[#F5F5F7]" : "text-[#6E6E76]"
+                              : "text-[#3A3A42]"
+                          )}
+                        >
+                          {isLive || isFinal ? g.homeTeam.score : "—"}
+                        </span>
+                      </div>
+
+                      {/* HOME */}
+                      <div className="flex flex-col items-end lg:items-center gap-3 lg:gap-4">
+                        <TeamLogo
+                          teamId={homeInfo?.id}
+                          abbreviation={g.homeTeam.teamTricode}
+                          primaryColor={homeColor}
+                          size="xl"
+                        />
+                        <div className="text-right lg:text-center">
+                          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#8A8A93]">
+                            {g.homeTeam.teamCity}
+                          </p>
+                          <p className="font-[family-name:var(--font-barlow)] font-black text-2xl lg:text-3xl tracking-tight text-[#F5F5F7]">
+                            {g.homeTeam.teamName}
+                          </p>
+                          <p className="text-[11px] text-[#8A8A93] mt-0.5">
+                            {g.homeTeam.wins}-{g.homeTeam.losses}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Footer line */}
+                    {g.seriesText && (
+                      <p className="text-center mt-6 lg:mt-8 text-[11px] tracking-wider text-[#8A8A93]">
+                        {g.seriesText}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              );
+            })()}
+          </div>
+        </section>
+      )}
 
       {/* HERO — Apple-style massive display type */}
       <section className="brand-glow relative px-4 lg:px-12 pt-10 lg:pt-24 pb-10 lg:pb-24" data-reveal>
