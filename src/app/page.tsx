@@ -431,7 +431,7 @@ export default function HomePage() {
 
       {/* DIVIDER */}
       <div className="px-6 lg:px-12">
-        <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="max-w-6xl mx-auto h-px divider-shimmer" />
       </div>
 
       {/* TODAY'S GAMES */}
@@ -511,7 +511,7 @@ export default function HomePage() {
 
       {/* DIVIDER */}
       <div className="px-6 lg:px-12">
-        <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="max-w-6xl mx-auto h-px divider-shimmer" />
       </div>
 
       {/* LEAGUE PULSE — bigger numbers, more space */}
@@ -606,7 +606,7 @@ export default function HomePage() {
 
       {/* DIVIDER */}
       <div className="px-6 lg:px-12">
-        <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="max-w-6xl mx-auto h-px divider-shimmer" />
       </div>
 
       {/* TOP SCORERS + NEWS */}

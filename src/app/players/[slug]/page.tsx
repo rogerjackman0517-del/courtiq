@@ -13,6 +13,9 @@ import { TeamLogo } from "@/components/teams/TeamLogo";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { PlayerRadar } from "@/components/charts/PlayerRadar";
 import { ScrollRail } from "@/components/ui/ScrollRail";
+import { useCopyToClipboard } from "@/components/ui/Toast";
+import { PLAYER_NICKNAMES } from "@/lib/playerNicknames";
+import { Share2 } from "lucide-react";
 
 type PlayerRow = {
   id: number;
@@ -67,6 +70,8 @@ export default function PlayerProfilePage() {
   const [teams, setTeams] = useState<TeamMeta[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [loadedAt, setLoadedAt] = useState<Date | null>(null);
+  const copy = useCopyToClipboard();
 
   useEffect(() => {
     let cancelled = false;
@@ -82,7 +87,12 @@ export default function PlayerProfilePage() {
         if (Array.isArray(teamData)) setTeams(teamData);
       })
       .catch(e => { if (!cancelled) setError(String(e)); })
-      .finally(() => { if (!cancelled) setLoading(false); });
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+          setLoadedAt(new Date());
+        }
+      });
     return () => { cancelled = true; };
   }, []);
 
@@ -129,7 +139,7 @@ export default function PlayerProfilePage() {
           </div>
         </section>
         <div className="px-4 lg:px-12">
-          <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+          <div className="max-w-6xl mx-auto h-px divider-shimmer" />
         </div>
         <section className="px-4 lg:px-12 py-10 lg:py-20">
           <div className="max-w-6xl mx-auto">
@@ -213,10 +223,20 @@ export default function PlayerProfilePage() {
         </div>
 
         <div className="relative max-w-6xl mx-auto px-4 lg:px-12">
-          {/* Back link */}
-          <Link href="/players" className="inline-flex items-center gap-1.5 text-xs font-medium text-[#6E6E76] hover:text-[#F5F5F7] mb-8 tracking-wide transition-colors">
-            <ArrowLeft size={12} /> All Players
-          </Link>
+          {/* Back link + share */}
+          <div className="flex items-center justify-between mb-8">
+            <Link href="/players" className="inline-flex items-center gap-1.5 text-xs font-medium text-[#6E6E76] hover:text-[#F5F5F7] tracking-wide transition-colors">
+              <ArrowLeft size={12} /> All Players
+            </Link>
+            <button
+              type="button"
+              onClick={() => copy(window.location.href, `${player.fullName} link copied`)}
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-[#6E6E76] hover:text-[#F5F5F7] tracking-wide transition-colors ripple px-2 py-1 rounded-md"
+              aria-label="Copy link to this player"
+            >
+              <Share2 size={12} /> Share
+            </button>
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-8 lg:gap-14 items-center">
             {/* LEFT: name + meta + quick stats */}
@@ -238,12 +258,19 @@ export default function PlayerProfilePage() {
                 const parts = player.fullName.split(" ");
                 const first = parts[0];
                 const last = parts.slice(1).join(" ");
+                const nickname = PLAYER_NICKNAMES[player.slug];
                 return (
-                  <h1 className="font-[family-name:var(--font-barlow)] font-black leading-[0.85] tracking-[-0.045em] mb-6">
+                  <h1 className="font-[family-name:var(--font-barlow)] font-black leading-[0.85] tracking-[-0.045em] mb-3">
                     <span className="block text-[clamp(2.5rem,9vw,6rem)] text-[#F5F5F7]">{first}</span>
                     <span className="block text-[clamp(2.5rem,9vw,6rem)]" style={{ color: teamColor }}>
                       {last}
                     </span>
+                    {nickname && (
+                      <span className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-bold tracking-[0.2em] uppercase text-[#8A8A93]">
+                        <span className="h-px w-6 bg-[#3A3A42]" />
+                        “{nickname}”
+                      </span>
+                    )}
                   </h1>
                 );
               })()}
@@ -324,7 +351,7 @@ export default function PlayerProfilePage() {
 
       {/* DIVIDER */}
       <div className="px-4 lg:px-12">
-        <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="max-w-6xl mx-auto h-px divider-shimmer" />
       </div>
 
       {/* PER GAME */}
@@ -350,7 +377,7 @@ export default function PlayerProfilePage() {
 
       {/* DIVIDER */}
       <div className="px-4 lg:px-12">
-        <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="max-w-6xl mx-auto h-px divider-shimmer" />
       </div>
 
       {/* SHOOTING + RADAR */}
@@ -466,8 +493,24 @@ export default function PlayerProfilePage() {
 
       {/* Note */}
       <section className="px-4 lg:px-12">
-        <div className="max-w-6xl mx-auto rounded-2xl bg-[#1C1C24]/50 px-6 py-4 text-xs text-[#6E6E76] tracking-wide leading-relaxed">
-          Stats verified from NBA.com via nba_api. Game log, shot chart, and advanced metrics coming soon.
+        <div className="max-w-6xl mx-auto rounded-2xl bg-[#1C1C24]/50 px-6 py-4 text-xs text-[#6E6E76] tracking-wide leading-relaxed flex flex-wrap items-center justify-between gap-2">
+          <span>
+            Stats verified from{" "}
+            <a
+              href="https://www.nba.com/stats"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline decoration-dotted underline-offset-2 hover:text-[#F5F5F7]"
+            >
+              NBA.com
+            </a>{" "}
+            via nba_api.
+          </span>
+          {loadedAt && (
+            <span className="text-[#6E6E76]" suppressHydrationWarning>
+              Updated {loadedAt.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+            </span>
+          )}
         </div>
       </section>
 

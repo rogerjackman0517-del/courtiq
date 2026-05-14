@@ -86,6 +86,25 @@ export function LiveTicker() {
                 const awayKey = g.gameId + ":away";
                 const homePulsed = pulseKeys[homeKey] && Date.now() - pulseKeys[homeKey] < 1800;
                 const awayPulsed = pulseKeys[awayKey] && Date.now() - pulseKeys[awayKey] < 1800;
+                const renderSparkles = (count = 6) =>
+                  Array.from({ length: count }).map((_, k) => {
+                    const angle = (k / count) * Math.PI * 2;
+                    const dx = Math.cos(angle) * 14;
+                    const dy = Math.sin(angle) * 14;
+                    return (
+                      <span
+                        key={k}
+                        className="sparkle"
+                        style={{
+                          left: "50%",
+                          top: "50%",
+                          ["--sx" as string]: `${dx.toFixed(1)}px`,
+                          ["--sy" as string]: `${dy.toFixed(1)}px`,
+                          animationDelay: `${k * 30}ms`,
+                        }}
+                      />
+                    );
+                  });
                 return (
                   <Link
                     key={`${g.gameId}-${i}`}
@@ -94,15 +113,17 @@ export function LiveTicker() {
                   >
                     <span className="text-[#8A8A93] font-medium">{g.awayTeam.teamTricode}</span>
                     <span
-                      className={`font-[family-name:var(--font-barlow)] font-bold tabular-nums text-[#F5F5F7] ${awayPulsed ? "score-pulse" : ""}`}
+                      className={`relative font-[family-name:var(--font-barlow)] font-bold tabular-nums text-[#F5F5F7] ${awayPulsed ? "score-pulse" : ""}`}
                     >
                       {g.awayTeam.score}
+                      {awayPulsed && renderSparkles()}
                     </span>
                     <span className="text-[#3A3A42]">·</span>
                     <span
-                      className={`font-[family-name:var(--font-barlow)] font-bold tabular-nums text-[#F5F5F7] ${homePulsed ? "score-pulse" : ""}`}
+                      className={`relative font-[family-name:var(--font-barlow)] font-bold tabular-nums text-[#F5F5F7] ${homePulsed ? "score-pulse" : ""}`}
                     >
                       {g.homeTeam.score}
+                      {homePulsed && renderSparkles()}
                     </span>
                     <span className="text-[#8A8A93] font-medium">{g.homeTeam.teamTricode}</span>
                     <span className="text-[10px] text-[#6E6E76]">{g.gameStatusText}</span>

@@ -148,11 +148,29 @@ function StandingsTable({ teams, conference }: { teams: TeamRow[]; conference: "
                 </td>
                 <td className="px-3 py-4 text-right text-[#8A8A93] text-xs tabular-nums">{gamesBehind(team)}</td>
                 <td className="px-3 py-4 text-right text-xs tabular-nums">
-                  <span className="inline-flex items-center gap-1 text-[#8A8A93]">
-                    {team.l10 || "—"}
-                    {trendUp && <ArrowUp size={10} className="text-[#34D399]" />}
-                    {trendDown && <ArrowDown size={10} className="text-[#F87171]" />}
-                  </span>
+                  <div className="inline-flex items-center gap-2">
+                    {l10 && (
+                      <div className="flex items-center gap-0.5" aria-label={`Last 10: ${l10.wins}-${l10.losses}`}>
+                        {Array.from({ length: 10 }).map((_, k) => {
+                          const isWin = k < l10.wins;
+                          return (
+                            <span
+                              key={k}
+                              className="h-1.5 w-1.5 rounded-full"
+                              style={{
+                                backgroundColor: isWin ? "#34D399" : "rgba(248,113,113,0.55)",
+                              }}
+                            />
+                          );
+                        })}
+                      </div>
+                    )}
+                    <span className="inline-flex items-center gap-1 text-[#8A8A93]">
+                      {team.l10 || "—"}
+                      {trendUp && <ArrowUp size={10} className="text-[#34D399]" />}
+                      {trendDown && <ArrowDown size={10} className="text-[#F87171]" />}
+                    </span>
+                  </div>
                 </td>
                 <td className="px-3 py-4 pr-6 text-right text-xs tabular-nums">
                   <span className={cn(
@@ -260,7 +278,7 @@ export default function StandingsPage() {
         <>
           {/* DIVIDER */}
           <div className="px-4 lg:px-12">
-            <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+            <div className="max-w-6xl mx-auto h-px divider-shimmer" />
           </div>
 
           {/* EAST */}
@@ -280,7 +298,7 @@ export default function StandingsPage() {
 
           {/* DIVIDER */}
           <div className="px-4 lg:px-12">
-            <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+            <div className="max-w-6xl mx-auto h-px divider-shimmer" />
           </div>
 
           {/* WEST */}

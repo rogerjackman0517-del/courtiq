@@ -105,7 +105,7 @@ export function Sidebar() {
 
         <Link
           href="/billing"
-          className="group block relative overflow-hidden rounded-2xl p-4 border border-[#D4B560]/15 bg-gradient-to-br from-[#D4B560]/10 via-[#D4B560]/5 to-transparent transition-all duration-300 hover:border-[#D4B560]/30 hover:from-[#D4B560]/15"
+          className="group block relative overflow-hidden rounded-2xl p-4 border border-[#D4B560]/15 bg-[#D4B560]/[0.06] backdrop-blur-md ring-1 ring-inset ring-white/[0.04] transition-all duration-300 hover:border-[#D4B560]/35 hover:bg-[#D4B560]/[0.10] hover:ring-[#D4B560]/15"
         >
           <div className="absolute -top-8 -right-8 h-20 w-20 rounded-full bg-[#D4B560]/10 blur-2xl group-hover:bg-[#D4B560]/20 transition-all duration-500" />
           <div className="relative flex items-center gap-1.5 mb-1">

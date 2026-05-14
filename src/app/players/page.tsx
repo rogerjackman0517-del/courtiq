@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
 import { PlayerAvatar } from "@/components/players/PlayerAvatar";
 import { Sparkline } from "@/components/players/Sparkline";
@@ -8,8 +8,9 @@ import { PlayerHoverCard } from "@/components/players/PlayerHoverCard";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { PlayerRowSkeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
-import { Search, ArrowUpDown, ArrowUp, ArrowDown, Rows3, Rows4 } from "lucide-react";
+import { Search, ArrowUpDown, ArrowUp, ArrowDown, Rows3, Rows4, X } from "lucide-react";
 import { AnimatedHeading } from "@/components/ui/AnimatedHeading";
+import { useSearchHotkey } from "@/components/ui/Toast";
 
 type SortKey = "name" | "pts" | "reb" | "ast" | "fgPct" | "fg3Pct" | "ftPct" | "min";
 type SortDir = "asc" | "desc";
@@ -31,6 +32,16 @@ type PlayerRow = {
   gp: number;
 };
 
+const STAT_HINTS: Record<string, string> = {
+  MIN: "Minutes per game",
+  PPG: "Points per game",
+  RPG: "Rebounds per game",
+  APG: "Assists per game",
+  "FG%": "Field goal percentage",
+  "3P%": "Three-point percentage",
+  "FT%": "Free throw percentage",
+};
+
 function SortHeader({
   label, sortKey, current, dir, onSort, align = "right"
 }: {
@@ -41,8 +52,9 @@ function SortHeader({
   return (
     <button
       onClick={() => onSort(sortKey)}
+      title={STAT_HINTS[label]}
       className={cn(
-        "inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.15em] transition-colors",
+        "inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.15em] transition-colors cursor-help",
         align === "right" && "ml-auto",
         active ? "text-[#D4B560] [text-shadow:0_0_12px_rgba(212,181,96,0.4)]" : "text-[#6E6E76] hover:text-[#F5F5F7]"
       )}
@@ -63,6 +75,8 @@ export default function PlayersPage() {
   const [players, setPlayers] = useState<PlayerRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  useSearchHotkey(searchInputRef);
 
   // Restore persisted preferences
   useEffect(() => {
@@ -153,12 +167,16 @@ export default function PlayersPage() {
             <div className="flex items-center gap-3 bg-[#1C1C24] border border-white/[0.05] rounded-2xl px-5 py-3 max-w-md flex-1 min-w-[260px] transition-all hover:border-white/[0.1] focus-within:border-[#D4B560]/40">
               <Search size={16} className="text-[#6E6E76] shrink-0" strokeWidth={2} />
               <input
+                ref={searchInputRef}
                 type="text"
                 placeholder="Search by name or team..."
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 className="flex-1 bg-transparent text-sm text-[#F5F5F7] placeholder:text-[#6E6E76] outline-none tracking-tight"
               />
+              {!query && (
+                <kbd className="hidden sm:inline-flex items-center text-[10px] text-[#6E6E76] border border-white/[0.08] rounded px-1.5 py-0.5">/</kbd>
+              )}
               {query && (
                 <button
                   onClick={() => setQuery("")}
@@ -199,6 +217,33 @@ export default function PlayersPage() {
           {error && (
             <div className="rounded-2xl border border-[#F87171]/30 bg-[#F87171]/10 px-5 py-4 mb-6 text-sm text-[#F87171]">
               Failed to load: {error}
+            </div>
+          )}
+
+          {/* Active filter chips */}
+          {(query || sortKey !== "pts" || sortDir !== "desc") && (
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#6E6E76]">Active</span>
+              {query && (
+                <button
+                  type="button"
+                  onClick={() => setQuery("")}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-[#D4B560]/10 border border-[#D4B560]/25 text-[#D4B560] px-2.5 py-1 text-xs hover:bg-[#D4B560]/15"
+                >
+                  Search: &ldquo;{query}&rdquo;
+                  <X size={11} />
+                </button>
+              )}
+              {(sortKey !== "pts" || sortDir !== "desc") && (
+                <button
+                  type="button"
+                  onClick={() => { setSortKey("pts"); setSortDir("desc"); }}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.05] border border-white/[0.08] text-[#F5F5F7] px-2.5 py-1 text-xs hover:bg-white/[0.08]"
+                >
+                  Sort: {sortKey.toUpperCase()} {sortDir === "desc" ? "↓" : "↑"}
+                  <X size={11} />
+                </button>
+              )}
             </div>
           )}
 

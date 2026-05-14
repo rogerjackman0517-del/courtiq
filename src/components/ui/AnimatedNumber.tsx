@@ -9,9 +9,15 @@ type Props = {
   prefix?: string;
   suffix?: string;
   className?: string;
+  /** Stable key to remember the last shown value across remounts in the same session. */
+  cacheKey?: string;
 };
 
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+
+// In-memory session cache so navigating back to a page doesn't re-animate
+// values from 0 every time. Keyed by the optional cacheKey prop.
+const SESSION_CACHE = new Map<string, number>();
 
 export function AnimatedNumber({
   value,
@@ -20,12 +26,20 @@ export function AnimatedNumber({
   prefix = "",
   suffix = "",
   className,
+  cacheKey,
 }: Props) {
-  const [display, setDisplay] = useState(0);
+  // If we've already animated this value in this session, start from it.
+  const cached = cacheKey ? SESSION_CACHE.get(cacheKey) : undefined;
+  const [display, setDisplay] = useState(cached ?? 0);
   const startRef = useRef<number | null>(null);
-  const fromRef = useRef(0);
+  const fromRef = useRef(cached ?? 0);
 
   useEffect(() => {
+    // Fast-path: same cached value, skip animation entirely.
+    if (cacheKey && SESSION_CACHE.get(cacheKey) === value) {
+      setDisplay(value);
+      return;
+    }
     fromRef.current = display;
     startRef.current = null;
     let raf = 0;
@@ -38,6 +52,7 @@ export function AnimatedNumber({
       const next = fromRef.current + (value - fromRef.current) * eased;
       setDisplay(next);
       if (progress < 1) raf = requestAnimationFrame(tick);
+      else if (cacheKey) SESSION_CACHE.set(cacheKey, value);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);

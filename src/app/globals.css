@@ -617,6 +617,139 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
   box-shadow: 0 0 14px rgba(212, 181, 96, 0.45);
 }
 
+/* ============================================================
+   Accessibility + system polish
+   ============================================================ */
+
+/* Visible keyboard focus ring (mouse focus stays clean). */
+*:focus { outline: none; }
+*:focus-visible {
+  outline: 2px solid rgba(212, 181, 96, 0.7);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Respect reduced-motion preference: shut off heavy animations. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Print stylesheet — tables print cleanly, no chrome. */
+@media print {
+  aside,
+  header,
+  footer,
+  nav,
+  .splash-overlay,
+  .court-grid-bg,
+  [data-no-print] {
+    display: none !important;
+  }
+  body,
+  main {
+    background: white !important;
+    color: black !important;
+  }
+  .floating-card {
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+    page-break-inside: avoid;
+  }
+  table, tr, td, th {
+    color: black !important;
+    background: transparent !important;
+    border-color: #ccc !important;
+  }
+  a { color: black !important; text-decoration: underline; }
+}
+
+/* Tap ripple — adds a soft expanding ring on press. */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+.ripple::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--rx, 50%) var(--ry, 50%),
+    rgba(212, 181, 96, 0.25) 0%,
+    rgba(212, 181, 96, 0) 60%);
+  opacity: 0;
+  transition: opacity 600ms cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+.ripple:active::after {
+  opacity: 1;
+  transition: opacity 50ms ease;
+}
+
+/* Divider shimmer — soft horizontal sweep on the gradient HRs */
+@keyframes dividerShimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.divider-shimmer {
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(212, 181, 96, 0.0) 30%,
+    rgba(212, 181, 96, 0.45) 50%,
+    rgba(212, 181, 96, 0.0) 70%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: dividerShimmer 6s ease-in-out infinite;
+}
+
+/* Section entry parallax — slides up + fades on reveal. */
+[data-reveal] {
+  animation: sectionEntry 700ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+@keyframes sectionEntry {
+  0%   { opacity: 0; transform: translateY(18px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+[data-reveal-delay="1"] { animation-delay: 80ms; }
+[data-reveal-delay="2"] { animation-delay: 160ms; }
+[data-reveal-delay="3"] { animation-delay: 240ms; }
+
+/* Toast container + cards */
+@keyframes toastIn {
+  0%   { opacity: 0; transform: translateY(20px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toastOut {
+  0%   { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(20px) scale(0.95); }
+}
+.toast-enter { animation: toastIn 280ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.toast-leave { animation: toastOut 220ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* Sparkle burst on score change */
+@keyframes sparklePop {
+  0%   { opacity: 0; transform: translate(0, 0) scale(0.4); }
+  20%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--sx, 0), var(--sy, 0)) scale(1.1); }
+}
+.sparkle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  background: #D4B560;
+  pointer-events: none;
+  animation: sparklePop 900ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  box-shadow: 0 0 6px rgba(212, 181, 96, 0.8);
+}
+
 /* Headline word-by-word fade-in */
 @keyframes wordFadeIn {
   0%   { opacity: 0; transform: translateY(14px); filter: blur(6px); }

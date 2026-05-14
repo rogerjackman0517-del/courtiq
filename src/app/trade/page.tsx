@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Search, X, ArrowLeftRight, Sparkles, TrendingUp, TrendingDown } from "lucide-react";
+import { Search, X, ArrowLeftRight, Sparkles, TrendingUp, TrendingDown, Share2 } from "lucide-react";
+import { useCopyToClipboard } from "@/components/ui/Toast";
 import { PlayerAvatar } from "@/components/players/PlayerAvatar";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -383,6 +384,7 @@ function tradeVerdict(
 
 export default function TradePage() {
   const router = useRouter();
+  const copy = useCopyToClipboard();
   const [players, setPlayers] = useState<Player[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
@@ -526,11 +528,21 @@ export default function TradePage() {
                 <div className="floating-card no-jiggle rounded-3xl p-6 lg:p-8 mb-8 relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-[#D4B560]/[0.04] to-transparent pointer-events-none" />
                   <div className="relative">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Sparkles size={14} className="text-[#D4B560]" />
-                      <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#D4B560]">
-                        The verdict
-                      </p>
+                    <div className="flex items-center justify-between gap-2 mb-4">
+                      <div className="flex items-center gap-2">
+                        <Sparkles size={14} className="text-[#D4B560]" />
+                        <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#D4B560]">
+                          The verdict
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => copy(window.location.href, "Trade link copied")}
+                        className="ripple inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/[0.08] bg-white/[0.02] text-[11px] font-medium text-[#8A8A93] hover:text-[#F5F5F7] hover:bg-white/[0.05] transition-colors"
+                        aria-label="Copy trade link"
+                      >
+                        <Share2 size={12} /> Share
+                      </button>
                     </div>
                     <p className="text-base lg:text-lg leading-relaxed text-[#F5F5F7] font-medium">
                       {tradeVerdict(teamA, teamB, playerA, playerB, projection.valueDeltaA)}

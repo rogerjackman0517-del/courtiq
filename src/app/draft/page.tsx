@@ -97,7 +97,7 @@ export default function DraftPage() {
 
       {/* DIVIDER */}
       <div className="px-4 lg:px-12">
-        <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="max-w-6xl mx-auto h-px divider-shimmer" />
       </div>
 
       {/* TOP 3 spotlight */}
@@ -140,7 +140,7 @@ export default function DraftPage() {
 
       {/* DIVIDER */}
       <div className="px-4 lg:px-12">
-        <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="max-w-6xl mx-auto h-px divider-shimmer" />
       </div>
 
       {/* FULL DRAFT */}

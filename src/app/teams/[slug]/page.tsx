@@ -9,6 +9,58 @@ import { TeamLogo } from "@/components/teams/TeamLogo";
 import { PlayerAvatar } from "@/components/players/PlayerAvatar";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 
+function PlayerGallery({ players, color }: { players: Array<{ id: number; fullName: string; slug: string; pts: number; reb: number; ast: number }>; color: string }) {
+  const [active, setActive] = useState(0);
+  useEffect(() => {
+    if (players.length <= 1) return;
+    const t = setInterval(() => setActive((i) => (i + 1) % players.length), 4200);
+    return () => clearInterval(t);
+  }, [players.length]);
+  if (players.length === 0) return null;
+  return (
+    <div className="floating-card no-jiggle rounded-3xl p-6 lg:p-10 relative overflow-hidden">
+      <div
+        className="absolute inset-0 opacity-30 pointer-events-none"
+        style={{ background: `radial-gradient(ellipse 70% 60% at 75% 50%, ${color}66 0%, transparent 65%)` }}
+      />
+      <div className="relative grid grid-cols-1 md:grid-cols-[1fr_auto] gap-6 items-center">
+        <div>
+          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#6E6E76] mb-2">Spotlight</p>
+          {players.map((p, i) => (
+            <Link
+              key={p.id}
+              href={`/players/${p.slug}`}
+              className={`block transition-all duration-700 ${i === active ? "opacity-100 max-h-40" : "opacity-0 max-h-0 overflow-hidden"}`}
+              aria-hidden={i !== active}
+            >
+              <h3 className="font-[family-name:var(--font-barlow)] font-black text-3xl lg:text-5xl tracking-[-0.03em] text-[#F5F5F7] hover:text-[#D4B560] transition-colors">
+                {p.fullName}
+              </h3>
+              <p className="mt-2 text-sm text-[#8A8A93] tabular-nums">
+                {p.pts.toFixed(1)} pts · {p.reb.toFixed(1)} reb · {p.ast.toFixed(1)} ast
+              </p>
+            </Link>
+          ))}
+        </div>
+        <div className="flex items-center gap-3 md:flex-col">
+          {players.map((p, i) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => setActive(i)}
+              className={`rounded-full transition-all ${i === active ? "ring-2 scale-110" : "opacity-50 hover:opacity-100"}`}
+              style={{ ["--tw-ring-color" as string]: color }}
+              aria-label={`Show ${p.fullName}`}
+            >
+              <PlayerAvatar playerId={p.id} fullName={p.fullName} size="md" />
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 type TeamRow = {
   id: number;
   abbreviation: string;
@@ -114,7 +166,7 @@ export default function TeamProfilePage() {
           </div>
         </section>
         <div className="px-4 lg:px-12">
-          <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+          <div className="max-w-6xl mx-auto h-px divider-shimmer" />
         </div>
         <section className="px-6 lg:px-12 py-16">
           <div className="max-w-6xl mx-auto">
@@ -251,7 +303,7 @@ export default function TeamProfilePage() {
 
       {/* DIVIDER */}
       <div className="px-4 lg:px-12">
-        <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="max-w-6xl mx-auto h-px divider-shimmer" />
       </div>
 
       {/* TEAM LEADERS */}
@@ -319,13 +371,21 @@ export default function TeamProfilePage() {
                 </Link>
               )}
             </div>
+
+            {/* Rotating gallery */}
+            <div className="mt-8">
+              <PlayerGallery
+                players={roster.slice(0, Math.min(4, roster.length))}
+                color={color}
+              />
+            </div>
           </div>
         </section>
       )}
 
       {/* DIVIDER */}
       <div className="px-4 lg:px-12">
-        <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="max-w-6xl mx-auto h-px divider-shimmer" />
       </div>
 
       {/* ROSTER */}

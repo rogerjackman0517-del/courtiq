@@ -9,6 +9,7 @@ import { Footer } from "@/components/layout/Footer";
 import { LiveTicker } from "@/components/layout/LiveTicker";
 import { CommandPalette } from "@/components/layout/CommandPalette";
 import { Splash } from "@/components/ui/Splash";
+import { ToastProvider } from "@/components/ui/Toast";
 
 const barlowCondensed = Barlow_Condensed({
   variable: "--font-barlow",
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <ClerkProvider>
       <html lang="en" className={`${barlowCondensed.variable} ${dmSans.variable} h-full`}>
         <body className="h-full bg-[#0A0A0F] text-[#F0F0F0] antialiased">
+          <ToastProvider>
           <div className="flex h-full">
             {/* Desktop sidebar */}
             <Sidebar />
@@ -66,6 +68,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* Global overlays */}
           <Splash />
           <CommandPalette />
+          </ToastProvider>
         </body>
       </html>
     </ClerkProvider>
