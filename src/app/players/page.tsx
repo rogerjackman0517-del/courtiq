@@ -85,7 +85,7 @@ export default function PlayersPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
-      const raw = localStorage.getItem("courtiq-players-prefs");
+      const raw = localStorage.getItem("courtiq-players-prefs-v2");
       if (raw) {
         const p = JSON.parse(raw) as { sortKey?: SortKey; sortDir?: SortDir; dense?: boolean; query?: string };
         if (p.sortKey) setSortKey(p.sortKey);
@@ -100,7 +100,7 @@ export default function PlayersPage() {
     if (typeof window === "undefined") return;
     try {
       localStorage.setItem(
-        "courtiq-players-prefs",
+        "courtiq-players-prefs-v2",
         JSON.stringify({ sortKey, sortDir, dense })
       );
     } catch { /* ignore */ }

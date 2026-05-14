@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-const KEY = "courtiq-pinned-players";
+const KEY = "courtiq-pinned-players-v2";
 
 export function usePinnedPlayers() {
   const [pinned, setPinned] = useState<string[]>([]);
