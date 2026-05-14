@@ -650,15 +650,12 @@ export default function HomePage() {
                     i !== 5 && "border-b border-white/[0.04]"
                   )}
                 >
-                  <span className={cn(
-                    "font-[family-name:var(--font-barlow)] font-black text-2xl tabular-nums w-8",
-                    i === 0 ? "text-[#D4B560]" : "text-[#6E6E76]"
-                  )}>
+                  <span className="font-[family-name:var(--font-barlow)] font-black text-2xl tabular-nums w-8 text-[#6E6E76]">
                     {i + 1}
                   </span>
                   <PlayerAvatar playerId={p.id} fullName={p.fullName} size="sm" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-base font-semibold text-[#F5F5F7] tracking-tight truncate group-hover:text-[#D4B560] transition-colors">{p.fullName}</p>
+                    <p className="text-base font-semibold text-[#F5F5F7] tracking-tight truncate group-hover:text-white transition-colors">{p.fullName}</p>
                     <div className="flex items-center gap-1.5 mt-0.5">
                       <TeamLogo teamId={p.teamId} abbreviation={p.teamAbbr} size="xs" />
                       <span className="text-xs text-[#8A8A93]">{p.teamAbbr}</span>
