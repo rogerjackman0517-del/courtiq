@@ -574,28 +574,35 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
 .cursor-spotlight {
   position: relative;
   isolation: isolate;
-  overflow: visible;
-}
-/* When stacked with brand-glow (which sets overflow:hidden), force the
-   spotlight pseudo to bleed past the section bounds so the radial does
-   not clip in a hard line at the bottom edge. */
-.brand-glow.cursor-spotlight {
-  overflow: visible;
 }
 .cursor-spotlight::before {
   content: "";
   position: absolute;
-  /* Bleed beyond the section so the radial fades smoothly past the section edges
-     instead of clipping in a hard horizontal line at the bottom. */
-  inset: -260px 0;
+  inset: 0;
   background:
     radial-gradient(
-      900px circle at var(--mx, 50%) calc(var(--my, 50%) + 260px),
+      900px circle at var(--mx, 50%) var(--my, 50%),
       rgba(212, 181, 96, 0.28) 0%,
       rgba(212, 181, 96, 0.14) 35%,
       rgba(212, 181, 96, 0.06) 65%,
       rgba(212, 181, 96, 0.03) 100%
     );
+  /* Soft fade at the very top and bottom so the gold never clips in a
+     hard horizontal line at the section edge. */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 12%,
+    black 88%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 12%,
+    black 88%,
+    transparent 100%
+  );
   pointer-events: none;
   opacity: 0;
   transition: opacity 300ms ease;
