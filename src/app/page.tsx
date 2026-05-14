@@ -14,7 +14,7 @@ type PlayerRow = {
   fgPct: number; fg3Pct: number; ftPct: number; min: number; gp: number;
 };
 type TeamRow = {
-  abbreviation: string; city: string; name: string; slug: string; fullName: string;
+  id: number; abbreviation: string; city: string; name: string; slug: string; fullName: string;
   conference: string; confRank: number; wins: number; losses: number;
   streak: string; l10: string; primaryColor?: string;
 };

@@ -36,6 +36,8 @@ type PlayerRow = {
   pts: number;
   reb: number;
   ast: number;
+  blk: number;
+  stl: number;
   gp: number;
   min: number;
 };
