@@ -222,17 +222,7 @@ export default function HomePage() {
                     }}
                   />
 
-                  {/* Bottom fade — blends into the next section */}
-                  <div
-                    className="pointer-events-none absolute inset-x-0 bottom-0 h-24 lg:h-32 z-10"
-                    style={{
-                      background: "linear-gradient(to bottom, transparent 0%, rgba(10,10,14,0.85) 70%, #0A0A0E 100%)",
-                      backdropFilter: "blur(0.5px)",
-                      WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 50%)",
-                      maskImage: "linear-gradient(to bottom, transparent 0%, black 50%)",
-                    }}
-                  />
-                  <div className="relative px-6 lg:px-12 py-6 lg:py-9">
+                  <div className="relative z-10 px-6 lg:px-12 py-6 lg:py-9">
                     {/* Status pill */}
                     <div className="flex items-center justify-between mb-4 lg:mb-6">
                       <div className="flex items-center gap-2">

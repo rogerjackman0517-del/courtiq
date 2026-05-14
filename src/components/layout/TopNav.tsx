@@ -37,14 +37,21 @@ export function TopNav() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrolled, setScrolled] = useState(false);
 
-  // Scrolled state on the main element (scroll container)
+  // Scrolled state — listen on the main scroll container AND window as a fallback
   useEffect(() => {
     const main = document.querySelector("main");
-    if (!main) return;
-    const onScroll = () => setScrolled(main.scrollTop > 8);
-    main.addEventListener("scroll", onScroll, { passive: true });
+    const onScroll = () => {
+      const mainTop = main ? main.scrollTop : 0;
+      const winTop = window.scrollY || document.documentElement.scrollTop || 0;
+      setScrolled(Math.max(mainTop, winTop) > 8);
+    };
+    main?.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
-    return () => main.removeEventListener("scroll", onScroll);
+    return () => {
+      main?.removeEventListener("scroll", onScroll);
+      window.removeEventListener("scroll", onScroll);
+    };
   }, []);
 
   // Load data once on mount
