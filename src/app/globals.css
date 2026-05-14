@@ -524,11 +524,12 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
 }
 /* Stronger frosted glass when the page has scrolled */
 .topnav-blur.topnav-scrolled {
-  background: rgba(10, 10, 14, 0.78);
-  backdrop-filter: blur(24px) saturate(200%);
-  -webkit-backdrop-filter: blur(24px) saturate(200%);
-  border-bottom-color: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px -16px rgba(0, 0, 0, 0.6);
+  background: rgba(10, 10, 14, 0.85);
+  backdrop-filter: blur(28px) saturate(220%);
+  -webkit-backdrop-filter: blur(28px) saturate(220%);
+  border-bottom-color: rgba(212, 181, 96, 0.18);
+  box-shadow: 0 8px 32px -16px rgba(0, 0, 0, 0.7),
+              0 1px 0 rgba(212, 181, 96, 0.06) inset;
 }
 
 /* Live ticker scrolling marquee */
@@ -557,10 +558,10 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
 
 /* Gradient hero numbers — gold-to-white vertical sweep */
 .stat-gradient-text {
-  background: linear-gradient(180deg, #F5F5F7 0%, #F5F5F7 45%, #D4B560 100%);
+  background: linear-gradient(180deg, #FFFFFF 0%, #F5F5F7 30%, #E5C57A 70%, #D4B560 100%);
   -webkit-background-clip: text;
   background-clip: text;
-  color: transparent;
+  color: transparent !important;
   -webkit-text-fill-color: transparent;
 }
 
@@ -579,14 +580,16 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
   position: absolute;
   inset: 0;
   background: radial-gradient(
-    400px circle at var(--mx, 50%) var(--my, 50%),
-    rgba(212, 181, 96, 0.08) 0%,
-    transparent 65%
+    500px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(212, 181, 96, 0.22) 0%,
+    rgba(212, 181, 96, 0.08) 40%,
+    transparent 70%
   );
   pointer-events: none;
   opacity: 0;
-  transition: opacity 350ms ease;
+  transition: opacity 300ms ease;
   z-index: 0;
+  mix-blend-mode: screen;
 }
 .cursor-spotlight:hover::before {
   opacity: 1;
