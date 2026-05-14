@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { PlayerAvatar } from "@/components/players/PlayerAvatar";
+import { Sparkline } from "@/components/players/Sparkline";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { PlayerRowSkeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
@@ -160,6 +161,9 @@ export default function PlayersPage() {
                     <th className="text-right px-5 py-4">
                       <SortHeader label="PPG" sortKey="pts" current={sortKey} dir={sortDir} onSort={handleSort} />
                     </th>
+                    <th className="text-center px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">
+                      Trend
+                    </th>
                     <th className="text-right px-5 py-4">
                       <SortHeader label="RPG" sortKey="reb" current={sortKey} dir={sortDir} onSort={handleSort} />
                     </th>
@@ -180,7 +184,7 @@ export default function PlayersPage() {
                 <tbody>
                   {loading && Array.from({ length: 10 }).map((_, i) => <PlayerRowSkeleton key={`skel-${i}`} />)}
                   {!loading && rows.length === 0 && !error && (
-                    <tr><td colSpan={11} className="px-5 py-16 text-center">
+                    <tr><td colSpan={12} className="px-5 py-16 text-center">
                       <div className="flex flex-col items-center gap-3">
                         <svg viewBox="0 0 24 24" className="h-10 w-10 opacity-30" fill="none" stroke="#D4B560" strokeWidth="1.5" strokeLinecap="round">
                           <circle cx="11" cy="11" r="7" />
@@ -210,6 +214,11 @@ export default function PlayersPage() {
                       <td className="px-5 py-3.5 text-right text-[#8A8A93] text-xs tabular-nums">{p.gp}</td>
                       <td className="px-5 py-3.5 text-right text-[#8A8A93] text-xs tabular-nums">{p.min.toFixed(1)}</td>
                       <td className={cn("px-5 py-3.5 text-right font-[family-name:var(--font-barlow)] font-bold text-base tabular-nums", sortKey === "pts" ? "text-[#D4B560]" : "text-[#F5F5F7]")}>{p.pts.toFixed(1)}</td>
+                      <td className="px-3 py-3.5">
+                        <div className="flex items-center justify-center">
+                          <Sparkline seed={p.id} average={p.pts} />
+                        </div>
+                      </td>
                       <td className={cn("px-5 py-3.5 text-right font-[family-name:var(--font-barlow)] font-bold text-base tabular-nums", sortKey === "reb" ? "text-[#D4B560]" : "text-[#F5F5F7]")}>{p.reb.toFixed(1)}</td>
                       <td className={cn("px-5 py-3.5 text-right font-[family-name:var(--font-barlow)] font-bold text-base tabular-nums", sortKey === "ast" ? "text-[#D4B560]" : "text-[#F5F5F7]")}>{p.ast.toFixed(1)}</td>
                       <td className={cn("px-5 py-3.5 text-right tabular-nums text-sm", sortKey === "fgPct" ? "text-[#D4B560] font-bold" : "text-[#F5F5F7]")}>{(p.fgPct * 100).toFixed(1)}%</td>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowUpRight, RadioTower } from "lucide-react";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { CourtEmpty } from "@/components/ui/CourtEmpty";
 
 type Team = {
   teamId: number;
@@ -268,19 +269,15 @@ export default function LivePage() {
             )}
           </>
         ) : (
-          <div className="floating-card no-jiggle rounded-3xl p-10 lg:p-16 text-center mb-10 lg:mb-14">
-            <p className="text-sm font-bold tracking-[0.2em] uppercase text-[#D4B560] mb-2">
-              Quiet night
-            </p>
-            <p className="text-xl lg:text-2xl font-[family-name:var(--font-barlow)] font-bold text-[#F5F5F7] mb-3">
-              No games live right now
-            </p>
-            {upcoming.length > 0 && (
-              <p className="text-sm text-[#8A8A93]">
-                Next tip-off: <span className="text-[#F5F5F7]">{upcoming[0].gameStatusText}</span> ·{" "}
-                {upcoming[0].awayTeam.teamTricode} @ {upcoming[0].homeTeam.teamTricode}
-              </p>
-            )}
+          <div className="mb-10 lg:mb-14">
+            <CourtEmpty
+              title="No games live right now"
+              subtitle={
+                upcoming.length > 0
+                  ? `Next tip-off: ${upcoming[0].gameStatusText} · ${upcoming[0].awayTeam.teamTricode} @ ${upcoming[0].homeTeam.teamTricode}`
+                  : "Quiet night across the league. Check back when the next slate tips off."
+              }
+            />
           </div>
         )}
 

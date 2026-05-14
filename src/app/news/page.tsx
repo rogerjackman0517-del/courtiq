@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ArrowUpRight, AlertCircle } from "lucide-react";
 import { NewsCardSkeleton } from "@/components/ui/Skeleton";
+import { CourtEmpty } from "@/components/ui/CourtEmpty";
 import { cn } from "@/lib/utils";
 
 type NewsItem = {
@@ -167,7 +168,12 @@ export default function NewsPage() {
       )}
 
       {!loading && items.length === 0 && !error && (
-        <div className="px-6 lg:px-12 py-16 text-center text-[#8A8A93]">No news available.</div>
+        <div className="px-4 lg:px-12 max-w-3xl mx-auto py-8">
+          <CourtEmpty
+            title="No headlines right now"
+            subtitle="The ESPN feed is quiet. We'll pick up fresh stories as soon as they drop."
+          />
+        </div>
       )}
 
       {!loading && items.length > 0 && (

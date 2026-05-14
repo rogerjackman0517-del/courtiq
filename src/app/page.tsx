@@ -6,6 +6,7 @@ import { PlayerAvatar } from "@/components/players/PlayerAvatar";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { ArrowUpRight, Flame, Radio, Sparkles, TrendingUp, Trophy, Zap } from "lucide-react";
 import { StatCardSkeleton, Skeleton } from "@/components/ui/Skeleton";
+import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import { cn } from "@/lib/utils";
 
 type PlayerRow = {
@@ -360,14 +361,16 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {players.length === 0 && Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={"pulse-skel-" + i} />)}
             {ptsLeader && (
-              <Link href={`/players/${ptsLeader.slug}`} className="floating-card group block rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-[#D4B560]/10">
+              <Link href={`/players/${ptsLeader.slug}`} className="floating-card gold-sweep group block rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-[#D4B560]/10">
                 <div className="flex items-center gap-1.5 mb-6">
                   <Flame size={11} className="text-[#D4B560]" />
                   <p className="text-[10px] font-bold tracking-widest uppercase text-[#D4B560]">Scoring</p>
                 </div>
-                <p className="font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-7xl tabular-nums tracking-[-0.04em] text-[#F5F5F7] mb-2">
-                  {ptsLeader.pts.toFixed(1)}
-                </p>
+                <AnimatedNumber
+                  value={ptsLeader.pts}
+                  decimals={1}
+                  className="block font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-7xl tabular-nums tracking-[-0.04em] text-[#F5F5F7] mb-2"
+                />
                 <p className="text-[11px] text-[#8A8A93] mb-6 tracking-wide">PPG · {ptsLeader.gp} GP</p>
                 <div>
                   <div className="flex items-center gap-2.5"><PlayerAvatar playerId={ptsLeader.id} fullName={ptsLeader.fullName} size="sm" /><div className="min-w-0"><p className="text-sm font-semibold text-[#F5F5F7] tracking-tight truncate">{ptsLeader.fullName}</p><p className="text-xs text-[#8A8A93]">{ptsLeader.teamAbbr}</p></div></div>
@@ -375,14 +378,16 @@ export default function HomePage() {
               </Link>
             )}
             {astLeader && (
-              <Link href={`/players/${astLeader.slug}`} className="floating-card group block rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/40">
+              <Link href={`/players/${astLeader.slug}`} className="floating-card gold-sweep group block rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/40">
                 <div className="flex items-center gap-1.5 mb-6">
                   <TrendingUp size={11} className="text-[#8A8A93]" />
                   <p className="text-[10px] font-bold tracking-widest uppercase text-[#8A8A93]">Assists</p>
                 </div>
-                <p className="font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-7xl tabular-nums tracking-[-0.04em] text-[#F5F5F7] mb-2">
-                  {astLeader.ast.toFixed(1)}
-                </p>
+                <AnimatedNumber
+                  value={astLeader.ast}
+                  decimals={1}
+                  className="block font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-7xl tabular-nums tracking-[-0.04em] text-[#F5F5F7] mb-2"
+                />
                 <p className="text-[11px] text-[#8A8A93] mb-6 tracking-wide">APG · {astLeader.gp} GP</p>
                 <div>
                   <div className="flex items-center gap-2.5"><PlayerAvatar playerId={astLeader.id} fullName={astLeader.fullName} size="sm" /><div className="min-w-0"><p className="text-sm font-semibold text-[#F5F5F7] tracking-tight truncate">{astLeader.fullName}</p><p className="text-xs text-[#8A8A93]">{astLeader.teamAbbr}</p></div></div>
@@ -390,13 +395,15 @@ export default function HomePage() {
               </Link>
             )}
             {bestTeam && (
-              <Link href={`/teams/${bestTeam.slug}`} className="floating-card group block rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/40">
+              <Link href={`/teams/${bestTeam.slug}`} className="floating-card gold-sweep group block rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/40">
                 <div className="flex items-center gap-1.5 mb-6">
                   <Trophy size={11} className="text-[#8A8A93]" />
                   <p className="text-[10px] font-bold tracking-widest uppercase text-[#8A8A93]">Top Record</p>
                 </div>
                 <p className="font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-7xl tabular-nums tracking-[-0.04em] text-[#F5F5F7] mb-2">
-                  {bestTeam.wins}<span className="text-[#6E6E76]">–{bestTeam.losses}</span>
+                  <AnimatedNumber value={bestTeam.wins} />
+                  <span className="text-[#6E6E76]">–</span>
+                  <AnimatedNumber value={bestTeam.losses} />
                 </p>
                 <p className="text-[11px] text-[#8A8A93] mb-6 tracking-wide">
                   {((bestTeam.wins / (bestTeam.wins + bestTeam.losses)) * 100).toFixed(1)}% · {bestTeam.conference}
@@ -408,7 +415,7 @@ export default function HomePage() {
               </Link>
             )}
             {hottest && (
-              <Link href={`/teams/${hottest.slug}`} className="floating-card group block rounded-3xl bg-gradient-to-br from-[#34D399]/15 via-[#1C1C24] to-[#131318] p-6 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-[#34D399]/10">
+              <Link href={`/teams/${hottest.slug}`} className="floating-card gold-sweep group block rounded-3xl bg-gradient-to-br from-[#34D399]/15 via-[#1C1C24] to-[#131318] p-6 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-[#34D399]/10">
                 <div className="flex items-center gap-1.5 mb-6">
                   <Zap size={11} className="text-[#34D399]" />
                   <p className="text-[10px] font-bold tracking-widest uppercase text-[#34D399]">Hottest</p>
@@ -488,7 +495,11 @@ export default function HomePage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-[family-name:var(--font-barlow)] font-black text-2xl tabular-nums text-[#F5F5F7] tracking-tight">{p.pts.toFixed(1)}</p>
+                    <AnimatedNumber
+                      value={p.pts}
+                      decimals={1}
+                      className="block font-[family-name:var(--font-barlow)] font-black text-2xl tabular-nums text-[#F5F5F7] tracking-tight"
+                    />
                     <p className="text-[10px] text-[#8A8A93] tracking-wide">PPG</p>
                   </div>
                 </Link>
@@ -516,7 +527,7 @@ export default function HomePage() {
                   href={n.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="floating-card group block rounded-2xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-4 transition-all duration-300 hover:scale-[1.02]"
+                  className="floating-card gold-sweep group block rounded-2xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-4 transition-all duration-300 hover:scale-[1.02]"
                 >
                   <p className="text-sm font-semibold text-[#F5F5F7] group-hover:text-[#D4B560] leading-snug line-clamp-2 transition-colors tracking-tight">
                     {n.title}

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { GameCardSkeleton } from "@/components/ui/Skeleton";
+import { CourtEmpty } from "@/components/ui/CourtEmpty";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -321,9 +322,14 @@ export default function ScoresPage() {
           )}
 
           {!loading && !error && filtered.length === 0 && (
-            <div className="text-center py-16 text-[#8A8A93]">
-              {games.length === 0 ? "No games scheduled today." : "No games in this category."}
-            </div>
+            <CourtEmpty
+              title={games.length === 0 ? "No games on the slate today." : "Nothing in this category."}
+              subtitle={
+                games.length === 0
+                  ? "Check back tomorrow, or jump to the standings to see where every team sits."
+                  : "Try a different filter — there are games in another category."
+              }
+            />
           )}
 
           {!loading && filtered.length > 0 && (

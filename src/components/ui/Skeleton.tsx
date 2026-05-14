@@ -34,6 +34,7 @@ export function PlayerRowSkeleton() {
       <td className="px-3 py-3.5 text-right"><Skeleton className="h-3 w-6 ml-auto" /></td>
       <td className="px-3 py-3.5 text-right"><Skeleton className="h-3 w-8 ml-auto" /></td>
       <td className="px-3 py-3.5 text-right"><Skeleton className="h-4 w-10 ml-auto" /></td>
+      <td className="px-3 py-3.5"><Skeleton className="h-5 w-16 mx-auto rounded-md" /></td>
       <td className="px-3 py-3.5 text-right"><Skeleton className="h-3 w-8 ml-auto" /></td>
       <td className="px-3 py-3.5 text-right"><Skeleton className="h-3 w-8 ml-auto" /></td>
       <td className="px-3 py-3.5 text-right"><Skeleton className="h-3 w-10 ml-auto" /></td>
