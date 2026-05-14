@@ -83,14 +83,14 @@ export function PlayerHoverCard({ slug, children, className }: Props) {
           role="tooltip"
           onMouseEnter={show}
           onMouseLeave={scheduleHide}
-          className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-50 w-64 rounded-2xl border border-white/[0.08] bg-[#13131C] shadow-2xl p-4 text-left premium-fade-in"
+          className="absolute left-full top-1/2 ml-3 -translate-y-1/2 z-50 w-72 rounded-2xl border border-white/[0.08] bg-[#13131C] shadow-2xl p-4 text-left premium-fade-in"
           style={{ pointerEvents: "auto" }}
         >
           {player ? (
             <Link href={`/players/${player.slug}`} className="flex items-center gap-3 no-jiggle">
               <PlayerAvatar playerId={player.id} fullName={player.fullName} size="md" />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold text-[#F5F5F7] tracking-tight truncate">
+                <p className="text-sm font-bold text-[#F5F5F7] tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">
                   {player.fullName}
                 </p>
                 <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#6E6E76] mb-2">
