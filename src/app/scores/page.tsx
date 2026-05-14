@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { GameCardSkeleton } from "@/components/ui/Skeleton";
@@ -52,7 +52,7 @@ function statusBucket(g: LiveGame): "live" | "final" | "scheduled" {
   return "scheduled";
 }
 
-function GameCard({ game }: { game: LiveGame }) {
+function GameCard({ game, pulseAway, pulseHome }: { game: LiveGame; pulseAway?: boolean; pulseHome?: boolean }) {
   const status = statusBucket(game);
   const awayWinning = game.awayTeam.score > game.homeTeam.score;
   const homeWinning = game.homeTeam.score > game.awayTeam.score;
@@ -107,7 +107,8 @@ function GameCard({ game }: { game: LiveGame }) {
           <span className={cn(
             "font-[family-name:var(--font-barlow)] font-black text-4xl tabular-nums tracking-[-0.04em] ml-4",
             status === "scheduled" ? "text-[#3A3A42]" :
-            awayWinning ? "text-[#F5F5F7]" : "text-[#6E6E76]"
+            awayWinning ? "text-[#F5F5F7]" : "text-[#6E6E76]",
+            pulseAway && "score-pulse"
           )}>
             {status === "scheduled" ? "—" : game.awayTeam.score}
           </span>
@@ -134,7 +135,8 @@ function GameCard({ game }: { game: LiveGame }) {
           <span className={cn(
             "font-[family-name:var(--font-barlow)] font-black text-4xl tabular-nums tracking-[-0.04em] ml-4",
             status === "scheduled" ? "text-[#3A3A42]" :
-            homeWinning ? "text-[#F5F5F7]" : "text-[#6E6E76]"
+            homeWinning ? "text-[#F5F5F7]" : "text-[#6E6E76]",
+            pulseHome && "score-pulse"
           )}>
             {status === "scheduled" ? "—" : game.homeTeam.score}
           </span>
@@ -178,6 +180,8 @@ export default function ScoresPage() {
   const [selectedDate, setSelectedDate] = useState<string>(todayStr);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [pulses, setPulses] = useState<Record<string, number>>({});
+  const prevScoresRef = useRef<Record<string, { home: number; away: number }>>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -185,22 +189,55 @@ export default function ScoresPage() {
     const url = selectedDate === todayStr
       ? "/api/games/today"
       : `/api/games/today?date=${selectedDate}`;
+
+    function applyData(data: { scoreboard?: { games?: LiveGame[]; gameDate?: string } }) {
+      const sb = data?.scoreboard;
+      if (!sb || !Array.isArray(sb.games)) {
+        setError("Unexpected response shape");
+        return;
+      }
+      const newPulses: Record<string, number> = {};
+      sb.games.forEach((g) => {
+        if (g.gameStatus !== 2) return;
+        const prev = prevScoresRef.current[g.gameId];
+        if (prev) {
+          if (prev.away !== g.awayTeam.score) newPulses[g.gameId + ":away"] = Date.now();
+          if (prev.home !== g.homeTeam.score) newPulses[g.gameId + ":home"] = Date.now();
+        }
+        prevScoresRef.current[g.gameId] = {
+          away: g.awayTeam.score,
+          home: g.homeTeam.score,
+        };
+      });
+      if (Object.keys(newPulses).length > 0) {
+        setPulses((p) => ({ ...p, ...newPulses }));
+      }
+      setGames(sb.games);
+      setGameDate(sb.gameDate ?? "");
+      setError(null);
+    }
+
     fetch(url)
       .then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`))
-      .then(data => {
-        if (cancelled) return;
-        const sb = data?.scoreboard;
-        if (sb && Array.isArray(sb.games)) {
-          setGames(sb.games);
-          setGameDate(sb.gameDate ?? "");
-          setError(null);
-        } else {
-          setError("Unexpected response shape");
-        }
-      })
+      .then(data => { if (!cancelled) applyData(data); })
       .catch(e => { if (!cancelled) setError(String(e)); })
       .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+
+    // Only poll for today + when there are (or could be) live games
+    let interval: ReturnType<typeof setInterval> | null = null;
+    if (selectedDate === todayStr) {
+      interval = setInterval(() => {
+        fetch(url)
+          .then(r => r.ok ? r.json() : null)
+          .then(data => { if (!cancelled && data) applyData(data); })
+          .catch(() => {});
+      }, 30_000);
+    }
+
+    return () => {
+      cancelled = true;
+      if (interval) clearInterval(interval);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate]);
 
@@ -334,7 +371,19 @@ export default function ScoresPage() {
 
           {!loading && filtered.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filtered.map(game => <GameCard key={game.gameId} game={game} />)}
+              {filtered.map(game => {
+                const now = Date.now();
+                const aT = pulses[game.gameId + ":away"];
+                const hT = pulses[game.gameId + ":home"];
+                return (
+                  <GameCard
+                    key={game.gameId}
+                    game={game}
+                    pulseAway={aT ? now - aT < 1800 : false}
+                    pulseHome={hT ? now - hT < 1800 : false}
+                  />
+                );
+              })}
             </div>
           )}
         </div>

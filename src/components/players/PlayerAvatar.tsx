@@ -30,6 +30,7 @@ export function PlayerAvatar({
   source?: "nba" | "espn";
 }) {
   const [failed, setFailed] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const { w, text } = SIZES[size];
 
   if (failed || !playerId) {
@@ -59,8 +60,9 @@ export function PlayerAvatar({
       <img
         src={source === "espn" ? `https://a.espncdn.com/i/headshots/nba/players/full/${playerId}.png` : `https://cdn.nba.com/headshots/nba/latest/1040x760/${playerId}.png`}
         alt={fullName}
-        className="w-full h-full object-cover object-top"
+        className={cn("w-full h-full object-cover object-top", loaded ? "avatar-morph" : "opacity-0")}
         onError={() => setFailed(true)}
+        onLoad={() => setLoaded(true)}
         loading="lazy"
       />
       {/* Radial vignette to blend photo edges into the dark theme */}

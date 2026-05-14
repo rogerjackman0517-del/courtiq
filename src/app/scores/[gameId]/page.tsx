@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { PlayerAvatar } from "@/components/players/PlayerAvatar";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { Confetti } from "@/components/ui/Confetti";
 
 type Team = {
   teamId: number;
@@ -152,7 +153,8 @@ export default function BoxscorePage({
         </div>
 
         {/* Matchup card */}
-        <div className="floating-card no-jiggle rounded-3xl p-6 lg:p-10 mb-10">
+        <div className="floating-card no-jiggle rounded-3xl p-6 lg:p-10 mb-10 relative overflow-hidden">
+          {data.status.state === "post" && <Confetti />}
           <div className="grid grid-cols-[1fr_auto_1fr] gap-4 lg:gap-12 items-center">
             {/* Away team */}
             <Link
@@ -163,7 +165,7 @@ export default function BoxscorePage({
                 teamId={data.awayTeam.teamId}
                 abbreviation={data.awayTeam.tricode}
                 size="xl"
-                className="group-hover:scale-105 transition-transform"
+                className={`group-hover:scale-105 transition-transform ${data.awayTeam.winner ? "ring-2 ring-[#D4B560]/60 shadow-[0_0_30px_rgba(212,181,96,0.35)]" : ""}`}
               />
               <div>
                 <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#6E6E76]">
@@ -205,7 +207,7 @@ export default function BoxscorePage({
                 teamId={data.homeTeam.teamId}
                 abbreviation={data.homeTeam.tricode}
                 size="xl"
-                className="group-hover:scale-105 transition-transform"
+                className={`group-hover:scale-105 transition-transform ${data.homeTeam.winner ? "ring-2 ring-[#D4B560]/60 shadow-[0_0_30px_rgba(212,181,96,0.35)]" : ""}`}
               />
               <div>
                 <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#6E6E76]">

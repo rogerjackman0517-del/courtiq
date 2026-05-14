@@ -27,6 +27,7 @@ export function TeamLogo({
   className?: string;
 }) {
   const [failed, setFailed] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const { w, text } = SIZES[size];
   const color = primaryColor ?? "#D4B560";
 
@@ -46,13 +47,24 @@ export function TeamLogo({
   }
 
   return (
-    <div className={cn(w, "shrink-0 rounded-lg overflow-hidden p-1 flex items-center justify-center", className)}>
+    <div className={cn(w, "shrink-0 rounded-lg overflow-hidden p-1 flex items-center justify-center relative", className)}>
+      {/* Loading shimmer placeholder */}
+      {!loaded && (
+        <div
+          className="absolute inset-1 rounded-md logo-loading"
+          style={{
+            backgroundColor: color + "1A",
+            border: `1px solid ${color}33`,
+          }}
+        />
+      )}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={`https://cdn.nba.com/logos/nba/${teamId}/global/L/logo.svg`}
         alt={abbreviation}
-        className="w-full h-full object-contain"
+        className={cn("w-full h-full object-contain transition-opacity duration-500", loaded ? "opacity-100" : "opacity-0")}
         onError={() => setFailed(true)}
+        onLoad={() => setLoaded(true)}
         loading="lazy"
       />
     </div>

@@ -2,7 +2,7 @@
 
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TeamCardSkeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
 
@@ -28,11 +28,36 @@ function TeamCard({ team }: { team: TeamRow }) {
   const winPctDisplay = totalGames > 0 ? Math.round((team.wins / totalGames) * 100) : 0;
   const streakUp = team.streak?.startsWith("W");
   const playoffTier = team.confRank <= 6 ? "Playoffs" : team.confRank <= 10 ? "Play-in" : "Lottery";
+  const ref = useRef<HTMLAnchorElement>(null);
+
+  function handleMove(e: React.MouseEvent<HTMLAnchorElement>) {
+    const el = ref.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    const rotY = (x - 0.5) * 10;
+    const rotX = (0.5 - y) * 8;
+    el.style.setProperty("--tilt-x", `${rotX.toFixed(2)}deg`);
+    el.style.setProperty("--tilt-y", `${rotY.toFixed(2)}deg`);
+    el.style.setProperty("--tilt-z", "-3px");
+  }
+
+  function handleLeave() {
+    const el = ref.current;
+    if (!el) return;
+    el.style.setProperty("--tilt-x", "0deg");
+    el.style.setProperty("--tilt-y", "0deg");
+    el.style.setProperty("--tilt-z", "0");
+  }
 
   return (
     <Link
+      ref={ref}
       href={`/teams/${team.slug}`}
-      className="floating-card group block rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6 transition-all duration-500 hover:scale-[1.02]"
+      onMouseMove={handleMove}
+      onMouseLeave={handleLeave}
+      className="floating-card tilt-3d group block rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6"
     >
       {/* Top — team badge + record */}
       <div className="flex items-start justify-between mb-6">

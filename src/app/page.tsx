@@ -7,6 +7,7 @@ import { TeamLogo } from "@/components/teams/TeamLogo";
 import { ArrowUpRight, Flame, Radio, Sparkles, TrendingUp, Trophy, Zap } from "lucide-react";
 import { StatCardSkeleton, Skeleton } from "@/components/ui/Skeleton";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
+import { MagneticButton } from "@/components/ui/MagneticButton";
 import { cn } from "@/lib/utils";
 
 type PlayerRow = {
@@ -340,7 +341,16 @@ export default function HomePage() {
       )}
 
       {/* HERO — Apple-style massive display type */}
-      <section className="brand-glow relative px-4 lg:px-12 pt-10 lg:pt-24 pb-10 lg:pb-24" data-reveal>
+      <section
+        className="brand-glow cursor-spotlight relative px-4 lg:px-12 pt-10 lg:pt-24 pb-10 lg:pb-24"
+        data-reveal
+        onMouseMove={(e) => {
+          const el = e.currentTarget;
+          const rect = el.getBoundingClientRect();
+          el.style.setProperty("--mx", `${e.clientX - rect.left}px`);
+          el.style.setProperty("--my", `${e.clientY - rect.top}px`);
+        }}
+      >
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-12 lg:gap-16 items-center">
             <div>
@@ -395,13 +405,13 @@ export default function HomePage() {
 
           {/* CTAs */}
           <div className="flex flex-wrap items-center gap-3">
-            <Link
+            <MagneticButton
               href={liveGame ? "/scores" : statOfDay?.ctaHref ?? "/players"}
-              className="group inline-flex items-center gap-2 bg-[#F5F5F7] text-[#0A0A0E] text-sm font-semibold tracking-tight px-6 py-3 rounded-full hover:bg-white transition-all duration-300"
+              className="group bg-[#F5F5F7] text-[#0A0A0E] text-sm font-semibold tracking-tight px-6 py-3 rounded-full hover:bg-white"
             >
               {liveGame ? "View Live Scores" : statOfDay?.kind === "team" ? "View Team" : "View Profile"}
               <ArrowUpRight size={16} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-            </Link>
+            </MagneticButton>
             <Link
               href="/players"
               className="inline-flex items-center gap-2 text-sm font-semibold tracking-tight text-[#8A8A93] hover:text-[#F5F5F7] transition-colors px-4 py-3"
@@ -546,7 +556,7 @@ export default function HomePage() {
                 <AnimatedNumber
                   value={ptsLeader.pts}
                   decimals={1}
-                  className="block font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-7xl tabular-nums tracking-[-0.04em] text-[#F5F5F7] mb-2"
+                  className="block stat-gradient-text font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-7xl tabular-nums tracking-[-0.04em] mb-2"
                 />
                 <p className="text-[11px] text-[#8A8A93] mb-6 tracking-wide">PPG · {ptsLeader.gp} GP</p>
                 <div>
@@ -563,7 +573,7 @@ export default function HomePage() {
                 <AnimatedNumber
                   value={astLeader.ast}
                   decimals={1}
-                  className="block font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-7xl tabular-nums tracking-[-0.04em] text-[#F5F5F7] mb-2"
+                  className="block stat-gradient-text font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-7xl tabular-nums tracking-[-0.04em] mb-2"
                 />
                 <p className="text-[11px] text-[#8A8A93] mb-6 tracking-wide">APG · {astLeader.gp} GP</p>
                 <div>
@@ -577,9 +587,9 @@ export default function HomePage() {
                   <Trophy size={11} className="text-[#8A8A93]" />
                   <p className="text-[10px] font-bold tracking-widest uppercase text-[#8A8A93]">Top Record</p>
                 </div>
-                <p className="font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-7xl tabular-nums tracking-[-0.04em] text-[#F5F5F7] mb-2">
+                <p className="stat-gradient-text font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-7xl tabular-nums tracking-[-0.04em] mb-2">
                   <AnimatedNumber value={bestTeam.wins} />
-                  <span className="text-[#6E6E76]">–</span>
+                  <span style={{ WebkitTextFillColor: "#6E6E76", color: "#6E6E76" }}>–</span>
                   <AnimatedNumber value={bestTeam.losses} />
                 </p>
                 <p className="text-[11px] text-[#8A8A93] mb-6 tracking-wide">
@@ -597,7 +607,7 @@ export default function HomePage() {
                   <Zap size={11} className="text-[#34D399]" />
                   <p className="text-[10px] font-bold tracking-widest uppercase text-[#34D399]">Hottest</p>
                 </div>
-                <p className="font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-7xl tabular-nums tracking-[-0.04em] text-[#F5F5F7] mb-2">
+                <p className="stat-gradient-text font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-7xl tabular-nums tracking-[-0.04em] mb-2">
                   {hottest.streak}
                 </p>
                 <p className="text-[11px] text-[#8A8A93] mb-6 tracking-wide">{hottest.l10} last 10</p>

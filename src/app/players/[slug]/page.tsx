@@ -12,6 +12,7 @@ import { RankBadges } from "@/components/players/RankBadges";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { PlayerRadar } from "@/components/charts/PlayerRadar";
+import { ScrollRail } from "@/components/ui/ScrollRail";
 
 type PlayerRow = {
   id: number;
@@ -174,11 +175,20 @@ export default function PlayerProfilePage() {
     );
   }
 
+  const sections = [
+    { id: "hero", label: "Overview" },
+    { id: "per-game", label: "Per Game" },
+    { id: "shooting", label: "Shooting" },
+    { id: "shot-zones", label: "Shot Zones" },
+  ];
+
   return (
     <div className="pb-24 lg:pb-12">
 
+      <ScrollRail sections={sections} />
+
       {/* HERO — cinematic */}
-      <section className="relative overflow-hidden pt-10 lg:pt-16 pb-12 lg:pb-20" data-reveal>
+      <section id="hero" className="relative overflow-hidden pt-10 lg:pt-16 pb-12 lg:pb-20" data-reveal>
         {/* Background team-color wash */}
         <div
           className="pointer-events-none absolute inset-0"
@@ -318,7 +328,7 @@ export default function PlayerProfilePage() {
       </div>
 
       {/* PER GAME */}
-      <section className="px-4 lg:px-12 py-10 lg:py-20" data-reveal data-reveal-delay="1">
+      <section id="per-game" className="px-4 lg:px-12 py-10 lg:py-20 scroll-mt-20" data-reveal data-reveal-delay="1">
         <div className="max-w-6xl mx-auto">
 
           <div className="mb-10">
@@ -344,7 +354,7 @@ export default function PlayerProfilePage() {
       </div>
 
       {/* SHOOTING + RADAR */}
-      <section className="px-4 lg:px-12 py-10 lg:py-20" data-reveal data-reveal-delay="2">
+      <section id="shooting" className="px-4 lg:px-12 py-10 lg:py-20 scroll-mt-20" data-reveal data-reveal-delay="2">
         <div className="max-w-6xl mx-auto">
 
           <div className="mb-10">
@@ -416,7 +426,7 @@ export default function PlayerProfilePage() {
       <GameLogTable slug={slug} />
 
       {/* SHOT CHART */}
-      <section className="px-4 lg:px-12 pb-10 lg:pb-16" data-reveal data-reveal-delay="3">
+      <section id="shot-zones" className="px-4 lg:px-12 pb-10 lg:pb-16 scroll-mt-20" data-reveal data-reveal-delay="3">
         <div className="max-w-6xl mx-auto">
           <div className="mb-10">
             <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-2">Court Map</p>
