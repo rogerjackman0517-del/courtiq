@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
 import { PlayerAvatar } from "@/components/players/PlayerAvatar";
 import { ShotChart } from "@/components/players/ShotChart";
+import { GameLogTable } from "@/components/players/GameLogTable";
 import { RankBadges } from "@/components/players/RankBadges";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
@@ -309,6 +310,9 @@ export default function PlayerProfilePage() {
           </div>
         </div>
       </section>
+
+      {/* GAME LOG */}
+      <GameLogTable slug={slug} />
 
       {/* SHOT CHART */}
       <section className="px-4 lg:px-12 pb-10 lg:pb-16" data-reveal data-reveal-delay="3">
