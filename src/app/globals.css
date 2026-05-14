@@ -574,6 +574,13 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
 .cursor-spotlight {
   position: relative;
   isolation: isolate;
+  overflow: visible;
+}
+/* When stacked with brand-glow (which sets overflow:hidden), force the
+   spotlight pseudo to bleed past the section bounds so the radial does
+   not clip in a hard line at the bottom edge. */
+.brand-glow.cursor-spotlight {
+  overflow: visible;
 }
 .cursor-spotlight::before {
   content: "";
