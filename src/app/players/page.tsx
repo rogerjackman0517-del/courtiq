@@ -81,30 +81,8 @@ export default function PlayersPage() {
   useSearchHotkey(searchInputRef);
   const { isPinned, toggle: togglePin } = usePinnedPlayers();
 
-  // Restore persisted preferences
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      const raw = localStorage.getItem("courtiq-players-prefs-v2");
-      if (raw) {
-        const p = JSON.parse(raw) as { sortKey?: SortKey; sortDir?: SortDir; dense?: boolean; query?: string };
-        if (p.sortKey) setSortKey(p.sortKey);
-        if (p.sortDir) setSortDir(p.sortDir);
-        if (typeof p.dense === "boolean") setDense(p.dense);
-      }
-    } catch { /* ignore */ }
-  }, []);
-
-  // Persist preferences when they change
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      localStorage.setItem(
-        "courtiq-players-prefs-v2",
-        JSON.stringify({ sortKey, sortDir, dense })
-      );
-    } catch { /* ignore */ }
-  }, [sortKey, sortDir, dense]);
+  // Persistent prefs were causing top scorers to vanish for some users.
+  // Disabled until we ship a Reset button.
 
   useEffect(() => {
     let cancelled = false;
