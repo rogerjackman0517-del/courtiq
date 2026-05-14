@@ -376,6 +376,7 @@ img {
 .gold-sweep {
   position: relative;
   isolation: isolate;
+  overflow: hidden;
 }
 .gold-sweep::after {
   content: "";
