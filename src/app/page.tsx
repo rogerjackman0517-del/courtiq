@@ -182,7 +182,7 @@ export default function HomePage() {
 
       {/* FEATURED GAME — scoreboard-style with team color gradients */}
       {featuredGame && (
-        <section className="px-4 lg:px-12 pt-6 lg:pt-10" data-reveal>
+        <section className="px-4 lg:px-12 pt-6 lg:pt-10 -mb-6 lg:-mb-10 relative z-10" data-reveal>
           <div className="max-w-6xl mx-auto">
             {(() => {
               const g = featuredGame;
@@ -221,9 +221,19 @@ export default function HomePage() {
                     }}
                   />
 
-                  <div className="relative px-6 lg:px-12 py-8 lg:py-12">
+                  {/* Bottom fade — blends into the next section */}
+                  <div
+                    className="pointer-events-none absolute inset-x-0 bottom-0 h-24 lg:h-32 z-10"
+                    style={{
+                      background: "linear-gradient(to bottom, transparent 0%, rgba(10,10,14,0.85) 70%, #0A0A0E 100%)",
+                      backdropFilter: "blur(0.5px)",
+                      WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 50%)",
+                      maskImage: "linear-gradient(to bottom, transparent 0%, black 50%)",
+                    }}
+                  />
+                  <div className="relative px-6 lg:px-12 py-6 lg:py-9">
                     {/* Status pill */}
-                    <div className="flex items-center justify-between mb-6 lg:mb-8">
+                    <div className="flex items-center justify-between mb-4 lg:mb-6">
                       <div className="flex items-center gap-2">
                         {isLive && (
                           <span className="relative flex h-2 w-2">
@@ -251,13 +261,13 @@ export default function HomePage() {
                           teamId={awayInfo?.id}
                           abbreviation={g.awayTeam.teamTricode}
                           primaryColor={awayColor}
-                          size="xl"
+                          size="lg"
                         />
                         <div className="text-left lg:text-center">
                           <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#8A8A93]">
                             {g.awayTeam.teamCity}
                           </p>
-                          <p className="font-[family-name:var(--font-barlow)] font-black text-2xl lg:text-3xl tracking-tight text-[#F5F5F7]">
+                          <p className="font-[family-name:var(--font-barlow)] font-black text-xl lg:text-2xl tracking-tight text-[#F5F5F7]">
                             {g.awayTeam.teamName}
                           </p>
                           <p className="text-[11px] text-[#8A8A93] mt-0.5">
@@ -270,7 +280,7 @@ export default function HomePage() {
                       <div className="flex items-center gap-3 lg:gap-6">
                         <span
                           className={cn(
-                            "font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-8xl tabular-nums tracking-[-0.05em]",
+                            "font-[family-name:var(--font-barlow)] font-black text-5xl lg:text-7xl tabular-nums tracking-[-0.05em]",
                             isLive || isFinal
                               ? awayWin ? "text-[#F5F5F7]" : "text-[#6E6E76]"
                               : "text-[#3A3A42]"
@@ -283,7 +293,7 @@ export default function HomePage() {
                         </span>
                         <span
                           className={cn(
-                            "font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-8xl tabular-nums tracking-[-0.05em]",
+                            "font-[family-name:var(--font-barlow)] font-black text-5xl lg:text-7xl tabular-nums tracking-[-0.05em]",
                             isLive || isFinal
                               ? homeWin ? "text-[#F5F5F7]" : "text-[#6E6E76]"
                               : "text-[#3A3A42]"
@@ -299,13 +309,13 @@ export default function HomePage() {
                           teamId={homeInfo?.id}
                           abbreviation={g.homeTeam.teamTricode}
                           primaryColor={homeColor}
-                          size="xl"
+                          size="lg"
                         />
                         <div className="text-right lg:text-center">
                           <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#8A8A93]">
                             {g.homeTeam.teamCity}
                           </p>
-                          <p className="font-[family-name:var(--font-barlow)] font-black text-2xl lg:text-3xl tracking-tight text-[#F5F5F7]">
+                          <p className="font-[family-name:var(--font-barlow)] font-black text-xl lg:text-2xl tracking-tight text-[#F5F5F7]">
                             {g.homeTeam.teamName}
                           </p>
                           <p className="text-[11px] text-[#8A8A93] mt-0.5">
@@ -317,7 +327,7 @@ export default function HomePage() {
 
                     {/* Footer line */}
                     {g.seriesText && (
-                      <p className="text-center mt-6 lg:mt-8 text-[11px] tracking-wider text-[#8A8A93]">
+                      <p className="text-center mt-4 lg:mt-6 text-[11px] tracking-wider text-[#8A8A93]">
                         {g.seriesText}
                       </p>
                     )}

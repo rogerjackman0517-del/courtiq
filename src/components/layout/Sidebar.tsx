@@ -52,10 +52,18 @@ export function Sidebar() {
       <nav className="flex-1 overflow-y-auto px-3 space-y-0.5">
         {navItems.map(({ href, label, icon: Icon, premium }) => {
           const active = pathname === href || (href !== "/" && pathname.startsWith(href));
+          const sameRoute = pathname === href;
           return (
             <Link
               key={href}
               href={href}
+              onClick={(e) => {
+                if (sameRoute) {
+                  e.preventDefault();
+                  // Full reload so client-side data fetches re-run, not just server components.
+                  window.location.reload();
+                }
+              }}
               className={cn(
                 "group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
                 active
