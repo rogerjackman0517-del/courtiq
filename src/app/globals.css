@@ -578,9 +578,11 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
 .cursor-spotlight::before {
   content: "";
   position: absolute;
-  inset: 0;
+  /* Bleed beyond the section so the radial fades smoothly past the section edges
+     instead of clipping in a hard horizontal line at the bottom. */
+  inset: -260px 0;
   background: radial-gradient(
-    500px circle at var(--mx, 50%) var(--my, 50%),
+    500px circle at var(--mx, 50%) calc(var(--my, 50%) + 260px),
     rgba(212, 181, 96, 0.22) 0%,
     rgba(212, 181, 96, 0.08) 40%,
     transparent 70%
