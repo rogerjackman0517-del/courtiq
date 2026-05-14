@@ -4,10 +4,12 @@ import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { PlayerAvatar } from "@/components/players/PlayerAvatar";
 import { Sparkline } from "@/components/players/Sparkline";
+import { PlayerHoverCard } from "@/components/players/PlayerHoverCard";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { PlayerRowSkeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
-import { Search, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Search, ArrowUpDown, ArrowUp, ArrowDown, Rows3, Rows4 } from "lucide-react";
+import { AnimatedHeading } from "@/components/ui/AnimatedHeading";
 
 type SortKey = "name" | "pts" | "reb" | "ast" | "fgPct" | "fg3Pct" | "ftPct" | "min";
 type SortDir = "asc" | "desc";
@@ -57,9 +59,35 @@ export default function PlayersPage() {
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("pts");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [dense, setDense] = useState(false);
   const [players, setPlayers] = useState<PlayerRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Restore persisted preferences
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = localStorage.getItem("courtiq-players-prefs");
+      if (raw) {
+        const p = JSON.parse(raw) as { sortKey?: SortKey; sortDir?: SortDir; dense?: boolean; query?: string };
+        if (p.sortKey) setSortKey(p.sortKey);
+        if (p.sortDir) setSortDir(p.sortDir);
+        if (typeof p.dense === "boolean") setDense(p.dense);
+      }
+    } catch { /* ignore */ }
+  }, []);
+
+  // Persist preferences when they change
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.setItem(
+        "courtiq-players-prefs",
+        JSON.stringify({ sortKey, sortDir, dense })
+      );
+    } catch { /* ignore */ }
+  }, [sortKey, sortDir, dense]);
 
   useEffect(() => {
     let cancelled = false;
@@ -105,8 +133,11 @@ export default function PlayersPage() {
             Database
           </p>
           <h1 className="font-[family-name:var(--font-barlow)] font-black text-5xl lg:text-7xl tracking-[-0.04em] text-[#F5F5F7] mb-4 leading-[0.95]">
-            Every player.<br />
-            <span className="text-[#D4B560]">Every stat.</span>
+            <AnimatedHeading text="Every player." />
+            <br />
+            <span className="text-[#D4B560]">
+              <AnimatedHeading text="Every stat." startDelay={250} />
+            </span>
           </h1>
           <p className="text-base lg:text-lg text-[#8A8A93] max-w-xl leading-relaxed">
             {loading ? "Loading the league…" : `${rows.length} players in the 2025-26 season.`}
@@ -117,24 +148,52 @@ export default function PlayersPage() {
       <section className="px-4 lg:px-12" data-reveal data-reveal-delay="1">
         <div className="max-w-6xl mx-auto">
 
-          {/* Search */}
-          <div className="flex items-center gap-3 bg-[#1C1C24] border border-white/[0.05] rounded-2xl px-5 py-3 mb-6 max-w-md transition-all hover:border-white/[0.1] focus-within:border-[#D4B560]/40">
-            <Search size={16} className="text-[#6E6E76] shrink-0" strokeWidth={2} />
-            <input
-              type="text"
-              placeholder="Search by name or team..."
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              className="flex-1 bg-transparent text-sm text-[#F5F5F7] placeholder:text-[#6E6E76] outline-none tracking-tight"
-            />
-            {query && (
+          {/* Search + density toggle */}
+          <div className="flex items-center gap-3 mb-6 flex-wrap">
+            <div className="flex items-center gap-3 bg-[#1C1C24] border border-white/[0.05] rounded-2xl px-5 py-3 max-w-md flex-1 min-w-[260px] transition-all hover:border-white/[0.1] focus-within:border-[#D4B560]/40">
+              <Search size={16} className="text-[#6E6E76] shrink-0" strokeWidth={2} />
+              <input
+                type="text"
+                placeholder="Search by name or team..."
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                className="flex-1 bg-transparent text-sm text-[#F5F5F7] placeholder:text-[#6E6E76] outline-none tracking-tight"
+              />
+              {query && (
+                <button
+                  onClick={() => setQuery("")}
+                  className="text-[10px] text-[#6E6E76] hover:text-[#F5F5F7] uppercase tracking-wider font-semibold"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            <div className="inline-flex items-center rounded-2xl border border-white/[0.05] bg-[#1C1C24] p-1">
               <button
-                onClick={() => setQuery("")}
-                className="text-[10px] text-[#6E6E76] hover:text-[#F5F5F7] uppercase tracking-wider font-semibold"
+                type="button"
+                onClick={() => setDense(false)}
+                className={cn(
+                  "p-2 rounded-xl transition-colors",
+                  !dense ? "bg-white/[0.06] text-[#F5F5F7]" : "text-[#6E6E76] hover:text-[#F5F5F7]"
+                )}
+                aria-label="Comfortable density"
+                title="Comfortable density"
               >
-                Clear
+                <Rows3 size={15} />
               </button>
-            )}
+              <button
+                type="button"
+                onClick={() => setDense(true)}
+                className={cn(
+                  "p-2 rounded-xl transition-colors",
+                  dense ? "bg-white/[0.06] text-[#F5F5F7]" : "text-[#6E6E76] hover:text-[#F5F5F7]"
+                )}
+                aria-label="Compact density"
+                title="Compact density"
+              >
+                <Rows4 size={15} />
+              </button>
+            </div>
           </div>
 
           {error && (
@@ -146,7 +205,7 @@ export default function PlayersPage() {
           {/* Table card */}
           <div className="floating-card rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className={cn("w-full text-sm", dense && "table-dense")}>
                 <thead>
                   <tr className="border-b border-white/[0.06]">
                     <th className="text-left px-5 py-4 w-12 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">#</th>
@@ -197,13 +256,19 @@ export default function PlayersPage() {
                     </td></tr>
                   )}
                   {rows.map((p, i) => (
-                    <tr key={p.id} className="stat-row border-b border-white/[0.03] last:border-b-0 group hover:bg-white/[0.02]">
+                    <tr
+                      key={p.id}
+                      className="stat-row row-reveal border-b border-white/[0.03] last:border-b-0 group hover:bg-white/[0.02]"
+                      style={{ animationDelay: `${Math.min(i, 20) * 20}ms` }}
+                    >
                       <td className="px-5 py-3.5 text-[#6E6E76] text-xs tabular-nums">{i + 1}</td>
                       <td className="px-5 py-3.5">
-                        <Link href={`/players/${p.slug}`} className="flex items-center gap-3 group/name">
-                          <PlayerAvatar playerId={p.id} fullName={p.fullName} size="sm" />
-                          <span className="font-semibold text-[#F5F5F7] group-hover:text-[#D4B560] tracking-tight transition-colors">{p.fullName}</span>
-                        </Link>
+                        <PlayerHoverCard slug={p.slug}>
+                          <Link href={`/players/${p.slug}`} className="flex items-center gap-3 group/name">
+                            <PlayerAvatar playerId={p.id} fullName={p.fullName} size="sm" />
+                            <span className="font-semibold text-[#F5F5F7] group-hover:text-[#D4B560] tracking-tight transition-colors">{p.fullName}</span>
+                          </Link>
+                        </PlayerHoverCard>
                       </td>
                       <td className="px-5 py-3.5">
                         <Link href={`/teams/${p.teamAbbr.toLowerCase()}`} className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity">

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowUp, ArrowDown, Flame, Snowflake } from "lucide-react";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { StandingsRowSkeleton } from "@/components/ui/Skeleton";
+import { AnimatedHeading } from "@/components/ui/AnimatedHeading";
 import { cn } from "@/lib/utils";
 
 function parseStreakLen(s: string | undefined): { dir: "W" | "L" | null; n: number } {
@@ -79,6 +80,7 @@ function StandingsTable({ teams, conference }: { teams: TeamRow[]; conference: "
             <th className="text-right px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">W</th>
             <th className="text-right px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">L</th>
             <th className="text-right px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">PCT</th>
+            <th className="text-center px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">W/L</th>
             <th className="text-right px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">GB</th>
             <th className="text-right px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">L10</th>
             <th className="text-right px-3 py-4 pr-6 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">STRK</th>
@@ -136,6 +138,14 @@ function StandingsTable({ teams, conference }: { teams: TeamRow[]; conference: "
                 <td className="px-3 py-4 text-right font-[family-name:var(--font-barlow)] font-bold text-base text-[#F5F5F7] tabular-nums">{team.wins}</td>
                 <td className="px-3 py-4 text-right font-[family-name:var(--font-barlow)] font-bold text-base text-[#6E6E76] tabular-nums">{team.losses}</td>
                 <td className="px-3 py-4 text-right text-[#F5F5F7] text-xs font-semibold tabular-nums">{team.winPct.toFixed(3)}</td>
+                <td className="px-3 py-4">
+                  <div className="mx-auto h-1.5 w-24 rounded-full bg-white/[0.05] overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-[#34D399] to-[#34D399]/70 rounded-full transition-all duration-700"
+                      style={{ width: `${(team.winPct * 100).toFixed(1)}%` }}
+                    />
+                  </div>
+                </td>
                 <td className="px-3 py-4 text-right text-[#8A8A93] text-xs tabular-nums">{gamesBehind(team)}</td>
                 <td className="px-3 py-4 text-right text-xs tabular-nums">
                   <span className="inline-flex items-center gap-1 text-[#8A8A93]">
@@ -195,8 +205,11 @@ export default function StandingsPage() {
             Standings
           </p>
           <h1 className="font-[family-name:var(--font-barlow)] font-black text-5xl lg:text-7xl tracking-[-0.04em] text-[#F5F5F7] mb-4 leading-[0.95]">
-            The race to<br />
-            <span className="text-[#D4B560]">the playoffs.</span>
+            <AnimatedHeading text="The race to" />
+            <br />
+            <span className="text-[#D4B560]">
+              <AnimatedHeading text="the playoffs." startDelay={250} />
+            </span>
           </h1>
           <p className="text-base lg:text-lg text-[#8A8A93] max-w-xl leading-relaxed">
             2025-26 NBA standings, games back, and playoff positioning.

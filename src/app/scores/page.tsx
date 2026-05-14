@@ -5,6 +5,7 @@ import Link from "next/link";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { GameCardSkeleton } from "@/components/ui/Skeleton";
 import { CourtEmpty } from "@/components/ui/CourtEmpty";
+import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -110,7 +111,7 @@ function GameCard({ game, pulseAway, pulseHome }: { game: LiveGame; pulseAway?: 
             awayWinning ? "text-[#F5F5F7]" : "text-[#6E6E76]",
             pulseAway && "score-pulse"
           )}>
-            {status === "scheduled" ? "—" : game.awayTeam.score}
+            {status === "scheduled" ? "—" : <AnimatedNumber value={game.awayTeam.score} duration={650} />}
           </span>
         </div>
 
@@ -138,7 +139,7 @@ function GameCard({ game, pulseAway, pulseHome }: { game: LiveGame; pulseAway?: 
             homeWinning ? "text-[#F5F5F7]" : "text-[#6E6E76]",
             pulseHome && "score-pulse"
           )}>
-            {status === "scheduled" ? "—" : game.homeTeam.score}
+            {status === "scheduled" ? "—" : <AnimatedNumber value={game.homeTeam.score} duration={650} />}
           </span>
         </div>
       </div>

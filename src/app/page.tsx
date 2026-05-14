@@ -270,27 +270,27 @@ export default function HomePage() {
                       {/* SCORE */}
                       <div className="flex items-center gap-3 lg:gap-6">
                         <span
-                          className={cn(
-                            "font-[family-name:var(--font-barlow)] font-black text-5xl lg:text-7xl tabular-nums tracking-[-0.05em]",
-                            isLive || isFinal
-                              ? awayWin ? "text-[#F5F5F7]" : "text-[#6E6E76]"
-                              : "text-[#3A3A42]"
-                          )}
+                          className="font-[family-name:var(--font-barlow)] font-black text-5xl lg:text-7xl tabular-nums tracking-[-0.05em]"
+                          style={{
+                            color: isLive || isFinal
+                              ? (awayWin ? awayColor : "#6E6E76")
+                              : "#3A3A42",
+                          }}
                         >
-                          {isLive || isFinal ? g.awayTeam.score : "—"}
+                          {isLive || isFinal ? <AnimatedNumber value={g.awayTeam.score} /> : "—"}
                         </span>
                         <span className="text-2xl lg:text-3xl font-[family-name:var(--font-barlow)] font-black text-[#3A3A42]">
                           ·
                         </span>
                         <span
-                          className={cn(
-                            "font-[family-name:var(--font-barlow)] font-black text-5xl lg:text-7xl tabular-nums tracking-[-0.05em]",
-                            isLive || isFinal
-                              ? homeWin ? "text-[#F5F5F7]" : "text-[#6E6E76]"
-                              : "text-[#3A3A42]"
-                          )}
+                          className="font-[family-name:var(--font-barlow)] font-black text-5xl lg:text-7xl tabular-nums tracking-[-0.05em]"
+                          style={{
+                            color: isLive || isFinal
+                              ? (homeWin ? homeColor : "#6E6E76")
+                              : "#3A3A42",
+                          }}
                         >
-                          {isLive || isFinal ? g.homeTeam.score : "—"}
+                          {isLive || isFinal ? <AnimatedNumber value={g.homeTeam.score} /> : "—"}
                         </span>
                       </div>
 
@@ -331,7 +331,9 @@ export default function HomePage() {
       )}
 
       {/* HERO — Apple-style massive display type */}
-      <section className="brand-glow relative px-4 lg:px-12 pt-10 lg:pt-24 pb-10 lg:pb-24" data-reveal>
+      <section className="brand-glow relative px-4 lg:px-12 pt-10 lg:pt-24 pb-10 lg:pb-24 overflow-hidden" data-reveal>
+        {/* Animated court grid backdrop */}
+        <div className="court-grid-bg pointer-events-none absolute inset-0 opacity-60" aria-hidden="true" />
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-12 lg:gap-16 items-center">
             <div>

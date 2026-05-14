@@ -303,6 +303,7 @@ function RadarChart({ a, b }: { a: Player; b: Player }) {
         stroke="#D4B560"
         strokeWidth="2"
         strokeLinejoin="round"
+        className="radar-morph"
       />
       {/* Player B — blue */}
       <path
@@ -311,6 +312,8 @@ function RadarChart({ a, b }: { a: Player; b: Player }) {
         stroke="#5B8DEF"
         strokeWidth="2"
         strokeLinejoin="round"
+        className="radar-morph"
+        style={{ animationDelay: "150ms" }}
       />
     </svg>
   );

@@ -616,6 +616,118 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
   box-shadow: 0 0 14px rgba(212, 181, 96, 0.45);
 }
 
+/* Headline word-by-word fade-in */
+@keyframes wordFadeIn {
+  0%   { opacity: 0; transform: translateY(14px); filter: blur(6px); }
+  100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+.word-fade {
+  display: inline-block;
+  opacity: 0;
+  animation: wordFadeIn 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Staggered row reveal — used on /players rows */
+@keyframes rowReveal {
+  0%   { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.row-reveal {
+  animation: rowReveal 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Rank-badge pulse — soft golden breathe on the top-rank pill */
+@keyframes rankBadgePulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(212, 181, 96, 0.0),
+                0 0 14px 0 rgba(212, 181, 96, 0.0);
+  }
+  50% {
+    box-shadow: 0 0 0 2px rgba(212, 181, 96, 0.18),
+                0 0 22px 4px rgba(212, 181, 96, 0.25);
+  }
+}
+.rank-badge-pulse {
+  animation: rankBadgePulse 2.8s ease-in-out infinite;
+}
+
+/* Animated court grid backdrop — slow diagonal drift */
+@keyframes courtGridDrift {
+  0%   { background-position: 0 0; }
+  100% { background-position: 80px 80px; }
+}
+.court-grid-bg {
+  background-image:
+    linear-gradient(rgba(212, 181, 96, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(212, 181, 96, 0.04) 1px, transparent 1px);
+  background-size: 80px 80px;
+  animation: courtGridDrift 26s linear infinite;
+  -webkit-mask-image: radial-gradient(ellipse 70% 80% at 50% 40%, black 30%, transparent 80%);
+  mask-image: radial-gradient(ellipse 70% 80% at 50% 40%, black 30%, transparent 80%);
+}
+
+/* Team color glow on team card hover */
+.team-color-glow {
+  position: relative;
+  transition: box-shadow 350ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.team-color-glow:hover {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06),
+              0 18px 40px -16px var(--team-glow, rgba(212, 181, 96, 0.45));
+}
+
+/* Page-load splash */
+@keyframes splashFadeOut {
+  0%   { opacity: 1; pointer-events: auto; }
+  100% { opacity: 0; pointer-events: none; visibility: hidden; }
+}
+@keyframes splashLogoSpin {
+  0%   { transform: rotate(0deg) scale(0.6); opacity: 0; }
+  20%  { opacity: 1; }
+  100% { transform: rotate(540deg) scale(1.05); opacity: 1; }
+}
+@keyframes splashLogoSettle {
+  0%   { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+.splash-overlay {
+  animation: splashFadeOut 360ms cubic-bezier(0.16, 1, 0.3, 1) 1100ms forwards;
+}
+.splash-ball {
+  animation:
+    splashLogoSpin 900ms cubic-bezier(0.34, 1.4, 0.64, 1) both,
+    splashLogoSettle 220ms cubic-bezier(0.16, 1, 0.3, 1) 900ms both;
+}
+
+/* Compact density toggle for tables */
+.table-dense tbody tr td {
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+}
+
+/* Radar polygon morph-in from center */
+@keyframes radarMorph {
+  0%   { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.radar-morph {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: radarMorph 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Gamelog cell heatmap */
+.gamelog-pts {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
 /* Confetti for boxscore winners */
 @keyframes confettiFall {
   0%   { transform: translate3d(0, -8px, 0) rotate(0deg); opacity: 0; }

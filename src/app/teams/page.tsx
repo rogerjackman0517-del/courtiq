@@ -57,7 +57,8 @@ function TeamCard({ team }: { team: TeamRow }) {
       href={`/teams/${team.slug}`}
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
-      className="floating-card tilt-3d group block rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6"
+      className="floating-card tilt-3d team-color-glow group block rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6"
+      style={{ ["--team-glow" as string]: `${team.primaryColor}66` }}
     >
       {/* Top — team badge + record */}
       <div className="flex items-start justify-between mb-6">

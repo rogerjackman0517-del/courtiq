@@ -61,7 +61,7 @@ export function RankBadges({ player, allPlayers }: { player: Player; allPlayers:
           key={r.label}
           className={`floating-card no-jiggle inline-flex items-center gap-2 rounded-full px-3 py-1.5 ${
             r.rank <= 5 ? "ring-1 ring-[#D4B560]/30" : ""
-          }`}
+          } ${r.rank === 1 ? "rank-badge-pulse" : ""}`}
         >
           {r.rank <= 5 && <TrendingUp size={12} className="text-[#D4B560]" />}
           <span className={`text-xs font-bold tabular-nums ${r.rank <= 5 ? "text-[#D4B560]" : "text-[#F5F5F7]"}`}>

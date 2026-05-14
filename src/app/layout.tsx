@@ -7,6 +7,8 @@ import { TopNav } from "@/components/layout/TopNav";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { Footer } from "@/components/layout/Footer";
 import { LiveTicker } from "@/components/layout/LiveTicker";
+import { CommandPalette } from "@/components/layout/CommandPalette";
+import { Splash } from "@/components/ui/Splash";
 
 const barlowCondensed = Barlow_Condensed({
   variable: "--font-barlow",
@@ -60,6 +62,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
           {/* Mobile bottom nav */}
           <MobileNav />
+
+          {/* Global overlays */}
+          <Splash />
+          <CommandPalette />
         </body>
       </html>
     </ClerkProvider>

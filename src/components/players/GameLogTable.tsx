@@ -75,6 +75,15 @@ export function GameLogTable({ slug }: { slug: string }) {
                   {last10.map((g) => {
                     const d = new Date(g.date);
                     const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                    // Heatmap by points scored (gradient from cool blue → gold for hot)
+                    const ptsNum = parseFloat(g.pts) || 0;
+                    let bg = "rgba(255,255,255,0.02)";
+                    let fg = "#F5F5F7";
+                    if (ptsNum >= 40)      { bg = "rgba(212,181,96,0.32)"; fg = "#FFFBEA"; }
+                    else if (ptsNum >= 30) { bg = "rgba(212,181,96,0.22)"; fg = "#F5F5F7"; }
+                    else if (ptsNum >= 20) { bg = "rgba(212,181,96,0.10)"; fg = "#F5F5F7"; }
+                    else if (ptsNum >= 10) { bg = "rgba(91,141,239,0.10)"; fg = "#F5F5F7"; }
+                    else if (ptsNum > 0)   { bg = "rgba(91,141,239,0.18)"; fg = "#C7D6F7"; }
                     return (
                       <tr key={g.eventId} className="border-b border-white/[0.04] last:border-0 hover:bg-white/[0.02] transition-colors">
                         <td className="px-4 lg:px-6 py-3">
@@ -93,7 +102,14 @@ export function GameLogTable({ slug }: { slug: string }) {
                           <span className="text-[#6E6E76] ml-2">{g.score}</span>
                         </td>
                         <td className="text-right px-3 py-3 text-[#8A8A93] tabular-nums">{g.min}</td>
-                        <td className="text-right px-3 py-3 font-bold text-[#F5F5F7] tabular-nums">{g.pts}</td>
+                        <td className="text-right px-3 py-3 tabular-nums">
+                          <span
+                            className="gamelog-pts font-bold"
+                            style={{ background: bg, color: fg }}
+                          >
+                            {g.pts}
+                          </span>
+                        </td>
                         <td className="text-right px-3 py-3 text-[#8A8A93] tabular-nums">{g.reb}</td>
                         <td className="text-right px-3 py-3 text-[#8A8A93] tabular-nums">{g.ast}</td>
                         <td className="text-right px-3 py-3 text-[#8A8A93] tabular-nums">{g.fg}</td>
