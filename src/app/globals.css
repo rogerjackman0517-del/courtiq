@@ -750,6 +750,121 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
   box-shadow: 0 0 6px rgba(212, 181, 96, 0.8);
 }
 
+/* Sticky table headers */
+.sticky-thead thead th {
+  position: sticky;
+  top: 56px; /* below the TopNav (h-14) */
+  background: #131318;
+  z-index: 5;
+  backdrop-filter: blur(8px);
+}
+
+/* Animated rotating conic gradient border for premium cards */
+@property --grad-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes gradBorderSpin {
+  to { --grad-angle: 360deg; }
+}
+.gradient-border {
+  position: relative;
+  isolation: isolate;
+  background: linear-gradient(#13131C, #13131C) padding-box,
+              conic-gradient(from var(--grad-angle, 0deg),
+                rgba(212, 181, 96, 0.5),
+                rgba(91, 141, 239, 0.35),
+                rgba(212, 181, 96, 0.5),
+                rgba(248, 113, 113, 0.3),
+                rgba(212, 181, 96, 0.5)) border-box;
+  border: 1px solid transparent;
+  animation: gradBorderSpin 9s linear infinite;
+}
+
+/* Hero text mask reveal — wipes text in top-to-bottom */
+@keyframes maskReveal {
+  0%   { clip-path: inset(0 0 100% 0); }
+  100% { clip-path: inset(0 0 0% 0); }
+}
+.mask-reveal {
+  display: inline-block;
+  animation: maskReveal 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Cursor affordances */
+.cursor-zoom { cursor: zoom-in; }
+.cursor-grab { cursor: grab; }
+.cursor-grab:active { cursor: grabbing; }
+
+/* Leather noise — subtle texture overlay for circular team logo bg */
+.leather-noise {
+  background-image:
+    radial-gradient(circle at 30% 30%, rgba(255,255,255,0.04) 0%, transparent 60%),
+    radial-gradient(circle at 70% 70%, rgba(0,0,0,0.2) 0%, transparent 60%);
+}
+
+/* Card flip */
+.flip-perspective { perspective: 800px; }
+.flip-inner {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.flip-flipped { transform: rotateY(180deg); }
+.flip-face {
+  position: absolute;
+  inset: 0;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.flip-back { transform: rotateY(180deg); }
+
+/* Odometer */
+.odometer {
+  display: inline-flex;
+  align-items: baseline;
+  font-variant-numeric: tabular-nums;
+}
+.odometer-digit {
+  display: inline-block;
+  height: 1em;
+  overflow: hidden;
+  position: relative;
+  width: 0.62em;
+  text-align: center;
+}
+.odometer-stack {
+  display: flex;
+  flex-direction: column;
+  transition: transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.odometer-stack > span {
+  flex: 0 0 100%;
+  height: 1em;
+  line-height: 1;
+}
+
+/* Floating dust particles behind headshots */
+@keyframes dustDrift {
+  0%   { transform: translate(0, 0); opacity: 0; }
+  20%  { opacity: 1; }
+  100% { transform: translate(var(--dx, 40px), -120%); opacity: 0; }
+}
+.dust {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 9999px;
+  background: rgba(212, 181, 96, 0.5);
+  pointer-events: none;
+  animation: dustDrift var(--dd, 6s) linear infinite;
+  filter: blur(0.5px);
+}
+
 /* Headline word-by-word fade-in */
 @keyframes wordFadeIn {
   0%   { opacity: 0; transform: translateY(14px); filter: blur(6px); }

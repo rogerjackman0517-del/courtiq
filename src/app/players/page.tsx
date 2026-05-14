@@ -5,6 +5,8 @@ import Link from "next/link";
 import { PlayerAvatar } from "@/components/players/PlayerAvatar";
 import { Sparkline } from "@/components/players/Sparkline";
 import { PlayerHoverCard } from "@/components/players/PlayerHoverCard";
+import { usePinnedPlayers } from "@/lib/usePinnedPlayers";
+import { Star } from "lucide-react";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { PlayerRowSkeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
@@ -77,6 +79,7 @@ export default function PlayersPage() {
   const [error, setError] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   useSearchHotkey(searchInputRef);
+  const { isPinned, toggle: togglePin } = usePinnedPlayers();
 
   // Restore persisted preferences
   useEffect(() => {
@@ -123,7 +126,7 @@ export default function PlayersPage() {
       const q = query.toLowerCase().trim();
       return !q || p.fullName.toLowerCase().includes(q) || p.teamAbbr.toLowerCase().includes(q);
     });
-    return [...filtered].sort((a, b) => {
+    const sorted = [...filtered].sort((a, b) => {
       if (sortKey === "name") {
         return sortDir === "asc" ? a.fullName.localeCompare(b.fullName) : b.fullName.localeCompare(a.fullName);
       }
@@ -131,7 +134,13 @@ export default function PlayersPage() {
       const bv = (b as unknown as Record<string, number>)[sortKey] ?? 0;
       return sortDir === "desc" ? bv - av : av - bv;
     });
-  }, [players, query, sortKey, sortDir]);
+    // Pinned players float to the top, preserving sort order within each group.
+    return sorted.sort((a, b) => {
+      const aPin = isPinned(a.slug) ? 1 : 0;
+      const bPin = isPinned(b.slug) ? 1 : 0;
+      return bPin - aPin;
+    });
+  }, [players, query, sortKey, sortDir, isPinned]);
 
   function handleSort(key: SortKey) {
     if (sortKey === key) setSortDir(d => d === "desc" ? "asc" : "desc");
@@ -250,7 +259,7 @@ export default function PlayersPage() {
           {/* Table card */}
           <div className="floating-card rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] overflow-hidden">
             <div className="overflow-x-auto">
-              <table className={cn("w-full text-sm", dense && "table-dense")}>
+              <table className={cn("w-full text-sm sticky-thead", dense && "table-dense")}>
                 <thead>
                   <tr className="border-b border-white/[0.06]">
                     <th className="text-left px-5 py-4 w-12 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">#</th>
@@ -306,7 +315,24 @@ export default function PlayersPage() {
                       className="stat-row row-reveal border-b border-white/[0.03] last:border-b-0 group hover:bg-white/[0.02]"
                       style={{ animationDelay: `${Math.min(i, 20) * 20}ms` }}
                     >
-                      <td className="px-5 py-3.5 text-[#6E6E76] text-xs tabular-nums">{i + 1}</td>
+                      <td className="px-5 py-3.5 text-[#6E6E76] text-xs tabular-nums">
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); togglePin(p.slug); }}
+                            className="no-jiggle"
+                            aria-label={isPinned(p.slug) ? `Unpin ${p.fullName}` : `Pin ${p.fullName}`}
+                            title={isPinned(p.slug) ? "Unpin" : "Pin to top"}
+                          >
+                            <Star
+                              size={12}
+                              className={isPinned(p.slug) ? "text-[#D4B560] fill-[#D4B560]" : "text-[#3A3A42] hover:text-[#D4B560]"}
+                              fill={isPinned(p.slug) ? "currentColor" : "none"}
+                            />
+                          </button>
+                          <span>{i + 1}</span>
+                        </div>
+                      </td>
                       <td className="px-5 py-3.5">
                         <PlayerHoverCard slug={p.slug}>
                           <Link href={`/players/${p.slug}`} className="flex items-center gap-3 group/name">

@@ -489,7 +489,7 @@ export default function TradePage() {
                 onClear={() => setPlayerA(null)}
                 color="#D4B560"
               />
-              <div className="hidden md:flex items-center justify-center">
+              <div className="hidden md:flex flex-col items-center justify-center gap-2">
                 <button
                   type="button"
                   onClick={() => {
@@ -503,6 +503,26 @@ export default function TradePage() {
                   title="Swap sides"
                 >
                   <ArrowLeftRight size={16} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (players.length < 4) return;
+                    const stars = [...players].sort((a, b) => b.pts - a.pts).slice(0, 30);
+                    const a = stars[Math.floor(Math.random() * stars.length)];
+                    let b = stars[Math.floor(Math.random() * stars.length)];
+                    let safety = 0;
+                    while ((b.teamAbbr === a.teamAbbr || b.id === a.id) && safety < 10) {
+                      b = stars[Math.floor(Math.random() * stars.length)];
+                      safety++;
+                    }
+                    setPlayerA(a);
+                    setPlayerB(b);
+                  }}
+                  className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#D4B560] hover:text-[#F5F5F7] no-jiggle"
+                  title="Random trade"
+                >
+                  Surprise me
                 </button>
               </div>
               <PlayerPicker

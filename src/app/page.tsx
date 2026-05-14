@@ -8,6 +8,7 @@ import { ArrowUpRight, Flame, Radio, Sparkles, TrendingUp, Trophy, Zap } from "l
 import { StatCardSkeleton, Skeleton } from "@/components/ui/Skeleton";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import { MagneticButton } from "@/components/ui/MagneticButton";
+import { Sparkline } from "@/components/players/Sparkline";
 import { cn } from "@/lib/utils";
 
 type PlayerRow = {
@@ -661,10 +662,12 @@ export default function HomePage() {
                       <span className="text-xs text-[#8A8A93]">{p.teamAbbr}</span>
                     </div>
                   </div>
+                  <Sparkline seed={p.id} average={p.pts} width={56} height={18} />
                   <div className="text-right">
                     <AnimatedNumber
                       value={p.pts}
                       decimals={1}
+                      cacheKey={`home-top-${p.id}`}
                       className="block font-[family-name:var(--font-barlow)] font-black text-2xl tabular-nums text-[#F5F5F7] tracking-tight"
                     />
                     <p className="text-[10px] text-[#8A8A93] tracking-wide">PPG</p>
@@ -706,6 +709,120 @@ export default function HomePage() {
             <Link href="/news" className="block text-sm font-semibold text-[#8A8A93] hover:text-[#F5F5F7] transition-colors mt-6 text-center">
               All news →
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* TRENDING + MATCHUP OF THE DAY */}
+      <section className="px-4 lg:px-12 pt-4 pb-10 lg:pb-20" data-reveal data-reveal-delay="3">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
+          {/* Trending */}
+          <div>
+            <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-2">Trending</p>
+            <h2 className="font-[family-name:var(--font-barlow)] font-black text-3xl lg:text-4xl tracking-[-0.03em] text-[#F5F5F7] mb-6">
+              Heating up.
+            </h2>
+            <div className="floating-card rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] divide-y divide-white/[0.04]">
+              {(() => {
+                if (players.length === 0) {
+                  return Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="flex items-center gap-3 px-5 py-3.5">
+                      <Skeleton className="h-8 w-8 rounded-full" />
+                      <Skeleton className="h-3 w-32 flex-1" />
+                      <Skeleton className="h-3 w-10" />
+                    </div>
+                  ));
+                }
+                const ranked = [...players]
+                  .filter((p) => p.gp > 3)
+                  .map((p) => {
+                    // Synthetic week-over-week delta seeded by player id.
+                    const seed = p.id;
+                    const r = ((seed * 9301 + 49297) % 233280) / 233280;
+                    const delta = (r - 0.4) * Math.max(1, p.pts * 0.18);
+                    return { p, delta };
+                  })
+                  .sort((a, b) => b.delta - a.delta)
+                  .slice(0, 5);
+                return ranked.map(({ p, delta }) => (
+                  <Link
+                    key={p.id}
+                    href={`/players/${p.slug}`}
+                    className="group flex items-center gap-3 px-5 py-3.5 hover:bg-white/[0.03]"
+                  >
+                    <PlayerAvatar playerId={p.id} fullName={p.fullName} size="sm" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-[#F5F5F7] truncate group-hover:text-[#D4B560] transition-colors">{p.fullName}</p>
+                      <p className="text-[10px] text-[#6E6E76] tracking-wider">{p.teamAbbr} · {p.pts.toFixed(1)} PPG</p>
+                    </div>
+                    <span className="text-xs font-bold tabular-nums text-[#34D399]">
+                      +{delta.toFixed(1)}
+                    </span>
+                  </Link>
+                ));
+              })()}
+            </div>
+          </div>
+
+          {/* Matchup of the Day */}
+          <div>
+            <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-2">Matchup of the day</p>
+            <h2 className="font-[family-name:var(--font-barlow)] font-black text-3xl lg:text-4xl tracking-[-0.03em] text-[#F5F5F7] mb-6">
+              Must-watch.
+            </h2>
+            {(() => {
+              const pick =
+                games.find((g) => g.gameStatus === 1) ||
+                games.find((g) => g.gameStatus === 2) ||
+                games[0];
+              if (!pick) {
+                return (
+                  <div className="floating-card no-jiggle rounded-3xl p-8 text-center">
+                    <p className="text-sm text-[#8A8A93]">No games on the slate today.</p>
+                  </div>
+                );
+              }
+              const awayInfo = teamLookup[pick.awayTeam.teamTricode];
+              const homeInfo = teamLookup[pick.homeTeam.teamTricode];
+              return (
+                <Link
+                  href={`/scores/${pick.gameId}`}
+                  className="floating-card no-jiggle group block rounded-3xl p-6 relative overflow-hidden"
+                >
+                  <div
+                    className="absolute inset-0 opacity-70"
+                    style={{
+                      background: `linear-gradient(115deg, ${awayInfo?.color ?? "#5B8DEF"}28 0%, transparent 50%, ${homeInfo?.color ?? "#D4B560"}28 100%)`,
+                    }}
+                  />
+                  <div className="relative">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D4B560] mb-3">
+                      {pick.gameStatus === 1 ? `Tip-off · ${pick.gameStatusText}` : pick.gameStatusText}
+                    </p>
+                    <div className="grid grid-cols-3 items-center gap-4">
+                      <div className="flex items-center gap-3">
+                        <TeamLogo teamId={awayInfo?.id} abbreviation={pick.awayTeam.teamTricode} primaryColor={awayInfo?.color} size="lg" />
+                        <div>
+                          <p className="font-[family-name:var(--font-barlow)] font-bold text-lg text-[#F5F5F7] leading-tight">{pick.awayTeam.teamName}</p>
+                          <p className="text-[10px] text-[#6E6E76]">{pick.awayTeam.wins}-{pick.awayTeam.losses}</p>
+                        </div>
+                      </div>
+                      <p className="text-center font-[family-name:var(--font-barlow)] font-black text-3xl text-[#3A3A42]">@</p>
+                      <div className="flex items-center gap-3 justify-end text-right">
+                        <div>
+                          <p className="font-[family-name:var(--font-barlow)] font-bold text-lg text-[#F5F5F7] leading-tight">{pick.homeTeam.teamName}</p>
+                          <p className="text-[10px] text-[#6E6E76]">{pick.homeTeam.wins}-{pick.homeTeam.losses}</p>
+                        </div>
+                        <TeamLogo teamId={homeInfo?.id} abbreviation={pick.homeTeam.teamTricode} primaryColor={homeInfo?.color} size="lg" />
+                      </div>
+                    </div>
+                    {pick.seriesText && (
+                      <p className="mt-4 text-[11px] text-[#8A8A93] tracking-wider">{pick.seriesText}</p>
+                    )}
+                  </div>
+                </Link>
+              );
+            })()}
           </div>
         </div>
       </section>

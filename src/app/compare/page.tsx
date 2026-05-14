@@ -547,6 +547,42 @@ export default function ComparePage() {
                   })}
                 </div>
               </>
+            ) : playerA && !playerB ? (
+              (() => {
+                // Find the stat-twin / nemesis: closest player by weighted stat distance.
+                const candidates = players.filter((p) => p.id !== playerA.id);
+                const dist = (p: Player) =>
+                  Math.abs(p.pts - playerA.pts) +
+                  Math.abs(p.reb - playerA.reb) * 1.2 +
+                  Math.abs(p.ast - playerA.ast) * 1.2 +
+                  Math.abs(p.fgPct - playerA.fgPct) * 30 +
+                  Math.abs(p.fg3Pct - playerA.fg3Pct) * 20;
+                const nemesis = candidates.sort((a, b) => dist(a) - dist(b))[0];
+                return (
+                  <div className="floating-card no-jiggle rounded-3xl p-10 lg:p-14 text-center">
+                    <p className="text-sm font-bold tracking-[0.2em] uppercase text-[#D4B560] mb-2">
+                      One more
+                    </p>
+                    <p className="text-xl lg:text-2xl font-[family-name:var(--font-barlow)] font-bold text-[#F5F5F7] mb-2">
+                      Pick a Player B
+                    </p>
+                    {nemesis && (
+                      <>
+                        <p className="text-sm text-[#8A8A93] max-w-md mx-auto mb-5">
+                          The closest stat-twin to {playerA.fullName.split(" ").pop()} is below — tap to load.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setPlayerB(nemesis)}
+                          className="ripple inline-flex items-center gap-2 bg-[#F5F5F7] text-[#0A0A0E] text-sm font-semibold tracking-tight px-5 py-2.5 rounded-full hover:bg-white"
+                        >
+                          Use {nemesis.fullName} as nemesis
+                        </button>
+                      </>
+                    )}
+                  </div>
+                );
+              })()
             ) : (
               <div className="floating-card no-jiggle rounded-3xl p-10 lg:p-16 text-center">
                 <p className="text-sm font-bold tracking-[0.2em] uppercase text-[#D4B560] mb-2">

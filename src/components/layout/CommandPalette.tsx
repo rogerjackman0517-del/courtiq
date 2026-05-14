@@ -35,6 +35,32 @@ type Hit =
   | { kind: "player"; key: string; href: string; player: Player }
   | { kind: "team"; key: string; href: string; team: Team };
 
+const RECENT_KEY = "courtiq-recent-jumps";
+
+type RecentJump = { kind: "player" | "team" | "page"; href: string; label: string };
+
+function readRecents(): RecentJump[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(RECENT_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr.slice(0, 5) : [];
+  } catch {
+    return [];
+  }
+}
+function pushRecent(jump: RecentJump) {
+  if (typeof window === "undefined") return;
+  try {
+    const cur = readRecents().filter((r) => r.href !== jump.href);
+    const next = [jump, ...cur].slice(0, 5);
+    localStorage.setItem(RECENT_KEY, JSON.stringify(next));
+  } catch {
+    /* ignore */
+  }
+}
+
 export function CommandPalette() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -42,6 +68,7 @@ export function CommandPalette() {
   const [activeIdx, setActiveIdx] = useState(0);
   const [players, setPlayers] = useState<Player[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [recents, setRecents] = useState<RecentJump[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -61,6 +88,7 @@ export function CommandPalette() {
     if (!open) return;
     setQuery("");
     setActiveIdx(0);
+    setRecents(readRecents());
     const t = setTimeout(() => inputRef.current?.focus(), 30);
 
     if (players.length === 0) {
@@ -114,6 +142,11 @@ export function CommandPalette() {
 
   function go(hit: Hit) {
     setOpen(false);
+    const label =
+      hit.kind === "page" ? hit.title :
+      hit.kind === "player" ? hit.player.fullName :
+      `${hit.team.city} ${hit.team.name}`;
+    pushRecent({ kind: hit.kind, href: hit.href, label });
     router.push(hit.href);
   }
 
@@ -157,6 +190,30 @@ export function CommandPalette() {
           </kbd>
         </div>
         <ul className="max-h-[60vh] overflow-y-auto py-2">
+          {!query && recents.length > 0 && (
+            <li className="px-4 pt-1 pb-2">
+              <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#6E6E76] mb-1">
+                Recent
+              </p>
+              <div className="flex flex-col">
+                {recents.map((r) => (
+                  <button
+                    key={r.href}
+                    type="button"
+                    onClick={() => {
+                      setOpen(false);
+                      pushRecent(r);
+                      router.push(r.href);
+                    }}
+                    className="text-left text-sm text-[#F5F5F7] py-1.5 hover:text-[#D4B560] no-jiggle"
+                  >
+                    <span className="text-[#6E6E76] mr-2 text-[10px] uppercase tracking-wider">{r.kind}</span>
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+            </li>
+          )}
           {hits.length === 0 && (
             <li className="px-4 py-6 text-center text-sm text-[#6E6E76]">
               Nothing matches &ldquo;{query}&rdquo;
