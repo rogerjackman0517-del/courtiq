@@ -10,6 +10,7 @@ import { LiveTicker } from "@/components/layout/LiveTicker";
 import { CommandPalette } from "@/components/layout/CommandPalette";
 import { Splash } from "@/components/ui/Splash";
 import { ToastProvider } from "@/components/ui/Toast";
+import { TiltProvider } from "@/components/ui/TiltProvider";
 
 const barlowCondensed = Barlow_Condensed({
   variable: "--font-barlow",
@@ -68,6 +69,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* Global overlays */}
           <Splash />
           <CommandPalette />
+          <TiltProvider />
           </ToastProvider>
         </body>
       </html>
