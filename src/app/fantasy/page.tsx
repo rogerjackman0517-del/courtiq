@@ -3,42 +3,32 @@
 import { useIsPro } from "@/lib/useIsPro";
 import { ProPaywall } from "@/components/billing/ProPaywall";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { TrendingUp, Target, Users, Zap } from "lucide-react";
+import { Star, Layers, TrendingUp, Zap } from "lucide-react";
 
 const FEATURES = [
   {
-    icon: Target,
-    title: "Shot Quality Analysis",
-    description: "League-wide shot quality charts, expected vs. actual efficiency breakdowns.",
+    icon: Star,
+    title: "Daily Lineup Optimizer",
+    description: "Build optimal DraftKings / FanDuel lineups under salary cap with projected points.",
+  },
+  {
+    icon: Layers,
+    title: "Stacking Strategy",
+    description: "Auto-suggest game stacks and player correlations for tournament play.",
   },
   {
     icon: TrendingUp,
-    title: "Pace & Space",
-    description: "Team offensive system analysis — 3PT rate, paint touches, transition frequency.",
-  },
-  {
-    icon: Users,
-    title: "Lineup Explorer",
-    description: "Best and worst 5-man lineup combinations by net rating and minutes.",
+    title: "Injury Heatmap",
+    description: "Real-time injury tags + minutes projection so you never start a DNP.",
   },
   {
     icon: Zap,
-    title: "On/Off Splits",
-    description: "How each team performs with or without any player on the court.",
-  },
-  {
-    icon: Target,
-    title: "Clutch Stats",
-    description: "Performance in final 5 minutes within 5 points — who shows up when it matters.",
-  },
-  {
-    icon: TrendingUp,
-    title: "Prop Bet Analyzer",
-    description: "Player prop hit rates vs. current lines. Find the edges before games tip off.",
+    title: "Late Swap Engine",
+    description: "Rebalance lineups in real time as news breaks and slates shift.",
   },
 ];
 
-export default function AnalyticsPage() {
+export default function FantasyPage() {
   const { isPro, loaded } = useIsPro();
 
   if (!loaded) {
@@ -46,8 +36,8 @@ export default function AnalyticsPage() {
       <div className="px-4 lg:px-12 pt-16 pb-24 max-w-6xl mx-auto space-y-6">
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-4 w-96" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-6">
-          {Array.from({ length: 6 }).map((_, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6">
+          {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-32 rounded-2xl" />
           ))}
         </div>
@@ -58,15 +48,13 @@ export default function AnalyticsPage() {
   if (!isPro) {
     return (
       <ProPaywall
-        title="Analytics Hub"
-        description="Advanced team and player analytics for serious fans, bettors, and fantasy players."
+        title="Fantasy Edge"
+        description="Tools for daily fantasy and season-long managers — built on the same data powering the rest of CourtIQ."
         features={[
-          "Shot quality and efficiency charts",
-          "Pace and space team breakdowns",
-          "Lineup explorer with net rating splits",
-          "On/off player impact",
-          "Clutch performance trackers",
-          "Player prop hit-rate analyzer",
+          "Daily DFS lineup optimizer",
+          "Stacking and correlation suggestions",
+          "Real-time injury impact heatmap",
+          "Late-swap engine for live slates",
         ]}
       />
     );
@@ -75,16 +63,16 @@ export default function AnalyticsPage() {
   return (
     <div className="px-4 lg:px-12 pt-10 lg:pt-16 pb-24 max-w-6xl mx-auto premium-fade-in" data-reveal>
       <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#D4B560] mb-3">
-        Pro · Analytics
+        Pro · Fantasy
       </p>
       <h1 className="font-[family-name:var(--font-barlow)] font-black text-5xl lg:text-7xl tracking-[-0.04em] text-[#F5F5F7] mb-3 leading-[0.95]">
-        Beyond the box score.
+        Win your league.
       </h1>
       <p className="text-base lg:text-lg text-[#8A8A93] max-w-xl leading-relaxed mb-10">
-        Every advanced tool, in one place. New tools land every few weeks.
+        DFS optimizer, injury heatmap, stacking engine. Rolling out tool-by-tool.
       </p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {FEATURES.map(({ icon: Icon, title, description }) => (
           <div
             key={title}

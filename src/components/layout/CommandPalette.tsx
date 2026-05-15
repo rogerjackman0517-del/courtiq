@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, ArrowRight, Home, Calendar, Users, Shield, Trophy, BarChart2, ArrowLeftRight, Repeat, Flame, RadioTower, Newspaper, Sparkles } from "lucide-react";
+import { Search, ArrowRight, Home, Calendar, Users, Shield, Trophy, BarChart2, ArrowLeftRight, Repeat, Flame, RadioTower, Newspaper, Sparkles, GitBranch } from "lucide-react";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { PlayerAvatar } from "@/components/players/PlayerAvatar";
 
@@ -23,6 +23,7 @@ const PAGES: PageRoute[] = [
   { kind: "page", href: "/players", title: "Players", icon: Users },
   { kind: "page", href: "/teams", title: "Teams", icon: Shield },
   { kind: "page", href: "/standings", title: "Standings", icon: Trophy },
+  { kind: "page", href: "/playoffs", title: "Playoffs", icon: GitBranch },
   { kind: "page", href: "/power-rankings", title: "Power Rankings", icon: Flame },
   { kind: "page", href: "/stats", title: "Stat Leaders", icon: BarChart2 },
   { kind: "page", href: "/compare", title: "Compare", icon: ArrowLeftRight },

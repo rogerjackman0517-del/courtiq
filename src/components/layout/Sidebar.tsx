@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Home, Calendar, Users, Shield, BarChart2,
-  TrendingUp, Trophy, Newspaper, Star, Settings, Sparkles, ArrowLeftRight, Flame, RadioTower, Repeat
+  TrendingUp, Trophy, Newspaper, Star, Settings, Sparkles, ArrowLeftRight, Flame, RadioTower, Repeat, GitBranch
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +15,7 @@ const navItems = [
   { href: "/players",   label: "Players",     icon: Users },
   { href: "/teams",     label: "Teams",       icon: Shield },
   { href: "/standings", label: "Standings",   icon: Trophy },
+  { href: "/playoffs",  label: "Playoffs",    icon: GitBranch },
   { href: "/power-rankings", label: "Power Rankings", icon: Flame },
   { href: "/stats",     label: "Stat Leaders",icon: BarChart2 },
   { href: "/compare",   label: "Compare",     icon: ArrowLeftRight },
