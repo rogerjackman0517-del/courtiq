@@ -237,7 +237,7 @@ export default function PlayersPage() {
           {/* Table card */}
           <div className="floating-card rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] overflow-hidden">
             <div className="overflow-x-auto">
-              <table className={cn("w-full text-sm sticky-thead", dense && "table-dense")}>
+              <table className={cn("w-full text-sm", dense && "table-dense")}>
                 <thead>
                   <tr className="border-b border-white/[0.06]">
                     <th className="text-left px-5 py-4 w-12 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">#</th>
