@@ -96,6 +96,7 @@ export default function PlayerProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [loadedAt, setLoadedAt] = useState<Date | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [photoSource, setPhotoSource] = useState<"nba" | "espn">("nba");
   const copy = useCopyToClipboard();
 
   useEffect(() => {
@@ -419,9 +420,28 @@ export default function PlayerProfilePage() {
                     playerId={player.id}
                     fullName={player.fullName}
                     size="xl"
+                    source={photoSource}
                     className="!h-64 !w-64 lg:!h-80 lg:!w-80 shadow-2xl"
                   />
                 </button>
+                {/* Photo source toggle */}
+                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 inline-flex items-center rounded-full border border-white/[0.08] bg-[#13131C]/90 backdrop-blur-md p-0.5 shadow-lg">
+                  {(["nba", "espn"] as const).map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setPhotoSource(s)}
+                      className={`px-3 py-1 text-[10px] font-bold tracking-[0.15em] uppercase rounded-full transition-colors ${
+                        photoSource === s
+                          ? "bg-white/[0.08] text-[#D4B560]"
+                          : "text-[#6E6E76] hover:text-[#F5F5F7]"
+                      }`}
+                      title={s === "nba" ? "NBA.com headshot" : "ESPN action photo"}
+                    >
+                      {s === "nba" ? "Headshot" : "Action"}
+                    </button>
+                  ))}
+                </div>
                 <div
                   className="pointer-events-none absolute inset-0 rounded-full"
                   style={{ boxShadow: `inset 0 0 0 2px ${teamColor}80, 0 30px 60px -20px ${teamColor}40` }}
@@ -583,7 +603,11 @@ export default function PlayerProfilePage() {
       <Lightbox
         open={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
-        src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${player.id}.png`}
+        src={
+          photoSource === "espn"
+            ? `https://a.espncdn.com/i/headshots/nba/players/full/${player.id}.png`
+            : `https://cdn.nba.com/headshots/nba/latest/1040x760/${player.id}.png`
+        }
         alt={player.fullName}
       />
 

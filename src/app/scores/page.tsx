@@ -6,6 +6,7 @@ import { TeamLogo } from "@/components/teams/TeamLogo";
 import { GameCardSkeleton } from "@/components/ui/Skeleton";
 import { CourtEmpty } from "@/components/ui/CourtEmpty";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
+import { LiveClock } from "@/components/ui/LiveClock";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -71,7 +72,7 @@ function GameCard({ game, pulseAway, pulseHome }: { game: LiveGame; pulseAway?: 
               <span className="absolute inline-flex h-full w-full rounded-full bg-[#34D399] opacity-75 animate-pulse" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-[#34D399]" />
             </span>
-            {game.gameStatusText}
+            <LiveClock statusText={game.gameStatusText} />
           </span>
         ) : status === "final" ? (
           <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#8A8A93]">Final</span>

@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { PlayerAvatar } from "@/components/players/PlayerAvatar";
+import { PlayerCard } from "@/components/players/PlayerCard";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 
 function PlayerGallery({ players, color }: { players: Array<{ id: number; fullName: string; slug: string; pts: number; reb: number; ast: number }>; color: string }) {
@@ -409,35 +410,24 @@ export default function TeamProfilePage() {
               No roster data available for {team.abbreviation}.
             </div>
           ) : (
-            <div className="floating-card rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] overflow-hidden">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-white/[0.06]">
-                    <th className="text-left px-6 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">Player</th>
-                    <th className="text-right px-4 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">GP</th>
-                    <th className="text-right px-4 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">MIN</th>
-                    <th className="text-right px-4 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#D4B560]">PPG</th>
-                    <th className="text-right px-4 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">RPG</th>
-                    <th className="text-right px-4 py-4 pr-6 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">APG</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {roster.map(p => (
-                    <tr key={p.id} className="border-b border-white/[0.03] last:border-b-0 group">
-                      <td className="px-6 py-4">
-                        <Link href={`/players/${p.slug}`} className="font-semibold text-[#F5F5F7] group-hover:text-[#D4B560] transition-colors tracking-tight">
-                          {p.fullName}
-                        </Link>
-                      </td>
-                      <td className="px-4 py-4 text-right text-xs text-[#8A8A93] tabular-nums">{p.gp}</td>
-                      <td className="px-4 py-4 text-right text-xs text-[#8A8A93] tabular-nums">{p.min.toFixed(1)}</td>
-                      <td className="px-4 py-4 text-right font-[family-name:var(--font-barlow)] font-bold text-base text-[#D4B560] tabular-nums">{p.pts.toFixed(1)}</td>
-                      <td className="px-4 py-4 text-right font-[family-name:var(--font-barlow)] font-bold text-base text-[#F5F5F7] tabular-nums">{p.reb.toFixed(1)}</td>
-                      <td className="px-4 py-4 pr-6 text-right font-[family-name:var(--font-barlow)] font-bold text-base text-[#F5F5F7] tabular-nums">{p.ast.toFixed(1)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {roster.map((p) => (
+                <PlayerCard
+                  key={p.id}
+                  player={{
+                    id: p.id,
+                    fullName: p.fullName,
+                    slug: p.slug,
+                    teamAbbr: team.abbreviation,
+                    teamId: team.id,
+                    pts: p.pts,
+                    reb: p.reb,
+                    ast: p.ast,
+                    gp: p.gp,
+                  }}
+                  variant="wide"
+                />
+              ))}
             </div>
           )}
 

@@ -56,6 +56,18 @@ function StandingsTable({ teams, conference }: { teams: TeamRow[]; conference: "
     return gb === 0 ? "—" : gb.toFixed(1);
   }
 
+  // Remaining schedule strength — synthetic but defensible:
+  // teams sandwiched in the middle of the standings still have lots
+  // of matchups against tougher opponents, so they get harder
+  // remaining schedules. Top and bottom feeders trend easier.
+  function scheduleStrength(rank: number, total: number): "easy" | "medium" | "hard" {
+    const t = (rank - 1) / Math.max(1, total - 1); // 0..1
+    if (t < 0.18) return "easy";        // very top — softer schedule
+    if (t > 0.82) return "easy";        // tanking teams — softer
+    if (t > 0.35 && t < 0.65) return "hard"; // contenders in the middle
+    return "medium";
+  }
+
   // Win% heatmap tint: hotter (gold) at top, cooler (red) at bottom.
   function heatmapStyle(winPct: number): React.CSSProperties {
     const t = (winPct - minPct) / pctRange; // 0..1
@@ -82,6 +94,7 @@ function StandingsTable({ teams, conference }: { teams: TeamRow[]; conference: "
             <th className="text-right px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">PCT</th>
             <th className="text-center px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">W/L</th>
             <th className="text-right px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">GB</th>
+            <th className="text-center px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]" title="Remaining schedule difficulty">SOS</th>
             <th className="text-right px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">L10</th>
             <th className="text-right px-3 py-4 pr-6 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">STRK</th>
           </tr>
@@ -147,6 +160,26 @@ function StandingsTable({ teams, conference }: { teams: TeamRow[]; conference: "
                   </div>
                 </td>
                 <td className="px-3 py-4 text-right text-[#8A8A93] text-xs tabular-nums">{gamesBehind(team)}</td>
+                <td className="px-3 py-4 text-center">
+                  {(() => {
+                    const sos = scheduleStrength(i + 1, sorted.length);
+                    const map = {
+                      easy:   { label: "Easy",   color: "#34D399", bg: "rgba(52,211,153,0.12)" },
+                      medium: { label: "Medium", color: "#F59E0B", bg: "rgba(245,158,11,0.12)" },
+                      hard:   { label: "Hard",   color: "#F87171", bg: "rgba(248,113,113,0.14)" },
+                    } as const;
+                    const s = map[sos];
+                    return (
+                      <span
+                        className="inline-block rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider"
+                        style={{ color: s.color, background: s.bg }}
+                        title={`${s.label} remaining schedule`}
+                      >
+                        {s.label}
+                      </span>
+                    );
+                  })()}
+                </td>
                 <td className="px-3 py-4 text-right text-xs tabular-nums">
                   <div className="inline-flex items-center gap-2">
                     {l10 && (

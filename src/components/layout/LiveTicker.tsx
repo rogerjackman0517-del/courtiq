@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { LiveClock } from "@/components/ui/LiveClock";
 
 type Team = { teamTricode: string; score: number };
 type Game = {
@@ -126,7 +127,7 @@ export function LiveTicker() {
                       {homePulsed && renderSparkles()}
                     </span>
                     <span className="text-[#8A8A93] font-medium">{g.homeTeam.teamTricode}</span>
-                    <span className="text-[10px] text-[#6E6E76]">{g.gameStatusText}</span>
+                    <LiveClock statusText={g.gameStatusText} className="text-[10px] text-[#6E6E76]" />
                   </Link>
                 );
               })}
