@@ -29,6 +29,12 @@ export function TiltProvider() {
       const card = active;
       if (!card) return;
       const rect = card.getBoundingClientRect();
+      // Skip large container cards (long lists, big tables). Tilt is meant
+      // for small, standalone cards. Opt-out class is also respected.
+      if (rect.height > 380 || rect.width > 760 || card.dataset.tilt === "off") {
+        reset(card);
+        return;
+      }
       // ignore if the cursor has actually moved outside (e.g. between frames)
       if (
         lastX < rect.left ||
