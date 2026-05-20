@@ -27,7 +27,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://courtiq-mocha.vercel.app"),
+  metadataBase: new URL("https://courtiq.uk"),
   title: { default: "CourtIQ — NBA Analytics", template: "%s | CourtIQ" },
   description: "Real-time NBA stats, scores, and league insights. Built for fans who love the numbers.",
   keywords: ["NBA", "basketball", "stats", "analytics", "fantasy", "props"],
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     description: "Real-time NBA stats, scores, and league insights.",
     siteName: "CourtIQ",
     type: "website",
-    url: "https://courtiq-mocha.vercel.app",
+    url: "https://courtiq.uk",
   },
   twitter: {
     card: "summary_large_image",

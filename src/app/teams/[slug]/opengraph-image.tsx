@@ -22,7 +22,7 @@ type Team = {
 
 async function fetchTeam(slug: string): Promise<Team | null> {
   try {
-    const r = await fetch(`https://courtiq-mocha.vercel.app/api/teams/with-records`, {
+    const r = await fetch(`https://courtiq.uk/api/teams/with-records`, {
       next: { revalidate: 3600 },
     });
     if (!r.ok) return null;

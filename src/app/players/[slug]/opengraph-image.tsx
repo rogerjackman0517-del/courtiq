@@ -17,7 +17,7 @@ type Player = {
 
 async function fetchPlayer(slug: string): Promise<Player | null> {
   try {
-    const r = await fetch(`https://courtiq-mocha.vercel.app/api/players/with-stats`, {
+    const r = await fetch(`https://courtiq.uk/api/players/with-stats`, {
       next: { revalidate: 3600 },
     });
     if (!r.ok) return null;

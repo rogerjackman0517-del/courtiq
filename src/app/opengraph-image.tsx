@@ -122,7 +122,7 @@ export default async function OGImage() {
               textTransform: "uppercase",
             }}
           >
-            courtiq-mocha.vercel.app
+            courtiq.uk
           </div>
         </div>
       </div>

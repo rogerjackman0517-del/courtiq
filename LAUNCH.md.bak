@@ -7,9 +7,9 @@ A self-contained playbook to take the site from "Vercel preview URL" to
 
 ## 1 · Custom domain (15 min, $12/yr)
 
-1. Buy `courtiq.uk` on Cloudflare Registrar (cheapest, no markup) or
+1. Buy `courtiq.app` on Cloudflare Registrar (cheapest, no markup) or
    Namecheap. Recommend Cloudflare since their DNS is faster.
-2. Vercel → Project Settings → Domains → Add → enter `courtiq.uk`
+2. Vercel → Project Settings → Domains → Add → enter `courtiq.app`
 3. Vercel will give you two records:
    - `A` for the apex (`@`) pointing at `76.76.21.21`
    - `CNAME` for `www` pointing at `cname.vercel-dns.com`
@@ -55,7 +55,7 @@ CourtIQ has:
 
 It's free. The data is from NBA.com + ESPN. No ads.
 
-Link: https://courtiq.uk
+Link: https://courtiq.app
 
 This is a one-person project so I'd love feedback — what's broken, what's
 missing, what you'd actually use. Roast it.
@@ -158,5 +158,5 @@ notice.
   interesting stat from each night's slate
 - Add an "Embed this stat" feature so commentators can paste numbers
   into tweets
-- Start a Substack-side blog at `courtiq.uk/blog` for in-depth
+- Start a Substack-side blog at `courtiq.app/blog` for in-depth
   analysis you can attach to the daily digest

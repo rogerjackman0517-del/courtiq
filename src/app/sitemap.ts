@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const BASE = "https://courtiq-mocha.vercel.app";
+const BASE = "https://courtiq.uk";
 
 const STATIC_ROUTES = [
   "",

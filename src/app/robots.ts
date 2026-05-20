@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       { userAgent: "*", allow: "/", disallow: ["/api/", "/billing", "/account"] },
     ],
-    sitemap: "https://courtiq-mocha.vercel.app/sitemap.xml",
-    host: "https://courtiq-mocha.vercel.app",
+    sitemap: "https://courtiq.uk/sitemap.xml",
+    host: "https://courtiq.uk",
   };
 }
