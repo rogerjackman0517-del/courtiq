@@ -116,7 +116,6 @@ export default function BoxscorePage({
     : "";
 
   const activeBlock = activeTeam === "away" ? data.awayPlayers : data.homePlayers;
-  const activeTeamInfo = activeTeam === "away" ? data.awayTeam : data.homeTeam;
 
   return (
     <div className="pb-24 lg:pb-12">

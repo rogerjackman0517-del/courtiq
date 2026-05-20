@@ -18,8 +18,6 @@ type Team = {
   primaryColor: string;
 };
 
-type SeriesResult = "won" | "lost" | "tied" | "tbd";
-
 type Series = {
   /** Abbr of either team. The winner is marked with `result: "won"`. */
   high: string; // higher seed

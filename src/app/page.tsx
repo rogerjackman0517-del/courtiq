@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { PlayerAvatar } from "@/components/players/PlayerAvatar";
 import { TeamLogo } from "@/components/teams/TeamLogo";
-import { ArrowUpRight, Flame, Radio, Sparkles, TrendingUp, Trophy, Zap } from "lucide-react";
+import { ArrowUpRight, Flame, Sparkles, TrendingUp, Trophy, Zap } from "lucide-react";
 import { StatCardSkeleton, Skeleton } from "@/components/ui/Skeleton";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import { MagneticButton } from "@/components/ui/MagneticButton";
