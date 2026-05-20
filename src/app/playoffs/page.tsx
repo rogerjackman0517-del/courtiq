@@ -6,6 +6,8 @@ import { TeamLogo } from "@/components/teams/TeamLogo";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { AnimatedHeading } from "@/components/ui/AnimatedHeading";
 import { useFavoriteTeam } from "@/lib/useFavoriteTeam";
+import { useBracketPicks, seriesKey } from "@/lib/useBracketPicks";
+import { Check, RotateCcw } from "lucide-react";
 
 type Team = {
   id: number;
@@ -70,22 +72,47 @@ function SeriesCard({
   teamMap,
   align = "left",
   favorite,
+  predictionsOn,
+  round,
+  userPick,
+  onPick,
 }: {
   series: Series;
   teamMap: Record<string, Team>;
   align?: "left" | "right";
   favorite?: string;
+  predictionsOn?: boolean;
+  round?: "r1" | "r2" | "cf" | "finals";
+  userPick?: string;
+  onPick?: (team: string) => void;
 }) {
   const hasFavorite = favorite && (series.high === favorite || series.low === favorite);
+  const canPick = predictionsOn && !series.winner && series.high !== "TBD" && series.low !== "TBD";
+  const pickCorrect = userPick && series.winner && userPick === series.winner;
+  const pickWrong = userPick && series.winner && userPick !== series.winner;
   const high = teamFor(teamMap, series.high);
   const low = teamFor(teamMap, series.low);
   const [score1, score2] = series.score.split("-");
   const isLive = series.winner === null && series.score !== PENDING_LABEL;
   const flex = align === "right" ? "flex-row-reverse text-right" : "flex-row";
 
-  function Row({ team, score, won }: { team: Team | null; score: string; won: boolean }) {
+  function Row({ team, score, won, teamAbbr }: { team: Team | null; score: string; won: boolean; teamAbbr: string }) {
+    const isUserPick = userPick === teamAbbr;
+    const interactive = canPick && !!team;
     return (
-      <div className={`flex items-center gap-3 ${flex} ${won ? "" : "opacity-60"}`}>
+      <div
+        className={`flex items-center gap-3 ${flex} ${won || isUserPick ? "" : "opacity-60"} ${
+          interactive ? "cursor-pointer rounded-lg -mx-1 px-1 py-0.5 hover:bg-white/[0.03]" : ""
+        } ${isUserPick ? "ring-1 ring-[#D4B560]/40 rounded-lg -mx-1 px-1 py-0.5" : ""}`}
+        onClick={
+          interactive
+            ? (e) => {
+                e.preventDefault();
+                onPick?.(teamAbbr);
+              }
+            : undefined
+        }
+      >
         {team && (
           <TeamLogo
             teamId={team.id}
@@ -112,6 +139,7 @@ function SeriesCard({
       </div>
     );
   }
+  void round; // round is currently informational; satisfy lint
 
   return (
     <div
@@ -148,9 +176,14 @@ function SeriesCard({
         )}
       </div>
       <div className="space-y-2">
-        <Row team={high} score={score1} won={series.winner === series.high} />
-        <Row team={low} score={score2} won={series.winner === series.low} />
+        <Row team={high} score={score1} won={series.winner === series.high} teamAbbr={series.high} />
+        <Row team={low} score={score2} won={series.winner === series.low} teamAbbr={series.low} />
       </div>
+      {(pickCorrect || pickWrong) && (
+        <p className={`mt-3 text-[10px] font-bold tracking-[0.15em] uppercase ${pickCorrect ? "text-[#34D399]" : "text-[#F87171]"}`}>
+          {pickCorrect ? "Your pick · correct" : `Your pick · ${userPick}`}
+        </p>
+      )}
     </div>
   );
 }
@@ -163,6 +196,9 @@ function ConferenceColumn({
   teamMap,
   side,
   favorite,
+  predictionsOn,
+  picks,
+  onPick,
 }: {
   title: string;
   accent: string;
@@ -171,6 +207,9 @@ function ConferenceColumn({
   teamMap: Record<string, Team>;
   side: "left" | "right";
   favorite?: string;
+  predictionsOn?: boolean;
+  picks: Record<string, string>;
+  onPick: (key: string, team: string) => void;
 }) {
   // Determine conference finals: winners of r2 if both decided, else TBD.
   const cfPair: Series = {
@@ -192,19 +231,59 @@ function ConferenceColumn({
       <div className="grid grid-cols-3 gap-3 lg:gap-4 items-center">
         {/* Round 1 */}
         <div className={`space-y-3 ${side === "right" ? "order-3" : ""}`}>
-          {r1.map((s, i) => (
-            <SeriesCard key={i} series={s} teamMap={teamMap} align={side} favorite={favorite} />
-          ))}
+          {r1.map((s, i) => {
+            const k = seriesKey("r1", s.high, s.low);
+            return (
+              <SeriesCard
+                key={i}
+                series={s}
+                teamMap={teamMap}
+                align={side}
+                favorite={favorite}
+                predictionsOn={predictionsOn}
+                round="r1"
+                userPick={picks[k]}
+                onPick={(team) => onPick(k, team)}
+              />
+            );
+          })}
         </div>
         {/* Round 2 */}
         <div className={`space-y-6 ${side === "right" ? "order-2" : ""}`}>
-          {r2.map((s, i) => (
-            <SeriesCard key={i} series={s} teamMap={teamMap} align={side} favorite={favorite} />
-          ))}
+          {r2.map((s, i) => {
+            const k = seriesKey("r2", s.high, s.low);
+            return (
+              <SeriesCard
+                key={i}
+                series={s}
+                teamMap={teamMap}
+                align={side}
+                favorite={favorite}
+                predictionsOn={predictionsOn}
+                round="r2"
+                userPick={picks[k]}
+                onPick={(team) => onPick(k, team)}
+              />
+            );
+          })}
         </div>
         {/* Conference Finals */}
         <div className={`${side === "right" ? "order-1" : ""}`}>
-          <SeriesCard series={cfPair} teamMap={teamMap} align={side} favorite={favorite} />
+          {(() => {
+            const k = seriesKey("cf", cfPair.high, cfPair.low);
+            return (
+              <SeriesCard
+                series={cfPair}
+                teamMap={teamMap}
+                align={side}
+                favorite={favorite}
+                predictionsOn={predictionsOn}
+                round="cf"
+                userPick={picks[k]}
+                onPick={(team) => onPick(k, team)}
+              />
+            );
+          })()}
         </div>
       </div>
     </div>
@@ -220,6 +299,8 @@ export default function PlayoffsPage() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
   const { team: favorite } = useFavoriteTeam();
+  const { picks, pick, clear: clearPicks } = useBracketPicks();
+  const [predictionsOn, setPredictionsOn] = useState(false);
   const [bracket, setBracket] = useState<BracketData>({
     east: { r1: EAST_R1, r2: EAST_R2 },
     west: { r1: WEST_R1, r2: WEST_R2 },
@@ -287,6 +368,68 @@ export default function PlayoffsPage() {
 
       <section className="px-4 lg:px-12 py-10 lg:py-16" data-reveal data-reveal-delay="1">
         <div className="max-w-7xl mx-auto">
+
+          {/* Predictions banner */}
+          {(() => {
+            const allSeries: Series[] = [
+              ...bracket.east.r1, ...bracket.east.r2,
+              ...bracket.west.r1, ...bracket.west.r2,
+            ];
+            const total = Object.keys(picks).length;
+            const decided = allSeries.filter((s) => s.winner);
+            const round = (s: Series): "r1" | "r2" => {
+              if (bracket.east.r1.includes(s) || bracket.west.r1.includes(s)) return "r1";
+              return "r2";
+            };
+            const correct = decided.filter((s) => picks[seriesKey(round(s), s.high, s.low)] === s.winner).length;
+            return (
+              <div className="floating-card no-jiggle rounded-3xl p-5 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#D4B560]">
+                    Pick the bracket
+                  </p>
+                  <p className="text-sm text-[#8A8A93] mt-1">
+                    {predictionsOn
+                      ? "Click either team in an undecided series to set your pick."
+                      : total > 0
+                      ? `${correct}/${decided.length} of your picks correct so far · ${total} total picks made`
+                      : "Toggle picks mode and choose a winner in any undecided series."}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {total > 0 && (
+                    <button
+                      type="button"
+                      onClick={clearPicks}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/[0.08] bg-white/[0.02] text-xs text-[#8A8A93] hover:text-[#F5F5F7] no-jiggle"
+                    >
+                      <RotateCcw size={11} />
+                      Reset
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setPredictionsOn((v) => !v)}
+                    className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold no-jiggle transition-colors ${
+                      predictionsOn
+                        ? "bg-[#D4B560] text-[#0A0A0E]"
+                        : "border border-white/[0.08] bg-white/[0.02] text-[#F5F5F7] hover:bg-white/[0.05]"
+                    }`}
+                  >
+                    {predictionsOn ? (
+                      <>
+                        <Check size={12} />
+                        Picks on
+                      </>
+                    ) : (
+                      "Make picks"
+                    )}
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
+
           {loading ? (
             <div className="grid grid-cols-2 gap-8">
               {[...Array(8)].map((_, i) => (
@@ -303,6 +446,9 @@ export default function PlayoffsPage() {
                 teamMap={teamMap}
                 side="left"
                 favorite={favorite}
+                predictionsOn={predictionsOn}
+                picks={picks}
+                onPick={pick}
               />
 
               {/* The Finals */}
@@ -343,6 +489,9 @@ export default function PlayoffsPage() {
                 teamMap={teamMap}
                 side="right"
                 favorite={favorite}
+                predictionsOn={predictionsOn}
+                picks={picks}
+                onPick={pick}
               />
             </div>
           )}
