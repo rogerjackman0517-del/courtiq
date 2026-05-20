@@ -276,12 +276,20 @@ export function TopNav() {
         </Link>
 
         {isSignedIn ? (
-          <UserButton
-            appearance={{
-              variables: { colorPrimary: "#C8A84B" },
-              elements: { avatarBox: "h-8 w-8" },
-            }}
-          />
+          <>
+            <Link
+              href="/dashboard"
+              className="hidden md:inline-flex items-center gap-1.5 text-xs font-semibold text-[#8A8A93] hover:text-[#F5F5F7] px-2.5 py-1.5 rounded-lg transition-colors"
+            >
+              Dashboard
+            </Link>
+            <UserButton
+              appearance={{
+                variables: { colorPrimary: "#C8A84B" },
+                elements: { avatarBox: "h-8 w-8" },
+              }}
+            />
+          </>
         ) : (
           <Link
             href="/login"

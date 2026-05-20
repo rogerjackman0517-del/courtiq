@@ -51,6 +51,17 @@ async def cache_set(key: str, value, ttl: int):
         print(f"[cache] set failed: {e}")
 
 
+async def cache_delete(key: str):
+    """Evict a key. No-op if cache is disabled."""
+    client = _get_client()
+    if client is None:
+        return
+    try:
+        await client.delete(key)
+    except Exception as e:
+        print(f"[cache] delete failed: {e}")
+
+
 def cached(ttl: int, key_fn=None):
     def decorator(fn):
         @wraps(fn)

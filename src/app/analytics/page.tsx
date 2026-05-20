@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useIsPro } from "@/lib/useIsPro";
 import { ProPaywall } from "@/components/billing/ProPaywall";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -19,7 +20,8 @@ const FEATURES = [
   {
     icon: Users,
     title: "Lineup Explorer",
-    description: "Best and worst 5-man lineup combinations by net rating and minutes.",
+    description: "Build any 5-man lineup from across the NBA and project combined production.",
+    href: "/analytics/lineup-explorer",
   },
   {
     icon: Zap,
@@ -85,27 +87,36 @@ export default function AnalyticsPage() {
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {FEATURES.map(({ icon: Icon, title, description }) => (
-          <div
-            key={title}
-            className="floating-card rounded-2xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-5"
-          >
-            <div className="flex items-start gap-3 mb-3">
-              <div className="p-2 rounded-lg bg-[#D4B560]/10 shrink-0">
-                <Icon size={16} className="text-[#D4B560]" />
+        {FEATURES.map((f) => {
+          const inner = (
+            <>
+              <div className="flex items-start gap-3 mb-3">
+                <div className="p-2 rounded-lg bg-[#D4B560]/10 shrink-0">
+                  <f.icon size={16} className="text-[#D4B560]" />
+                </div>
+                <h3 className="font-[family-name:var(--font-barlow)] font-bold text-base text-[#F5F5F7] group-hover:text-[#D4B560] transition-colors">
+                  {f.title}
+                </h3>
               </div>
-              <h3 className="font-[family-name:var(--font-barlow)] font-bold text-base text-[#F5F5F7]">
-                {title}
-              </h3>
+              <p className="text-xs text-[#8A8A93] leading-relaxed mb-3">
+                {f.description}
+              </p>
+              <p className={`text-[10px] font-bold tracking-[0.15em] uppercase ${f.href ? "text-[#34D399]" : "text-[#6E6E76]"}`}>
+                {f.href ? "Available now →" : "Coming soon"}
+              </p>
+            </>
+          );
+          const className = "floating-card group block rounded-2xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-5";
+          return f.href ? (
+            <Link key={f.title} href={f.href} className={className}>
+              {inner}
+            </Link>
+          ) : (
+            <div key={f.title} className={className}>
+              {inner}
             </div>
-            <p className="text-xs text-[#8A8A93] leading-relaxed mb-3">
-              {description}
-            </p>
-            <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#6E6E76]">
-              Coming soon
-            </p>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

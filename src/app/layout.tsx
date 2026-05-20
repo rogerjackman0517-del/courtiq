@@ -12,6 +12,8 @@ import { Splash } from "@/components/ui/Splash";
 import { ToastProvider } from "@/components/ui/Toast";
 import { TiltProvider } from "@/components/ui/TiltProvider";
 import { HelpModal } from "@/components/layout/HelpModal";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const barlowCondensed = Barlow_Condensed({
   variable: "--font-barlow",
@@ -73,6 +75,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <HelpModal />
           <TiltProvider />
           </ToastProvider>
+          <Analytics />
+          <SpeedInsights />
         </body>
       </html>
     </ClerkProvider>

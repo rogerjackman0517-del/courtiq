@@ -6,8 +6,27 @@ import { Home, RotateCcw } from "lucide-react";
 
 export default function GlobalError({ error, reset }: { error: Error; reset: () => void }) {
   useEffect(() => {
-    // Log to console; Sentry would hook in here too.
     console.error("[CourtIQ error boundary]", error);
+    // Sentry hook — only fires when NEXT_PUBLIC_SENTRY_DSN is set.
+    // Install `@sentry/nextjs` and uncomment:
+    //
+    //   import * as Sentry from "@sentry/nextjs";
+    //   Sentry.captureException(error);
+    //
+    // For now, forward to our /api/log endpoint as a fallback so we at
+    // least see errors in Vercel logs.
+    if (typeof window !== "undefined") {
+      fetch("/api/log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          kind: "client-error",
+          message: error.message,
+          stack: error.stack,
+          path: window.location.pathname,
+        }),
+      }).catch(() => {});
+    }
   }, [error]);
 
   return (

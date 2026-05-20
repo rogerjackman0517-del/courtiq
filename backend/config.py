@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     upstash_redis_rest_token: str = ""
     balldontlie_api_key: str = ""
     the_odds_api_key: str = ""
+    cron_secret: str = ""
     allowed_origins: str = "http://localhost:3000,http://localhost:3001"
     cache_ttl_live: int = 30
     cache_ttl_stats: int = 3600
