@@ -254,3 +254,42 @@ async def get_power_rankings(season: str = "2025-26") -> list[dict]:
 
     await cache_set(cache_key, ranked, ttl=600)
     return ranked
+
+
+# 2026 Playoff bracket — single source of truth for /playoffs page
+PLAYOFF_BRACKET_2026 = {
+    "season": "2025-26",
+    "east": {
+        "r1": [
+            {"high": "BOS", "low": "PHI", "score": "3-4", "winner": "PHI", "note": "Sixers came back from 3-1 down"},
+            {"high": "NYK", "low": "ATL", "score": "4-2", "winner": "NYK"},
+            {"high": "CLE", "low": "TOR", "score": "4-3", "winner": "CLE"},
+            {"high": "DET", "low": "ORL", "score": "4-3", "winner": "DET", "note": "Pistons stormed back from 3-1"},
+        ],
+        "r2": [
+            {"high": "NYK", "low": "PHI", "score": "4-0", "winner": "NYK", "note": "Sweep"},
+            {"high": "CLE", "low": "DET", "score": "2-2", "winner": None, "note": "Series tied"},
+        ],
+        "cf": None,
+    },
+    "west": {
+        "r1": [
+            {"high": "OKC", "low": "PHX", "score": "4-0", "winner": "OKC", "note": "Sweep"},
+            {"high": "LAL", "low": "HOU", "score": "4-2", "winner": "LAL"},
+            {"high": "MIN", "low": "DEN", "score": "4-3", "winner": "MIN"},
+            {"high": "SAS", "low": "POR", "score": "4-1", "winner": "SAS"},
+        ],
+        "r2": [
+            {"high": "OKC", "low": "LAL", "score": "4-1", "winner": "OKC"},
+            {"high": "MIN", "low": "SAS", "score": "2-2", "winner": None, "note": "Series tied"},
+        ],
+        "cf": None,
+    },
+    "finals": None,
+}
+
+
+@router.get("/playoff-bracket")
+async def get_playoff_bracket():
+    """Return the 2026 NBA playoff bracket. Single source of truth."""
+    return PLAYOFF_BRACKET_2026

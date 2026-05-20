@@ -842,12 +842,32 @@ export default function HomePage() {
           </p>
           <form
             className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto"
-            onSubmit={e => {
+            onSubmit={async (e) => {
               e.preventDefault();
               const input = e.currentTarget.querySelector("input") as HTMLInputElement;
-              if (input?.value) {
-                alert("Thanks! You'll be added when we launch the newsletter.");
-                input.value = "";
+              const btn = e.currentTarget.querySelector("button") as HTMLButtonElement;
+              const email = input?.value?.trim();
+              if (!email) return;
+              btn.disabled = true;
+              btn.textContent = "...";
+              try {
+                const r = await fetch("/api/email-signup", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ email }),
+                });
+                if (r.ok) {
+                  input.value = "";
+                  btn.textContent = "Subscribed ✓";
+                  setTimeout(() => { btn.textContent = "Subscribe"; btn.disabled = false; }, 2000);
+                } else {
+                  const j = await r.json().catch(() => null);
+                  btn.textContent = j?.error ? "Try again" : "Failed";
+                  setTimeout(() => { btn.textContent = "Subscribe"; btn.disabled = false; }, 2000);
+                }
+              } catch {
+                btn.textContent = "Failed";
+                setTimeout(() => { btn.textContent = "Subscribe"; btn.disabled = false; }, 2000);
               }
             }}
           >
@@ -859,7 +879,7 @@ export default function HomePage() {
             />
             <button
               type="submit"
-              className="bg-[#F5F5F7] text-[#0A0A0E] text-sm font-semibold px-8 py-3 rounded-full hover:bg-white transition-all duration-300"
+              className="bg-[#F5F5F7] text-[#0A0A0E] text-sm font-semibold px-8 py-3 rounded-full hover:bg-white transition-all duration-300 disabled:opacity-50"
             >
               Subscribe
             </button>

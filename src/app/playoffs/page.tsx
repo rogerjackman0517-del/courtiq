@@ -5,6 +5,7 @@ import Link from "next/link";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { AnimatedHeading } from "@/components/ui/AnimatedHeading";
+import { useFavoriteTeam } from "@/lib/useFavoriteTeam";
 
 type Team = {
   id: number;
@@ -68,11 +69,14 @@ function SeriesCard({
   series,
   teamMap,
   align = "left",
+  favorite,
 }: {
   series: Series;
   teamMap: Record<string, Team>;
   align?: "left" | "right";
+  favorite?: string;
 }) {
+  const hasFavorite = favorite && (series.high === favorite || series.low === favorite);
   const high = teamFor(teamMap, series.high);
   const low = teamFor(teamMap, series.low);
   const [score1, score2] = series.score.split("-");
@@ -110,7 +114,15 @@ function SeriesCard({
   }
 
   return (
-    <div className="floating-card no-jiggle rounded-2xl p-4 bg-gradient-to-br from-[#1C1C24] to-[#131318] w-full">
+    <div
+      className="floating-card no-jiggle rounded-2xl p-4 bg-gradient-to-br from-[#1C1C24] to-[#131318] w-full relative"
+      style={hasFavorite ? { boxShadow: "0 0 0 1px rgba(212,181,96,0.4), 0 18px 40px -16px rgba(212,181,96,0.45)" } : undefined}
+    >
+      {hasFavorite && (
+        <span className="absolute -top-2 -right-2 rounded-full bg-[#D4B560] text-[#0A0A0E] text-[9px] font-bold tracking-[0.15em] uppercase px-2 py-0.5">
+          ★ Your team
+        </span>
+      )}
       <div className="flex items-center justify-between mb-3">
         <span
           className={`text-[10px] font-bold tracking-[0.2em] uppercase ${
@@ -150,6 +162,7 @@ function ConferenceColumn({
   r2,
   teamMap,
   side,
+  favorite,
 }: {
   title: string;
   accent: string;
@@ -157,6 +170,7 @@ function ConferenceColumn({
   r2: Series[];
   teamMap: Record<string, Team>;
   side: "left" | "right";
+  favorite?: string;
 }) {
   // Determine conference finals: winners of r2 if both decided, else TBD.
   const cfPair: Series = {
@@ -179,35 +193,59 @@ function ConferenceColumn({
         {/* Round 1 */}
         <div className={`space-y-3 ${side === "right" ? "order-3" : ""}`}>
           {r1.map((s, i) => (
-            <SeriesCard key={i} series={s} teamMap={teamMap} align={side} />
+            <SeriesCard key={i} series={s} teamMap={teamMap} align={side} favorite={favorite} />
           ))}
         </div>
         {/* Round 2 */}
         <div className={`space-y-6 ${side === "right" ? "order-2" : ""}`}>
           {r2.map((s, i) => (
-            <SeriesCard key={i} series={s} teamMap={teamMap} align={side} />
+            <SeriesCard key={i} series={s} teamMap={teamMap} align={side} favorite={favorite} />
           ))}
         </div>
         {/* Conference Finals */}
         <div className={`${side === "right" ? "order-1" : ""}`}>
-          <SeriesCard series={cfPair} teamMap={teamMap} align={side} />
+          <SeriesCard series={cfPair} teamMap={teamMap} align={side} favorite={favorite} />
         </div>
       </div>
     </div>
   );
 }
 
+type BracketData = {
+  east: { r1: Series[]; r2: Series[] };
+  west: { r1: Series[]; r2: Series[] };
+};
+
 export default function PlayoffsPage() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
+  const { team: favorite } = useFavoriteTeam();
+  const [bracket, setBracket] = useState<BracketData>({
+    east: { r1: EAST_R1, r2: EAST_R2 },
+    west: { r1: WEST_R1, r2: WEST_R2 },
+  });
 
   useEffect(() => {
-    fetch("/api/teams/with-records")
-      .then((r) => (r.ok ? r.json() : []))
-      .then((data: Team[]) => {
-        if (Array.isArray(data)) setTeams(data);
+    let cancelled = false;
+    Promise.all([
+      fetch("/api/teams/with-records").then((r) => (r.ok ? r.json() : [])),
+      fetch("/api/playoff-bracket").then((r) => (r.ok ? r.json() : null)),
+    ])
+      .then(([teamData, bracketData]) => {
+        if (cancelled) return;
+        if (Array.isArray(teamData)) setTeams(teamData);
+        // Backend is authoritative; only use it when it responds cleanly.
+        if (bracketData && bracketData.east && bracketData.west) {
+          setBracket({
+            east: { r1: bracketData.east.r1 ?? EAST_R1, r2: bracketData.east.r2 ?? EAST_R2 },
+            west: { r1: bracketData.west.r1 ?? WEST_R1, r2: bracketData.west.r2 ?? WEST_R2 },
+          });
+        }
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
   }, []);
 
   const teamMap: Record<string, Team> = {};
@@ -260,10 +298,11 @@ export default function PlayoffsPage() {
               <ConferenceColumn
                 title="Eastern Conference"
                 accent="#5B8DEF"
-                r1={EAST_R1}
-                r2={EAST_R2}
+                r1={bracket.east.r1}
+                r2={bracket.east.r2}
                 teamMap={teamMap}
                 side="left"
+                favorite={favorite}
               />
 
               {/* The Finals */}
@@ -299,10 +338,11 @@ export default function PlayoffsPage() {
               <ConferenceColumn
                 title="Western Conference"
                 accent="#D4B560"
-                r1={WEST_R1}
-                r2={WEST_R2}
+                r1={bracket.west.r1}
+                r2={bracket.west.r2}
                 teamMap={teamMap}
                 side="right"
+                favorite={favorite}
               />
             </div>
           )}

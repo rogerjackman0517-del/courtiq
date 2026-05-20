@@ -11,6 +11,7 @@ import { CommandPalette } from "@/components/layout/CommandPalette";
 import { Splash } from "@/components/ui/Splash";
 import { ToastProvider } from "@/components/ui/Toast";
 import { TiltProvider } from "@/components/ui/TiltProvider";
+import { HelpModal } from "@/components/layout/HelpModal";
 
 const barlowCondensed = Barlow_Condensed({
   variable: "--font-barlow",
@@ -69,6 +70,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* Global overlays */}
           <Splash />
           <CommandPalette />
+          <HelpModal />
           <TiltProvider />
           </ToastProvider>
         </body>

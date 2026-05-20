@@ -10,7 +10,8 @@ import { Star } from "lucide-react";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { PlayerRowSkeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
-import { Search, ArrowUpDown, ArrowUp, ArrowDown, Rows3, Rows4, X } from "lucide-react";
+import { Search, ArrowUpDown, ArrowUp, ArrowDown, Rows3, Rows4, X, Shuffle } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { AnimatedHeading } from "@/components/ui/AnimatedHeading";
 import { useSearchHotkey } from "@/components/ui/Toast";
 
@@ -80,6 +81,7 @@ export default function PlayersPage() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   useSearchHotkey(searchInputRef);
   const { isPinned, toggle: togglePin } = usePinnedPlayers();
+  const router = useRouter();
 
   // Persistent prefs were causing top scorers to vanish for some users.
   // Disabled until we ship a Reset button.
@@ -173,6 +175,19 @@ export default function PlayersPage() {
                 </button>
               )}
             </div>
+            <button
+              type="button"
+              onClick={() => {
+                if (players.length === 0) return;
+                const random = players[Math.floor(Math.random() * players.length)];
+                router.push(`/players/${random.slug}`);
+              }}
+              className="ripple inline-flex items-center gap-1.5 rounded-2xl border border-white/[0.05] bg-[#1C1C24] px-3 py-2.5 text-xs font-semibold text-[#8A8A93] hover:text-[#D4B560]"
+              title="Open a random player"
+            >
+              <Shuffle size={13} />
+              Random
+            </button>
             <div className="inline-flex items-center rounded-2xl border border-white/[0.05] bg-[#1C1C24] p-1">
               <button
                 type="button"
