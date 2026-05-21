@@ -241,8 +241,8 @@ export default function BoxscorePage({
             <h2 className="text-xs font-bold tracking-[0.2em] uppercase text-[#6E6E76] mb-4">
               Quarter scoring
             </h2>
-            <div className="floating-card no-jiggle rounded-2xl overflow-hidden">
-              <table className="w-full text-sm">
+            <div className="floating-card no-jiggle rounded-2xl overflow-x-auto">
+              <table className="w-full text-sm min-w-[420px]">
                 <thead>
                   <tr className="border-b border-white/[0.06]">
                     <th className="text-left px-4 lg:px-6 py-3 text-[#6E6E76] font-medium text-xs uppercase tracking-wider">

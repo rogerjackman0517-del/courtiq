@@ -83,8 +83,8 @@ function StandingsTable({ teams, conference }: { teams: TeamRow[]; conference: "
   }
 
   return (
-    <div className="floating-card rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] overflow-hidden">
-      <table className="w-full text-sm">
+    <div className="floating-card rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] overflow-x-auto">
+      <table className="w-full text-sm min-w-[680px]">
         <thead>
           <tr className="border-b border-white/[0.06]">
             <th className="text-left px-5 py-4 w-12 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">#</th>

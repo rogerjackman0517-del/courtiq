@@ -246,7 +246,7 @@ export default function HomePage() {
                     </div>
 
                     {/* Scoreboard grid */}
-                    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 lg:gap-10">
+                    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-4 lg:gap-10">
                       {/* AWAY */}
                       <div className="flex flex-col items-start lg:items-center gap-3 lg:gap-4">
                         <TeamLogo
@@ -271,7 +271,7 @@ export default function HomePage() {
                       {/* SCORE */}
                       <div className="flex items-center gap-3 lg:gap-6">
                         <span
-                          className="font-[family-name:var(--font-barlow)] font-black text-5xl lg:text-7xl tabular-nums tracking-[-0.05em]"
+                          className="font-[family-name:var(--font-barlow)] font-black text-4xl sm:text-5xl lg:text-7xl tabular-nums tracking-[-0.05em]"
                           style={{
                             color: isLive || isFinal
                               ? (awayWin ? awayColor : "#6E6E76")
@@ -284,7 +284,7 @@ export default function HomePage() {
                           ·
                         </span>
                         <span
-                          className="font-[family-name:var(--font-barlow)] font-black text-5xl lg:text-7xl tabular-nums tracking-[-0.05em]"
+                          className="font-[family-name:var(--font-barlow)] font-black text-4xl sm:text-5xl lg:text-7xl tabular-nums tracking-[-0.05em]"
                           style={{
                             color: isLive || isFinal
                               ? (homeWin ? homeColor : "#6E6E76")
@@ -336,6 +336,20 @@ export default function HomePage() {
         {/* Animated court grid backdrop */}
         <div className="court-grid-bg pointer-events-none absolute inset-0 opacity-60" aria-hidden="true" />
         <div className="max-w-6xl mx-auto">
+
+          {/* First-time visitor intro chip */}
+          <div className="flex flex-wrap items-center gap-2 mb-6 text-[10px] sm:text-[11px] tracking-[0.15em] uppercase">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#D4B560]/30 bg-[#D4B560]/[0.08] text-[#D4B560] px-2.5 py-1 font-bold">
+              New here?
+            </span>
+            <span className="text-[#8A8A93] font-medium normal-case tracking-normal text-xs sm:text-sm">
+              CourtIQ is a free NBA stats site — scores, profiles, trade machine, playoff bracket. Made by{" "}
+              <Link href="/about" className="text-[#F5F5F7] underline decoration-dotted underline-offset-2 hover:text-[#D4B560]">
+                one Knicks fan
+              </Link>.
+            </span>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-12 lg:gap-16 items-center">
             <div>
 
