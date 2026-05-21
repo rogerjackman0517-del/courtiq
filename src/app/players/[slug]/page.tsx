@@ -19,6 +19,7 @@ import { Share2, TrendingUp as TrendingUpIcon, TrendingDown as TrendingDownIcon,
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { DustParticles } from "@/components/ui/DustParticles";
 import { Lightbox } from "@/components/ui/Lightbox";
+import { PlayerNews } from "@/components/players/PlayerNews";
 
 type PlayerRow = {
   id: number;
@@ -558,6 +559,12 @@ export default function PlayerProfilePage() {
       </section>
 
       {/* GAME LOG */}
+      <section className="px-4 lg:px-12">
+        <div className="max-w-6xl mx-auto">
+          <PlayerNews name={player.fullName} />
+        </div>
+      </section>
+
       <GameLogTable slug={slug} />
 
       {/* SHOT CHART */}

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
-import { Search, Bell, ChevronDown, Zap, X } from "lucide-react";
+import { Search, Bell, ChevronDown, Zap, X, Flame } from "lucide-react";
+import { useDailyStreak } from "@/lib/useDailyStreak";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -36,6 +37,7 @@ export function TopNav() {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrolled, setScrolled] = useState(false);
+  const streak = useDailyStreak();
 
   // Scrolled state — listen on the main scroll container AND window as a fallback
   useEffect(() => {
@@ -160,6 +162,15 @@ export function TopNav() {
         </span>
       </Link>
 
+      {streak >= 2 && (
+        <span
+          className="hidden md:inline-flex items-center gap-1 text-[11px] font-bold tabular-nums text-[#F59E0B] bg-[#F59E0B]/10 border border-[#F59E0B]/25 px-2 py-1 rounded-full"
+          title={`${streak}-day visit streak`}
+        >
+          <Flame size={11} className="text-[#F59E0B]" />
+          {streak}
+        </span>
+      )}
       <Link href="/scores" className="hidden lg:flex items-center gap-1.5 text-xs font-semibold text-[#22C55E] bg-[#22C55E]/10 border border-[#22C55E]/20 px-2.5 py-1 rounded-full hover:bg-[#22C55E]/20 transition-colors">
         <span className="relative flex h-1.5 w-1.5">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#22C55E] opacity-75"></span>

@@ -20,6 +20,7 @@ const PAGES: PageRoute[] = [
   { kind: "page", href: "/", title: "Home", icon: Home },
   { kind: "page", href: "/scores", title: "Scores", icon: Calendar },
   { kind: "page", href: "/live", title: "Live", icon: RadioTower },
+  { kind: "page", href: "/injuries", title: "Injuries", icon: RadioTower },
   { kind: "page", href: "/players", title: "Players", icon: Users },
   { kind: "page", href: "/teams", title: "Teams", icon: Shield },
   { kind: "page", href: "/standings", title: "Standings", icon: Trophy },

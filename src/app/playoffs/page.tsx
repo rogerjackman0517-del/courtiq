@@ -7,7 +7,8 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { AnimatedHeading } from "@/components/ui/AnimatedHeading";
 import { useFavoriteTeam } from "@/lib/useFavoriteTeam";
 import { useBracketPicks, seriesKey } from "@/lib/useBracketPicks";
-import { Check, RotateCcw } from "lucide-react";
+import { Check, RotateCcw, Share2 } from "lucide-react";
+import { useCopyToClipboard } from "@/components/ui/Toast";
 
 type Team = {
   id: number;
@@ -297,8 +298,9 @@ export default function PlayoffsPage() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
   const { team: favorite } = useFavoriteTeam();
-  const { picks, pick, clear: clearPicks } = useBracketPicks();
+  const { picks, pick, clear: clearPicks, shareUrl } = useBracketPicks();
   const [predictionsOn, setPredictionsOn] = useState(false);
+  const copy = useCopyToClipboard();
   const [bracket, setBracket] = useState<BracketData>({
     east: { r1: EAST_R1, r2: EAST_R2 },
     west: { r1: WEST_R1, r2: WEST_R2 },
@@ -395,6 +397,16 @@ export default function PlayoffsPage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
+                  {total > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => copy(shareUrl(), "Bracket link copied")}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#D4B560]/30 bg-[#D4B560]/10 text-xs text-[#D4B560] hover:bg-[#D4B560]/15 no-jiggle"
+                    >
+                      <Share2 size={11} />
+                      Share bracket
+                    </button>
+                  )}
                   {total > 0 && (
                     <button
                       type="button"

@@ -218,6 +218,40 @@ export default function BoxscorePage({
               </div>
             </Link>
           </div>
+
+          {/* Win probability — only meaningful when game is live or final */}
+          {data.status.state !== "pre" && (data.awayTeam.score > 0 || data.homeTeam.score > 0) && (() => {
+            const diff = data.homeTeam.score - data.awayTeam.score;
+            // Crude logistic: each +1 point of differential = ~+3% home win prob
+            const homeWP =
+              data.status.state === "post"
+                ? data.homeTeam.winner ? 100 : 0
+                : Math.max(2, Math.min(98, 50 + diff * 3.2));
+            const awayWP = 100 - homeWP;
+            return (
+              <div className="mt-6 pt-6 border-t border-white/[0.04]">
+                <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#6E6E76] mb-3 text-center">
+                  Win probability
+                </p>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-bold tabular-nums text-[#F5F5F7] w-12 text-right">
+                    {awayWP.toFixed(0)}%
+                  </span>
+                  <div className="flex-1 h-2 rounded-full overflow-hidden bg-white/[0.05] flex">
+                    <div className="bg-[#5B8DEF] transition-all duration-700" style={{ width: `${awayWP}%` }} />
+                    <div className="bg-[#D4B560] transition-all duration-700" style={{ width: `${homeWP}%` }} />
+                  </div>
+                  <span className="text-xs font-bold tabular-nums text-[#F5F5F7] w-12">
+                    {homeWP.toFixed(0)}%
+                  </span>
+                </div>
+                <div className="flex justify-between text-[10px] text-[#6E6E76] tracking-wider mt-1.5 px-12">
+                  <span>{data.awayTeam.tricode}</span>
+                  <span>{data.homeTeam.tricode}</span>
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Empty state for upcoming games */}

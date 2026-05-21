@@ -161,6 +161,32 @@ export default function HomePage() {
   const liveGames = games.filter(g => g.gameStatus === 2);
   const liveGame = liveGames[0];
 
+  // "Last night" recap: yesterday's finals fetched separately
+  type RecapGame = LiveGame;
+  const [yesterdayGames, setYesterdayGames] = useState<RecapGame[]>([]);
+  useEffect(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    const ymd = d.toISOString().slice(0, 10);
+    fetch(`/api/games/today?date=${ymd}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        const gs = data?.scoreboard?.games;
+        if (Array.isArray(gs)) setYesterdayGames(gs.filter((g: RecapGame) => g.gameStatus === 3));
+      })
+      .catch(() => {});
+  }, []);
+  const topFinishYesterday = useMemo(() => {
+    if (yesterdayGames.length === 0) return null;
+    // Closest game = best recap candidate (1-point thrillers > 30-point blowouts)
+    const sorted = [...yesterdayGames].sort((a, b) => {
+      const diffA = Math.abs(a.awayTeam.score - a.homeTeam.score);
+      const diffB = Math.abs(b.awayTeam.score - b.homeTeam.score);
+      return diffA - diffB;
+    });
+    return sorted[0];
+  }, [yesterdayGames]);
+
   // Featured game: live > final > upcoming
   const featuredGame = useMemo(() => {
     if (games.length === 0) return null;
@@ -726,6 +752,78 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* LAST NIGHT'S RECAP */}
+      {topFinishYesterday && (
+        <section className="px-4 lg:px-12 py-6 lg:py-8" data-reveal>
+          <div className="max-w-6xl mx-auto">
+            <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-3">
+              Last night
+            </p>
+            <Link
+              href={`/scores/${topFinishYesterday.gameId}`}
+              className="floating-card group block rounded-3xl p-6 lg:p-8 relative overflow-hidden"
+            >
+              <div
+                className="absolute inset-0 opacity-30 pointer-events-none"
+                style={{
+                  background: `linear-gradient(115deg, ${teamLookup[topFinishYesterday.awayTeam.teamTricode]?.color ?? "#5B8DEF"}22 0%, transparent 50%, ${teamLookup[topFinishYesterday.homeTeam.teamTricode]?.color ?? "#D4B560"}22 100%)`,
+                }}
+              />
+              <div className="relative flex items-center justify-between gap-6">
+                <div className="flex items-center gap-3 flex-1">
+                  <TeamLogo
+                    teamId={teamLookup[topFinishYesterday.awayTeam.teamTricode]?.id}
+                    abbreviation={topFinishYesterday.awayTeam.teamTricode}
+                    primaryColor={teamLookup[topFinishYesterday.awayTeam.teamTricode]?.color}
+                    size="md"
+                  />
+                  <div>
+                    <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#6E6E76]">
+                      {topFinishYesterday.awayTeam.teamTricode}
+                    </p>
+                    <p
+                      className={cn(
+                        "font-[family-name:var(--font-barlow)] font-black text-3xl lg:text-4xl tabular-nums",
+                        topFinishYesterday.awayTeam.score > topFinishYesterday.homeTeam.score ? "text-[#F5F5F7]" : "text-[#6E6E76]"
+                      )}
+                    >
+                      {topFinishYesterday.awayTeam.score}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#D4B560]">Final</p>
+                  <p className="text-[10px] text-[#6E6E76]">
+                    {Math.abs(topFinishYesterday.awayTeam.score - topFinishYesterday.homeTeam.score)}-pt game
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 flex-1 justify-end text-right">
+                  <div>
+                    <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#6E6E76]">
+                      {topFinishYesterday.homeTeam.teamTricode}
+                    </p>
+                    <p
+                      className={cn(
+                        "font-[family-name:var(--font-barlow)] font-black text-3xl lg:text-4xl tabular-nums",
+                        topFinishYesterday.homeTeam.score > topFinishYesterday.awayTeam.score ? "text-[#F5F5F7]" : "text-[#6E6E76]"
+                      )}
+                    >
+                      {topFinishYesterday.homeTeam.score}
+                    </p>
+                  </div>
+                  <TeamLogo
+                    teamId={teamLookup[topFinishYesterday.homeTeam.teamTricode]?.id}
+                    abbreviation={topFinishYesterday.homeTeam.teamTricode}
+                    primaryColor={teamLookup[topFinishYesterday.homeTeam.teamTricode]?.color}
+                    size="md"
+                  />
+                </div>
+              </div>
+            </Link>
+          </div>
+        </section>
+      )}
 
       {/* TRENDING + MATCHUP OF THE DAY */}
       <section className="px-4 lg:px-12 pt-4 pb-10 lg:pb-20" data-reveal data-reveal-delay="3">

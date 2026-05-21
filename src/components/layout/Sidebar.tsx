@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Home, Calendar, Users, Shield, BarChart2,
-  TrendingUp, Trophy, Newspaper, Star, Settings, Sparkles, ArrowLeftRight, Flame, RadioTower, Repeat, GitBranch
+  TrendingUp, Trophy, Newspaper, Star, Settings, Sparkles, ArrowLeftRight, Flame, RadioTower, Repeat, GitBranch, HeartPulse
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -16,9 +16,10 @@ const navGroups: NavGroup[] = [
     label: null,
     items: [
       { href: "/",       label: "Home",   icon: Home },
-      { href: "/scores", label: "Scores", icon: Calendar },
-      { href: "/live",   label: "Live",   icon: RadioTower },
-      { href: "/news",   label: "News",   icon: Newspaper },
+      { href: "/scores",    label: "Scores",    icon: Calendar },
+      { href: "/live",      label: "Live",      icon: RadioTower },
+      { href: "/injuries",  label: "Injuries",  icon: HeartPulse },
+      { href: "/news",      label: "News",      icon: Newspaper },
     ],
   },
   {

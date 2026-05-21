@@ -12,6 +12,7 @@ import { Splash } from "@/components/ui/Splash";
 import { ToastProvider } from "@/components/ui/Toast";
 import { TiltProvider } from "@/components/ui/TiltProvider";
 import { HelpModal } from "@/components/layout/HelpModal";
+import { OnboardingTooltip } from "@/components/ui/OnboardingTooltip";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
@@ -73,6 +74,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Splash />
           <CommandPalette />
           <HelpModal />
+          <OnboardingTooltip />
           <TiltProvider />
           </ToastProvider>
           <Analytics />
