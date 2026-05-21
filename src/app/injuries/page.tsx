@@ -125,10 +125,10 @@ export default function InjuriesPage() {
             <p className="text-sm text-[#8A8A93]">No matching injuries.</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filtered.map((tb) => {
+              {filtered.map((tb, ti) => {
                 const meta = metaByAbbr[tb.team];
                 return (
-                  <div key={tb.team} className="floating-card rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-5">
+                  <div key={`${tb.team || "team"}-${ti}`} className="floating-card rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-5">
                     <Link href={meta ? `/teams/${meta.slug}` : "#"} className="flex items-center gap-3 mb-4 group">
                       <TeamLogo
                         teamId={meta?.id}
