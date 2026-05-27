@@ -619,7 +619,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {players.length === 0 && Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={"pulse-skel-" + i} />)}
             {ptsLeader && (
-              <Link href={`/players/${ptsLeader.slug}`} className="floating-card gold-sweep group block rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-[#D4B560]/10">
+              <Link href={`/players/${ptsLeader.slug}`} className="floating-card gradient-border gold-sweep group block rounded-3xl p-6 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-[#D4B560]/10">
                 <div className="flex items-center gap-1.5 mb-6">
                   <Flame size={11} className="text-[#D4B560]" />
                   <p className="text-[10px] font-bold tracking-widest uppercase text-[#D4B560]">Scoring</p>
@@ -637,7 +637,7 @@ export default function HomePage() {
               </Link>
             )}
             {astLeader && (
-              <Link href={`/players/${astLeader.slug}`} className="floating-card gold-sweep group block rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/40">
+              <Link href={`/players/${astLeader.slug}`} className="floating-card gradient-border gold-sweep group block rounded-3xl p-6 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/40">
                 <div className="flex items-center gap-1.5 mb-6">
                   <TrendingUp size={11} className="text-[#8A8A93]" />
                   <p className="text-[10px] font-bold tracking-widest uppercase text-[#8A8A93]">Assists</p>
@@ -655,7 +655,7 @@ export default function HomePage() {
               </Link>
             )}
             {bestTeam && (
-              <Link href={`/teams/${bestTeam.slug}`} className="floating-card gold-sweep group block rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/40">
+              <Link href={`/teams/${bestTeam.slug}`} className="floating-card gradient-border gold-sweep group block rounded-3xl p-6 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/40">
                 <div className="flex items-center gap-1.5 mb-6">
                   <Trophy size={11} className="text-[#8A8A93]" />
                   <p className="text-[10px] font-bold tracking-widest uppercase text-[#8A8A93]">Top Record</p>

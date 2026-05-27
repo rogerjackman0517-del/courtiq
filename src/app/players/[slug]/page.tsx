@@ -522,7 +522,7 @@ export default function PlayerProfilePage() {
 
             {/* Shooting */}
             <div className="space-y-4">
-              <div className="floating-card rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6">
+              <div className="floating-card gradient-border rounded-3xl p-6">
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76] mb-4">Field Goal</p>
                 <div className="flex items-baseline justify-between mb-4">
                   <p className="font-[family-name:var(--font-barlow)] font-black text-5xl tabular-nums tracking-[-0.04em] text-[#F5F5F7]">
@@ -538,7 +538,7 @@ export default function PlayerProfilePage() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="floating-card rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6">
+                <div className="floating-card gradient-border rounded-3xl p-6">
                   <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76] mb-4">3-Point</p>
                   <p className="font-[family-name:var(--font-barlow)] font-black text-4xl tabular-nums tracking-[-0.04em] text-[#F5F5F7] mb-3">
                     {(player.fg3Pct * 100).toFixed(1)}<span className="text-xl text-[#6E6E76]">%</span>
@@ -551,7 +551,7 @@ export default function PlayerProfilePage() {
                   </div>
                 </div>
 
-                <div className="floating-card rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6">
+                <div className="floating-card gradient-border rounded-3xl p-6">
                   <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76] mb-4">Free Throw</p>
                   <p className="font-[family-name:var(--font-barlow)] font-black text-4xl tabular-nums tracking-[-0.04em] text-[#F5F5F7] mb-3">
                     {(player.ftPct * 100).toFixed(1)}<span className="text-xl text-[#6E6E76]">%</span>

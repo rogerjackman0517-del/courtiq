@@ -163,8 +163,8 @@ export default function BoxscorePage({
           </button>
         </div>
 
-        {/* Matchup card */}
-        <div className="floating-card no-jiggle rounded-3xl p-6 lg:p-10 mb-10 relative overflow-hidden">
+        {/* Matchup card — sticky while scrolling through player stats */}
+        <div className="floating-card gradient-border no-jiggle rounded-3xl p-6 lg:p-10 mb-10 relative overflow-hidden sticky top-16 z-20 backdrop-blur-md">
           {data.status.state === "post" && <Confetti />}
           <div className="grid grid-cols-[1fr_auto_1fr] gap-4 lg:gap-12 items-center">
             {/* Away team */}
