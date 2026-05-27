@@ -8,7 +8,6 @@ from nba_api.stats.endpoints import (
     playergamelog,
     commonplayerinfo,
     leagueleaders,
-    leaguedashplayerstats,
 )
 from nba_api.stats.static import players as nba_players, teams as nba_teams
 from cache import cached, cache_get, cache_set
@@ -50,34 +49,47 @@ async def get_all_players(season: str = Query(CURRENT_SEASON)):
     return df.to_dict(orient="records")
 
 
+def _slugify(name: str) -> str:
+    return (
+        "".join(c for c in unicodedata.normalize("NFD", name) if unicodedata.category(c) != "Mn")
+        .lower()
+        .replace(" ", "-")
+        .replace(".", "")
+        .replace("'", "")
+    )
+
+
 @router.get("/with-stats")
 @cached(ttl=settings.cache_ttl_stats, key_fn=lambda season="2025-26": f"players:with-stats:{season}")
 async def get_players_with_stats(season: str = Query(CURRENT_SEASON)):
-    """All players with at least 1 GP — no min-game qualification filter.
-    Sorted by PPG so injured/limited players still appear (Tatum, Embiid, etc.)."""
-    dash = leaguedashplayerstats.LeagueDashPlayerStats(
+    """Players with season stats via LeagueLeaders (reliable on Railway).
+    Returns ~230+ qualifying players sorted by PPG."""
+    leaders = leagueleaders.LeagueLeaders(
         season=season,
-        per_mode_detailed="PerGame",
-        measure_type_detailed_defense="Base",
+        stat_category_abbreviation="PTS",
+        per_mode48="PerGame",
+        scope="S",
         headers=NBA_HEADERS,
         timeout=30,
     )
-    import pandas as pd
-    df = dash.get_data_frames()[0]
-    df = df[df["GP"] >= 1].sort_values("PTS", ascending=False)
+    df = leaders.get_data_frames()[0]
+    df = df.sort_values("PTS", ascending=False)
     rows = df.to_dict(orient="records")
 
     out = []
-    for r in rows[:400]:
+    for r in rows:
         pid = r.get("PLAYER_ID")
-        name = r.get("PLAYER_NAME") or ""
+        name = r.get("PLAYER") or ""
+        # TEAM column in LeagueLeaders is the abbreviation
+        team_abbr = str(r.get("TEAM") or "")
+        team_id = int(r.get("TEAM_ID") or 0)
         out.append({
             "id": pid,
             "fullName": name,
-            "slug": "".join(c for c in unicodedata.normalize("NFD", name) if unicodedata.category(c) != "Mn").lower().replace(" ", "-").replace(".", "").replace("'", ""),
-            "teamId": int(r.get("TEAM_ID") or 0),
-            "teamAbbr": _TEAM_BY_ID.get(r.get("TEAM_ID"), r.get("TEAM_ABBREVIATION") or ""),
-            "position": r.get("START_POSITION") or "—",
+            "slug": _slugify(name),
+            "teamId": team_id,
+            "teamAbbr": team_abbr,
+            "position": "—",
             "pts": float(r.get("PTS") or 0),
             "reb": float(r.get("REB") or 0),
             "ast": float(r.get("AST") or 0),
