@@ -8,6 +8,7 @@ from nba_api.stats.endpoints import (
     playergamelog,
     commonplayerinfo,
     leagueleaders,
+    leaguedashplayerstats,
 )
 from nba_api.stats.static import players as nba_players, teams as nba_teams
 from cache import cached, cache_get, cache_set
@@ -52,32 +53,31 @@ async def get_all_players(season: str = Query(CURRENT_SEASON)):
 @router.get("/with-stats")
 @cached(ttl=settings.cache_ttl_stats, key_fn=lambda season="2025-26": f"players:with-stats:{season}")
 async def get_players_with_stats(season: str = Query(CURRENT_SEASON)):
-    """Top 300 players (PTS leaders) with PPG/RPG/APG/FG% for the table page."""
-    leaders = leagueleaders.LeagueLeaders(
+    """All players with at least 1 GP — no min-game qualification filter.
+    Sorted by PPG so injured/limited players still appear (Tatum, Embiid, etc.)."""
+    dash = leaguedashplayerstats.LeagueDashPlayerStats(
         season=season,
-        season_type_all_star="Regular Season",
-        per_mode48="PerGame",
-        stat_category_abbreviation="PTS",
+        per_mode_simple="PerGame",
+        measure_type_simple="Base",
         headers=NBA_HEADERS,
         timeout=30,
     )
-    df = leaders.get_data_frames()[0]
+    import pandas as pd
+    df = dash.get_data_frames()[0]
+    df = df[df["GP"] >= 1].sort_values("PTS", ascending=False)
     rows = df.to_dict(orient="records")
 
-    # Get all players for slug/position lookup
-    all_players = {p["id"]: p for p in nba_players.get_players()}
-
     out = []
-    for r in rows[:300]:
+    for r in rows[:400]:
         pid = r.get("PLAYER_ID")
-        meta = all_players.get(pid, {})
+        name = r.get("PLAYER_NAME") or ""
         out.append({
             "id": pid,
-            "fullName": r.get("PLAYER"),
-            "slug": "".join(c for c in unicodedata.normalize("NFD", (r.get("PLAYER") or "")) if unicodedata.category(c) != "Mn").lower().replace(" ", "-").replace(".", "").replace("'", ""),
+            "fullName": name,
+            "slug": "".join(c for c in unicodedata.normalize("NFD", name) if unicodedata.category(c) != "Mn").lower().replace(" ", "-").replace(".", "").replace("'", ""),
             "teamId": int(r.get("TEAM_ID") or 0),
-            "teamAbbr": _TEAM_BY_ID.get(r.get("TEAM_ID"), r.get("TEAM") or ""),
-            "position": "—",  # not in leaders endpoint
+            "teamAbbr": _TEAM_BY_ID.get(r.get("TEAM_ID"), r.get("TEAM_ABBREVIATION") or ""),
+            "position": r.get("START_POSITION") or "—",
             "pts": float(r.get("PTS") or 0),
             "reb": float(r.get("REB") or 0),
             "ast": float(r.get("AST") or 0),
@@ -205,6 +205,16 @@ ESPN_GAMELOG_URL = "https://site.web.api.espn.com/apis/common/v3/sports/basketba
 # active players in /players/with-stats. Falls back to ESPN search at request
 # time for anyone not in this map.
 NBA_TO_ESPN_ID = {
+    # ── Stars added — missing from original map ───────────────────────────────
+    202681: 6442,      # Kyrie Irving
+    202710: 6434,      # Jimmy Butler
+    202331: 3032977,   # Paul George
+    203954: 3059318,   # Joel Embiid
+    1628369: 4065697,  # Jayson Tatum
+    203076: 6583,      # Anthony Davis
+    203507: 3032980,   # Giannis Antetokounmpo
+    203110: 6606,      # Draymond Green
+    # ─────────────────────────────────────────────────────────────────────────
     2544: 1966,        # LeBron James
     201142: 3202,      # Kevin Durant
     201566: 3468,      # Russell Westbrook
