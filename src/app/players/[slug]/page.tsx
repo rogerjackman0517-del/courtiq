@@ -20,6 +20,7 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { DustParticles } from "@/components/ui/DustParticles";
 import { Lightbox } from "@/components/ui/Lightbox";
 import { PlayerNews } from "@/components/players/PlayerNews";
+import { useInjuryMap } from "@/lib/useInjuryMap";
 
 type PlayerRow = {
   id: number;
@@ -99,6 +100,7 @@ export default function PlayerProfilePage() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [photoSource, setPhotoSource] = useState<"nba" | "espn">("nba");
   const copy = useCopyToClipboard();
+  const injuryMap = useInjuryMap();
 
   useEffect(() => {
     let cancelled = false;
@@ -353,6 +355,22 @@ export default function PlayerProfilePage() {
                     <span className="text-[#D4B560] font-medium">#{scoringRank} in scoring</span>
                   </>
                 )}
+                {(() => {
+                  const status = injuryMap[player.fullName.toLowerCase()];
+                  if (!status || status === "Probable" || status === "Available") return null;
+                  const color = status === "Out" || status === "Doubtful" ? "#F87171" : "#F59E0B";
+                  return (
+                    <>
+                      <span className="text-[#3A3A42]">·</span>
+                      <span
+                        className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider"
+                        style={{ color, background: `${color}18`, border: `1px solid ${color}40` }}
+                      >
+                        {status}
+                      </span>
+                    </>
+                  );
+                })()}
               </div>
 
               {/* Hot / cold streak pill */}

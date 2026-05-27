@@ -14,6 +14,7 @@ import { Search, ArrowUpDown, ArrowUp, ArrowDown, Rows3, Rows4, X, Shuffle } fro
 import { useRouter } from "next/navigation";
 import { AnimatedHeading } from "@/components/ui/AnimatedHeading";
 import { useSearchHotkey } from "@/components/ui/Toast";
+import { useInjuryMap } from "@/lib/useInjuryMap";
 
 type SortKey = "name" | "pts" | "reb" | "ast" | "fgPct" | "fg3Pct" | "ftPct" | "min";
 type SortDir = "asc" | "desc";
@@ -81,6 +82,7 @@ export default function PlayersPage() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   useSearchHotkey(searchInputRef);
   const { isPinned, toggle: togglePin } = usePinnedPlayers();
+  const injuryMap = useInjuryMap();
   const router = useRouter();
 
   // Persistent prefs were causing top scorers to vanish for some users.
@@ -330,7 +332,19 @@ export default function PlayersPage() {
                         <PlayerHoverCard slug={p.slug}>
                           <Link href={`/players/${p.slug}`} className="flex items-center gap-3 group/name">
                             <PlayerAvatar playerId={p.id} fullName={p.fullName} size="sm" />
-                            <span className="font-semibold text-[#F5F5F7] group-hover:text-[#D4B560] tracking-tight transition-colors">{p.fullName}</span>
+                            <div className="min-w-0">
+                              <span className="font-semibold text-[#F5F5F7] group-hover/name:text-[#D4B560] tracking-tight transition-colors">{p.fullName}</span>
+                              {(() => {
+                                const status = injuryMap[p.fullName.toLowerCase()];
+                                if (!status || status === "Probable" || status === "Available") return null;
+                                const color = status === "Out" || status === "Doubtful" ? "#F87171" : "#F59E0B";
+                                return (
+                                  <span className="block text-[9px] font-bold uppercase tracking-wider mt-0.5" style={{ color }}>
+                                    {status}
+                                  </span>
+                                );
+                              })()}
+                            </div>
                           </Link>
                         </PlayerHoverCard>
                       </td>

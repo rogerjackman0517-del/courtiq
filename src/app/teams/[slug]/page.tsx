@@ -8,7 +8,8 @@ import { cn } from "@/lib/utils";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { PlayerAvatar } from "@/components/players/PlayerAvatar";
 import { PlayerCard } from "@/components/players/PlayerCard";
-import { ArrowLeft, ArrowUpRight } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Star } from "lucide-react";
+import { useFavoriteTeam } from "@/lib/useFavoriteTeam";
 
 function PlayerGallery({ players, color }: { players: Array<{ id: number; fullName: string; slug: string; pts: number; reb: number; ast: number }>; color: string }) {
   const [active, setActive] = useState(0);
@@ -98,6 +99,7 @@ type PlayerRow = {
 export default function TeamProfilePage() {
   const params = useParams<{ slug: string }>();
   const slug = params?.slug ?? "";
+  const { team: favoriteAbbr, setTeam: setFavorite } = useFavoriteTeam();
 
   const [teams, setTeams] = useState<TeamRow[]>([]);
   const [players, setPlayers] = useState<PlayerRow[]>([]);
@@ -249,10 +251,29 @@ export default function TeamProfilePage() {
         />
         <div className="relative max-w-6xl mx-auto">
 
-          {/* Back link */}
-          <Link href="/teams" className="inline-flex items-center gap-1.5 text-xs font-medium text-[#6E6E76] hover:text-[#F5F5F7] mb-8 tracking-wide transition-colors">
-            <ArrowLeft size={12} /> All Teams
-          </Link>
+          {/* Back link + favorite */}
+          <div className="flex items-center justify-between mb-8">
+            <Link href="/teams" className="inline-flex items-center gap-1.5 text-xs font-medium text-[#6E6E76] hover:text-[#F5F5F7] tracking-wide transition-colors">
+              <ArrowLeft size={12} /> All Teams
+            </Link>
+            <button
+              type="button"
+              onClick={() => setFavorite(favoriteAbbr === team.abbreviation ? "" : team.abbreviation)}
+              className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors"
+              style={
+                favoriteAbbr === team.abbreviation
+                  ? { color, borderColor: `${color}60`, background: `${color}15` }
+                  : { color: "#6E6E76", borderColor: "rgba(255,255,255,0.08)", background: "transparent" }
+              }
+              title={favoriteAbbr === team.abbreviation ? "Remove from My Team" : "Set as My Team"}
+            >
+              <Star
+                size={12}
+                fill={favoriteAbbr === team.abbreviation ? "currentColor" : "none"}
+              />
+              {favoriteAbbr === team.abbreviation ? "My Team" : "Follow"}
+            </button>
+          </div>
 
           {/* Eyebrow */}
           <div className="flex flex-wrap items-center gap-3 mb-6">

@@ -2,11 +2,12 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Share2 } from "lucide-react";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { PlayerAvatar } from "@/components/players/PlayerAvatar";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Confetti } from "@/components/ui/Confetti";
+import { useCopyToClipboard } from "@/components/ui/Toast";
 
 type Team = {
   teamId: number;
@@ -59,6 +60,7 @@ export default function BoxscorePage({
   const [error, setError] = useState<string | null>(null);
   const [activeTeam, setActiveTeam] = useState<"away" | "home">("away");
   const [playerSlugByName, setPlayerSlugByName] = useState<Record<string, string>>({});
+  const copy = useCopyToClipboard();
 
   useEffect(() => {
     fetch(`/api/games/${gameId}/boxscore`)
@@ -129,26 +131,36 @@ export default function BoxscorePage({
         </Link>
 
         {/* Status eyebrow */}
-        <div className="flex items-center gap-3 mb-6">
-          <span
-            className={`text-xs font-bold tracking-[0.2em] uppercase ${
-              data.status.state === "post"
-                ? "text-[#8A8A93]"
-                : data.status.state === "in"
-                ? "text-[#34D399]"
-                : "text-[#D4B560]"
-            }`}
+        <div className="flex items-center justify-between gap-3 mb-6">
+          <div className="flex items-center gap-3 flex-wrap">
+            <span
+              className={`text-xs font-bold tracking-[0.2em] uppercase ${
+                data.status.state === "post"
+                  ? "text-[#8A8A93]"
+                  : data.status.state === "in"
+                  ? "text-[#34D399]"
+                  : "text-[#D4B560]"
+              }`}
+            >
+              {data.status.text}
+            </span>
+            {data.seriesText && (
+              <>
+                <span className="text-[#3F3F46]">·</span>
+                <span className="text-xs text-[#8A8A93]">{data.seriesText}</span>
+              </>
+            )}
+            <span className="text-[#3F3F46]">·</span>
+            <span className="text-xs text-[#8A8A93]">{dateStr}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => copy(window.location.href, "Game link copied")}
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-[#6E6E76] hover:text-[#F5F5F7] tracking-wide transition-colors ripple px-2 py-1 rounded-md shrink-0"
+            aria-label="Copy link to this game"
           >
-            {data.status.text}
-          </span>
-          {data.seriesText && (
-            <>
-              <span className="text-[#3F3F46]">·</span>
-              <span className="text-xs text-[#8A8A93]">{data.seriesText}</span>
-            </>
-          )}
-          <span className="text-[#3F3F46]">·</span>
-          <span className="text-xs text-[#8A8A93]">{dateStr}</span>
+            <Share2 size={12} /> Share
+          </button>
         </div>
 
         {/* Matchup card */}

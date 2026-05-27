@@ -10,6 +10,7 @@ import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 import { Sparkline } from "@/components/players/Sparkline";
 import { cn } from "@/lib/utils";
+import { useFavoriteTeam } from "@/lib/useFavoriteTeam";
 
 type PlayerRow = {
   id: number; fullName: string; slug: string; teamAbbr: string; teamId?: number;
@@ -42,6 +43,7 @@ export default function HomePage() {
   const [games, setGames] = useState<LiveGame[]>([]);
   const [gamesLoaded, setGamesLoaded] = useState(false);
   const [news, setNews] = useState<NewsItem[]>([]);
+  const { team: favoriteTeam } = useFavoriteTeam();
 
   useEffect(() => {
     fetch("/api/players/with-stats").then(r => r.ok ? r.json() : []).then(d => Array.isArray(d) && setPlayers(d)).catch(() => {});
@@ -187,15 +189,21 @@ export default function HomePage() {
     return sorted[0];
   }, [yesterdayGames]);
 
-  // Featured game: live > final > upcoming
+  // Featured game: favorite team's live > any live > favorite team's final > any final > favorite's upcoming > first
   const featuredGame = useMemo(() => {
     if (games.length === 0) return null;
+    const isFav = (g: LiveGame) =>
+      favoriteTeam &&
+      (g.homeTeam.teamTricode === favoriteTeam || g.awayTeam.teamTricode === favoriteTeam);
     return (
+      games.find(g => isFav(g) && g.gameStatus === 2) ||
       games.find(g => g.gameStatus === 2) ||
+      games.find(g => isFav(g) && g.gameStatus === 3) ||
       games.find(g => g.gameStatus === 3) ||
+      games.find(g => isFav(g)) ||
       games[0]
     );
-  }, [games]);
+  }, [games, favoriteTeam]);
 
   const teamLookup = useMemo(() => {
     const map: Record<string, { color: string; id?: number }> = {};
@@ -267,7 +275,7 @@ export default function HomePage() {
                         </span>
                       </div>
                       <span className="text-[10px] font-medium tracking-wider uppercase text-[#8A8A93]">
-                        Featured matchup
+                        {favoriteTeam && (g.homeTeam.teamTricode === favoriteTeam || g.awayTeam.teamTricode === favoriteTeam) ? "Your team" : "Featured matchup"}
                       </span>
                     </div>
 
