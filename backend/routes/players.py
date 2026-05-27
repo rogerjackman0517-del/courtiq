@@ -57,8 +57,8 @@ async def get_players_with_stats(season: str = Query(CURRENT_SEASON)):
     Sorted by PPG so injured/limited players still appear (Tatum, Embiid, etc.)."""
     dash = leaguedashplayerstats.LeagueDashPlayerStats(
         season=season,
-        per_mode_simple="PerGame",
-        measure_type_simple="Base",
+        per_mode_detailed="PerGame",
+        measure_type_detailed_defense="Base",
         headers=NBA_HEADERS,
         timeout=30,
     )
