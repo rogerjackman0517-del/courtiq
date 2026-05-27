@@ -11,12 +11,12 @@ type Props = {
   className?: string;
   /** Stable key to remember the last shown value across remounts in the same session. */
   cacheKey?: string;
+  /** Only start counting once the element scrolls into view. */
+  startOnView?: boolean;
 };
 
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
-// In-memory session cache so navigating back to a page doesn't re-animate
-// values from 0 every time. Keyed by the optional cacheKey prop.
 const SESSION_CACHE = new Map<string, number>();
 
 export function AnimatedNumber({
@@ -27,15 +27,30 @@ export function AnimatedNumber({
   suffix = "",
   className,
   cacheKey,
+  startOnView = false,
 }: Props) {
-  // If we've already animated this value in this session, start from it.
   const cached = cacheKey ? SESSION_CACHE.get(cacheKey) : undefined;
   const [display, setDisplay] = useState(cached ?? 0);
+  const [visible, setVisible] = useState(!startOnView);
   const startRef = useRef<number | null>(null);
   const fromRef = useRef(cached ?? 0);
+  const spanRef = useRef<HTMLSpanElement>(null);
+
+  // IntersectionObserver — only used when startOnView is true
+  useEffect(() => {
+    if (!startOnView) return;
+    const el = spanRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); obs.disconnect(); } },
+      { threshold: 0.2 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [startOnView]);
 
   useEffect(() => {
-    // Fast-path: same cached value, skip animation entirely.
+    if (!visible) return;
     if (cacheKey && SESSION_CACHE.get(cacheKey) === value) {
       setDisplay(value);
       return;
@@ -57,10 +72,10 @@ export function AnimatedNumber({
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, duration]);
+  }, [value, duration, visible]);
 
   return (
-    <span className={className}>
+    <span ref={spanRef} className={className}>
       {prefix}
       {display.toFixed(decimals)}
       {suffix}

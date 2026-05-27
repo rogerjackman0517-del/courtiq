@@ -513,35 +513,50 @@ export default function ComparePage() {
                   </div>
                 </div>
 
-                {/* Stat rows */}
+                {/* Stat rows with visual bars */}
                 <div className="floating-card no-jiggle rounded-3xl overflow-hidden">
                   {STAT_ROWS.map((row) => {
                     const aVal = playerA[row.key] as number;
                     const bVal = playerB[row.key] as number;
                     const aWins = row.higherIsBetter ? aVal > bVal : aVal < bVal;
                     const bWins = row.higherIsBetter ? bVal > aVal : bVal < aVal;
+                    // Bar widths: split 50/50, then shift toward winner
+                    const total = aVal + bVal;
+                    const aPct = total === 0 ? 50 : Math.round((aVal / total) * 100);
+                    const bPct = 100 - aPct;
                     return (
                       <div
                         key={row.key}
-                        className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 lg:gap-6 px-4 lg:px-8 py-4 border-b border-white/[0.04] last:border-0"
+                        className="px-4 lg:px-8 py-4 border-b border-white/[0.04] last:border-0"
                       >
-                        <p
-                          className={`text-right text-xl lg:text-2xl font-[family-name:var(--font-barlow)] font-bold tabular-nums ${
-                            aWins ? "text-[#D4B560]" : "text-[#8A8A93]"
-                          }`}
-                        >
-                          {row.fmt(aVal)}
-                        </p>
-                        <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#6E6E76] min-w-[70px] text-center">
-                          {row.label}
-                        </p>
-                        <p
-                          className={`text-left text-xl lg:text-2xl font-[family-name:var(--font-barlow)] font-bold tabular-nums ${
-                            bWins ? "text-[#5B8DEF]" : "text-[#8A8A93]"
-                          }`}
-                        >
-                          {row.fmt(bVal)}
-                        </p>
+                        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 lg:gap-6 mb-2.5">
+                          <p className={`text-right text-xl lg:text-2xl font-[family-name:var(--font-barlow)] font-bold tabular-nums ${aWins ? "text-[#D4B560]" : "text-[#8A8A93]"}`}>
+                            {row.fmt(aVal)}
+                          </p>
+                          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#6E6E76] min-w-[70px] text-center">
+                            {row.label}
+                          </p>
+                          <p className={`text-left text-xl lg:text-2xl font-[family-name:var(--font-barlow)] font-bold tabular-nums ${bWins ? "text-[#5B8DEF]" : "text-[#8A8A93]"}`}>
+                            {row.fmt(bVal)}
+                          </p>
+                        </div>
+                        {/* Visual bar */}
+                        <div className="flex h-1 rounded-full overflow-hidden gap-px">
+                          <div
+                            className="rounded-l-full transition-all duration-700"
+                            style={{
+                              width: `${aPct}%`,
+                              background: aWins ? "#D4B560" : "rgba(212,181,96,0.2)",
+                            }}
+                          />
+                          <div
+                            className="rounded-r-full transition-all duration-700"
+                            style={{
+                              width: `${bPct}%`,
+                              background: bWins ? "#5B8DEF" : "rgba(91,141,239,0.2)",
+                            }}
+                          />
+                        </div>
                       </div>
                     );
                   })}

@@ -33,6 +33,12 @@ NBA_HEADERS = {
 # Build a lookup: team_id -> abbreviation
 _TEAM_BY_ID = {t["id"]: t["abbreviation"] for t in nba_teams.get_teams()}
 
+# Build a lookup: player_id -> position from the bundled static data (no API call)
+_POSITION_BY_ID: dict = {
+    p["id"]: (p.get("position") or "—")
+    for p in nba_players.get_players()
+}
+
 
 @router.get("")
 @cached(ttl=settings.cache_ttl_stats, key_fn=lambda season="2025-26": f"players:all:{season}")
@@ -89,7 +95,7 @@ async def get_players_with_stats(season: str = Query(CURRENT_SEASON)):
             "slug": _slugify(name),
             "teamId": team_id,
             "teamAbbr": team_abbr,
-            "position": "—",
+            "position": _POSITION_BY_ID.get(pid, "—"),
             "pts": float(r.get("PTS") or 0),
             "reb": float(r.get("REB") or 0),
             "ast": float(r.get("AST") or 0),

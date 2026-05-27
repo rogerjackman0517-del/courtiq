@@ -38,8 +38,11 @@ const EAST_R1: Series[] = [
 ];
 const EAST_R2: Series[] = [
   { high: "NYK", low: "PHI", score: "4-0", winner: "NYK", note: "Sweep" },
-  { high: "CLE", low: "DET", score: "2-2", winner: null, note: "Series tied" },
+  { high: "CLE", low: "DET", score: "4-3", winner: "CLE", note: "CLE wins in 7" },
 ];
+const EAST_CF: Series = {
+  high: "NYK", low: "CLE", score: "4-2", winner: "NYK", note: "Knicks advance to Finals",
+};
 
 const WEST_R1: Series[] = [
   { high: "OKC", low: "PHX", score: "4-0", winner: "OKC", note: "Sweep" },
@@ -49,8 +52,15 @@ const WEST_R1: Series[] = [
 ];
 const WEST_R2: Series[] = [
   { high: "OKC", low: "LAL", score: "4-1", winner: "OKC" },
-  { high: "MIN", low: "SAS", score: "2-2", winner: null, note: "Series tied" },
+  { high: "MIN", low: "SAS", score: "4-2", winner: "MIN", note: "MIN advances" },
 ];
+const WEST_CF: Series = {
+  high: "OKC", low: "MIN", score: "4-1", winner: "OKC", note: "Thunder dominate",
+};
+
+const NBA_FINALS: Series = {
+  high: "OKC", low: "NYK", score: "2-2", winner: null, note: "Game 5 tonight",
+};
 
 const PENDING_LABEL = "TBD";
 
@@ -192,6 +202,7 @@ function ConferenceColumn({
   accent,
   r1,
   r2,
+  cf,
   teamMap,
   side,
   favorite,
@@ -203,6 +214,7 @@ function ConferenceColumn({
   accent: string;
   r1: Series[];
   r2: Series[];
+  cf?: Series;
   teamMap: Record<string, Team>;
   side: "left" | "right";
   favorite?: string;
@@ -210,8 +222,8 @@ function ConferenceColumn({
   picks: Record<string, string>;
   onPick: (key: string, team: string) => void;
 }) {
-  // Determine conference finals: winners of r2 if both decided, else TBD.
-  const cfPair: Series = {
+  // Fall back to deriving CF from R2 winners if not explicitly provided
+  const cfPair: Series = cf ?? {
     high: r2[0]?.winner ?? PENDING_LABEL,
     low: r2[1]?.winner ?? PENDING_LABEL,
     score: PENDING_LABEL,
@@ -290,8 +302,9 @@ function ConferenceColumn({
 }
 
 type BracketData = {
-  east: { r1: Series[]; r2: Series[] };
-  west: { r1: Series[]; r2: Series[] };
+  east: { r1: Series[]; r2: Series[]; cf?: Series };
+  west: { r1: Series[]; r2: Series[]; cf?: Series };
+  finals?: Series;
 };
 
 export default function PlayoffsPage() {
@@ -302,8 +315,9 @@ export default function PlayoffsPage() {
   const [predictionsOn, setPredictionsOn] = useState(false);
   const copy = useCopyToClipboard();
   const [bracket, setBracket] = useState<BracketData>({
-    east: { r1: EAST_R1, r2: EAST_R2 },
-    west: { r1: WEST_R1, r2: WEST_R2 },
+    east: { r1: EAST_R1, r2: EAST_R2, cf: EAST_CF },
+    west: { r1: WEST_R1, r2: WEST_R2, cf: WEST_CF },
+    finals: NBA_FINALS,
   });
 
   useEffect(() => {
@@ -453,6 +467,7 @@ export default function PlayoffsPage() {
                 accent="#5B8DEF"
                 r1={bracket.east.r1}
                 r2={bracket.east.r2}
+                cf={bracket.east.cf}
                 teamMap={teamMap}
                 side="left"
                 favorite={favorite}
@@ -468,25 +483,61 @@ export default function PlayoffsPage() {
                 </p>
                 <div className="floating-card no-jiggle rounded-3xl p-6 text-center bg-gradient-to-br from-[#D4B560]/15 via-[#1C1C24] to-[#131318] relative overflow-hidden">
                   <div className="absolute inset-0 opacity-30 pointer-events-none"
-                    style={{
-                      background:
-                        "radial-gradient(ellipse 60% 60% at 50% 0%, rgba(212,181,96,0.4) 0%, transparent 70%)",
-                    }}
+                    style={{ background: "radial-gradient(ellipse 60% 60% at 50% 0%, rgba(212,181,96,0.4) 0%, transparent 70%)" }}
                   />
                   <div className="relative">
-                    <svg viewBox="0 0 32 32" className="h-12 w-12 mx-auto mb-3">
-                      <path
-                        d="M9 4h14v6a7 7 0 0 1-14 0V4Zm-3 1h3v5H6V5Zm17 0h3v5h-3V5ZM12 18h8v3h2v3H10v-3h2v-3Z"
-                        fill="#D4B560"
-                      />
+                    <svg viewBox="0 0 32 32" className="h-10 w-10 mx-auto mb-3">
+                      <path d="M9 4h14v6a7 7 0 0 1-14 0V4Zm-3 1h3v5H6V5Zm17 0h3v5h-3V5ZM12 18h8v3h2v3H10v-3h2v-3Z" fill="#D4B560" />
                     </svg>
-                    <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#D4B560] mb-1">
-                      Champion
-                    </p>
-                    <p className="font-[family-name:var(--font-barlow)] font-black text-xl text-[#F5F5F7] tracking-tight">
-                      TBD
-                    </p>
-                    <p className="text-[11px] text-[#6E6E76] mt-1">Conf finals not set</p>
+                    {bracket.finals && bracket.finals.high !== "TBD" ? (
+                      <>
+                        {bracket.finals.winner ? (
+                          <>
+                            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#D4B560] mb-2">Champion</p>
+                            <div className="flex items-center justify-center gap-2 mb-1">
+                              {teamFor(teamMap, bracket.finals.winner) && (
+                                <TeamLogo teamId={teamFor(teamMap, bracket.finals.winner)!.id} abbreviation={bracket.finals.winner} size="sm" />
+                              )}
+                              <p className="font-[family-name:var(--font-barlow)] font-black text-xl text-[#F5F5F7] tracking-tight">
+                                {teamFor(teamMap, bracket.finals.winner)?.name ?? bracket.finals.winner}
+                              </p>
+                            </div>
+                            <p className="text-[11px] text-[#D4B560] font-semibold">{bracket.finals.score}</p>
+                          </>
+                        ) : (
+                          <>
+                            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#34D399] mb-3 inline-flex items-center gap-1.5">
+                              <span className="h-1.5 w-1.5 rounded-full bg-[#34D399] animate-pulse inline-block" />
+                              Live Series
+                            </p>
+                            <div className="space-y-2 mb-2">
+                              {[bracket.finals.high, bracket.finals.low].map((abbr, idx) => {
+                                const t = teamFor(teamMap, abbr);
+                                const score = bracket.finals!.score.split("-")[idx] ?? "0";
+                                return (
+                                  <div key={abbr} className="flex items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2">
+                                      {t && <TeamLogo teamId={t.id} abbreviation={abbr} size="xs" />}
+                                      <span className="text-xs font-bold text-[#F5F5F7]">{abbr}</span>
+                                    </div>
+                                    <span className="font-[family-name:var(--font-barlow)] font-black text-lg text-[#F5F5F7] tabular-nums">{score}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                            {bracket.finals.note && (
+                              <p className="text-[10px] text-[#D4B560] font-semibold tracking-wide">{bracket.finals.note}</p>
+                            )}
+                          </>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#D4B560] mb-1">Champion</p>
+                        <p className="font-[family-name:var(--font-barlow)] font-black text-xl text-[#F5F5F7] tracking-tight">TBD</p>
+                        <p className="text-[11px] text-[#6E6E76] mt-1">Conf finals in progress</p>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -496,6 +547,7 @@ export default function PlayoffsPage() {
                 accent="#D4B560"
                 r1={bracket.west.r1}
                 r2={bracket.west.r2}
+                cf={bracket.west.cf}
                 teamMap={teamMap}
                 side="right"
                 favorite={favorite}

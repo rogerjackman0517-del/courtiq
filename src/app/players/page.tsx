@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { AnimatedHeading } from "@/components/ui/AnimatedHeading";
 import { useSearchHotkey } from "@/components/ui/Toast";
 import { useInjuryMap } from "@/lib/useInjuryMap";
+import { TEAM_COLORS } from "@/lib/teamColors";
 
 type SortKey = "name" | "pts" | "reb" | "ast" | "fgPct" | "fg3Pct" | "ftPct" | "min";
 type SortDir = "asc" | "desc";
@@ -307,8 +308,8 @@ export default function PlayersPage() {
                   {rows.map((p, i) => (
                     <tr
                       key={p.id}
-                      className="stat-row row-reveal border-b border-white/[0.03] last:border-b-0 group hover:bg-white/[0.02]"
-                      style={{ animationDelay: `${Math.min(i, 20) * 20}ms` }}
+                      className="stat-row row-reveal border-b border-white/[0.03] last:border-b-0 group"
+                      style={{ animationDelay: `${Math.min(i, 20) * 20}ms`, ["--stat-row-color" as string]: TEAM_COLORS[p.teamAbbr] ?? "#D4B560" }}
                     >
                       <td className="px-5 py-3.5 text-[#6E6E76] text-xs tabular-nums">
                         <div className="flex items-center gap-2">

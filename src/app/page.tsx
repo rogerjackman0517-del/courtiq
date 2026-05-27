@@ -191,15 +191,19 @@ export default function HomePage() {
     return sorted[0];
   }, [yesterdayGames]);
 
-  // Featured game: favorite team's live > any live > favorite team's final > any final > favorite's upcoming > first
+  // Featured game: Finals live > fav live > any live > Finals final > fav final > any final > fav upcoming > first
   const featuredGame = useMemo(() => {
     if (games.length === 0) return null;
     const isFav = (g: LiveGame) =>
       favoriteTeam &&
       (g.homeTeam.teamTricode === favoriteTeam || g.awayTeam.teamTricode === favoriteTeam);
+    const isFinalsGame = (g: LiveGame) =>
+      g.gameLabel?.toLowerCase().includes("finals") || g.seriesText?.toLowerCase().includes("finals");
     return (
+      games.find(g => isFinalsGame(g) && g.gameStatus === 2) ||
       games.find(g => isFav(g) && g.gameStatus === 2) ||
       games.find(g => g.gameStatus === 2) ||
+      games.find(g => isFinalsGame(g) && g.gameStatus === 3) ||
       games.find(g => isFav(g) && g.gameStatus === 3) ||
       games.find(g => g.gameStatus === 3) ||
       games.find(g => isFav(g)) ||
@@ -233,6 +237,11 @@ export default function HomePage() {
               const awayWin = g.awayTeam.score > g.homeTeam.score;
               const homeWin = g.homeTeam.score > g.awayTeam.score;
               const statusLabel = isLive ? g.gameStatusText : isFinal ? "Final" : g.gameStatusText;
+              const isFinalsGame = g.gameLabel?.toLowerCase().includes("finals") || g.seriesText?.toLowerCase().includes("finals");
+              // Parse series record from seriesText e.g. "OKC leads 3-2" or "Series tied 2-2"
+              const seriesMatch = g.seriesText?.match(/(\d)-(\d)/);
+              const awayWins = seriesMatch ? parseInt(seriesMatch[1]) : 0;
+              const homeWins = seriesMatch ? parseInt(seriesMatch[2]) : 0;
               return (
                 <Link
                   href={isLive || isFinal ? `/scores/${g.gameId}` : "/scores"}
@@ -353,12 +362,35 @@ export default function HomePage() {
                       </div>
                     </div>
 
-                    {/* Footer line */}
-                    {g.seriesText && (
+                    {/* Footer: Finals series tracker or series text */}
+                    {isFinalsGame && seriesMatch ? (
+                      <div className="mt-4 lg:mt-6 flex flex-col items-center gap-2">
+                        <div className="flex items-center gap-1.5">
+                          {Array.from({ length: 4 }).map((_, i) => (
+                            <span
+                              key={`away-${i}`}
+                              className="h-2 w-2 rounded-full transition-all"
+                              style={{ background: i < awayWins ? awayColor : "rgba(255,255,255,0.12)" }}
+                            />
+                          ))}
+                          <span className="mx-2 text-[10px] font-bold tracking-[0.2em] uppercase text-[#D4B560]">
+                            {g.gameLabel || "NBA Finals"}
+                          </span>
+                          {Array.from({ length: 4 }).map((_, i) => (
+                            <span
+                              key={`home-${i}`}
+                              className="h-2 w-2 rounded-full transition-all"
+                              style={{ background: i < homeWins ? homeColor : "rgba(255,255,255,0.12)" }}
+                            />
+                          ))}
+                        </div>
+                        <p className="text-[11px] text-[#8A8A93] tracking-wider">{g.seriesText}</p>
+                      </div>
+                    ) : g.seriesText ? (
                       <p className="text-center mt-4 lg:mt-6 text-[11px] tracking-wider text-[#8A8A93]">
                         {g.seriesText}
                       </p>
-                    )}
+                    ) : null}
                   </div>
                 </Link>
               );

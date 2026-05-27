@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { GameCardSkeleton } from "@/components/ui/Skeleton";
@@ -9,6 +9,7 @@ import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import { LiveClock } from "@/components/ui/LiveClock";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { TEAM_COLORS } from "@/lib/teamColors";
 
 type GameTeam = {
   teamId: number;
@@ -58,12 +59,30 @@ function GameCard({ game, pulseAway, pulseHome }: { game: LiveGame; pulseAway?: 
   const status = statusBucket(game);
   const awayWinning = game.awayTeam.score > game.homeTeam.score;
   const homeWinning = game.homeTeam.score > game.awayTeam.score;
+  const awayColor = TEAM_COLORS[game.awayTeam.teamTricode] ?? "#8A8A93";
+  const homeColor = TEAM_COLORS[game.homeTeam.teamTricode] ?? "#8A8A93";
+  const isFinalsGame = game.gameLabel?.toLowerCase().includes("finals") || game.seriesText?.toLowerCase().includes("finals");
 
   return (
     <Link
       href={`/scores/${game.gameId}`}
-      className="floating-card no-jiggle group block rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6 transition-all duration-500 hover:scale-[1.01]"
+      className="floating-card no-jiggle group block rounded-3xl overflow-hidden transition-all duration-500 hover:scale-[1.01] relative"
+      style={{
+        background: `linear-gradient(135deg, color-mix(in srgb, ${awayColor} 8%, #1C1C24) 0%, #131318 50%, color-mix(in srgb, ${homeColor} 8%, #131318) 100%)`,
+      }}
     >
+      {/* Top color strip — away left, home right */}
+      <div
+        className="absolute top-0 left-0 right-0 h-[2px] opacity-70"
+        style={{ background: `linear-gradient(90deg, ${awayColor}, ${homeColor})` }}
+      />
+      {/* Finals glow */}
+      {isFinalsGame && (
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: "radial-gradient(ellipse 80% 40% at 50% 0%, rgba(212,181,96,0.08) 0%, transparent 70%)",
+        }} />
+      )}
+      <div className="p-6">
       {/* Status header */}
       <div className="flex items-center justify-between mb-6">
         {status === "live" ? (
@@ -107,7 +126,7 @@ function GameCard({ game, pulseAway, pulseHome }: { game: LiveGame; pulseAway?: 
             </div>
           </div>
           <span className={cn(
-            "font-[family-name:var(--font-barlow)] font-black text-4xl tabular-nums tracking-[-0.04em] ml-4",
+            "font-[family-name:var(--font-barlow)] font-black text-5xl tabular-nums tracking-[-0.04em] ml-4",
             status === "scheduled" ? "text-[#3A3A42]" :
             awayWinning ? "text-[#F5F5F7]" : "text-[#6E6E76]",
             pulseAway && "score-pulse"
@@ -135,7 +154,7 @@ function GameCard({ game, pulseAway, pulseHome }: { game: LiveGame; pulseAway?: 
             </div>
           </div>
           <span className={cn(
-            "font-[family-name:var(--font-barlow)] font-black text-4xl tabular-nums tracking-[-0.04em] ml-4",
+            "font-[family-name:var(--font-barlow)] font-black text-5xl tabular-nums tracking-[-0.04em] ml-4",
             status === "scheduled" ? "text-[#3A3A42]" :
             homeWinning ? "text-[#F5F5F7]" : "text-[#6E6E76]",
             pulseHome && "score-pulse"
@@ -170,6 +189,7 @@ function GameCard({ game, pulseAway, pulseHome }: { game: LiveGame; pulseAway?: 
           {game.gameLabel}
         </div>
       )}
+      </div>{/* /p-6 */}
     </Link>
   );
 }
@@ -184,6 +204,8 @@ export default function ScoresPage() {
   const [error, setError] = useState<string | null>(null);
   const [pulses, setPulses] = useState<Record<string, number>>({});
   const prevScoresRef = useRef<Record<string, { home: number; away: number }>>({});
+  const tabContainerRef = useRef<HTMLDivElement>(null);
+  const [pillStyle, setPillStyle] = useState({ left: 4, width: 60 });
 
   useEffect(() => {
     let cancelled = false;
@@ -266,6 +288,17 @@ export default function ScoresPage() {
   });
 
   const liveCount = games.filter(g => statusBucket(g) === "live").length;
+
+  // Measure active tab button for sliding pill
+  useLayoutEffect(() => {
+    const container = tabContainerRef.current;
+    if (!container) return;
+    const btn = container.querySelector<HTMLElement>(`[data-tab="${tab}"]`);
+    if (!btn) return;
+    const containerRect = container.getBoundingClientRect();
+    const btnRect = btn.getBoundingClientRect();
+    setPillStyle({ left: btnRect.left - containerRect.left, width: btnRect.width });
+  }, [tab]);
   const dateStr = gameDate ? new Date(gameDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }) : "";
 
   return (
@@ -325,14 +358,23 @@ export default function ScoresPage() {
             )}
           </div>
 
-          <div className="inline-flex items-center gap-1 bg-[#1C1C24] border border-white/[0.05] rounded-full p-1 mb-10">
+          <div
+            ref={tabContainerRef}
+            className="relative inline-flex items-center bg-[#1C1C24] border border-white/[0.05] rounded-full p-1 mb-10"
+          >
+            {/* Sliding pill */}
+            <div
+              className="absolute top-1 bottom-1 rounded-full bg-[#F5F5F7] transition-all duration-300 pointer-events-none"
+              style={{ left: pillStyle.left, width: pillStyle.width }}
+            />
             {TABS.map(t => (
               <button
                 key={t}
+                data-tab={t}
                 onClick={() => setTab(t)}
                 className={cn(
-                  "px-5 py-2 rounded-full text-xs font-semibold tracking-tight transition-all duration-300",
-                  tab === t ? "bg-[#F5F5F7] text-[#0A0A0E]" : "text-[#8A8A93] hover:text-[#F5F5F7]"
+                  "relative z-10 px-5 py-2 rounded-full text-xs font-semibold tracking-tight transition-colors duration-200",
+                  tab === t ? "text-[#0A0A0E]" : "text-[#8A8A93] hover:text-[#F5F5F7]"
                 )}
               >
                 {t}
