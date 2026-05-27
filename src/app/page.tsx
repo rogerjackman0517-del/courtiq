@@ -491,7 +491,7 @@ export default function HomePage() {
           <div className="max-w-6xl mx-auto">
             <div className="flex items-end justify-between mb-10">
               <div>
-                <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-2">
+                <p className="section-label text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-2">
                   Today · {games.length} game{games.length !== 1 ? "s" : ""}
                 </p>
                 <h2 className="font-[family-name:var(--font-barlow)] font-black text-4xl lg:text-5xl tracking-[-0.03em] text-[#F5F5F7]">
@@ -607,7 +607,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto">
           <div className="flex items-end justify-between mb-10">
             <div>
-              <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-2">
+              <p className="section-label text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-2">
                 League Pulse
               </p>
               <h2 className="font-[family-name:var(--font-barlow)] font-black text-4xl lg:text-5xl tracking-[-0.03em] text-[#F5F5F7]">
@@ -616,7 +616,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="stagger-children grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {players.length === 0 && Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={"pulse-skel-" + i} />)}
             {ptsLeader && (
               <Link href={`/players/${ptsLeader.slug}`} className="floating-card gradient-border gold-sweep group block rounded-3xl p-6 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-[#D4B560]/10">

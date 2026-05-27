@@ -69,6 +69,48 @@ body {
   letter-spacing: -0.011em;
 }
 
+/* Section eyebrow labels — gold left-bar anchor */
+.section-label {
+  position: relative;
+  padding-left: 10px;
+}
+.section-label::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.5px;
+  height: 11px;
+  background: linear-gradient(to bottom, #E8C770, #B89548);
+  border-radius: 999px;
+}
+
+/* Staggered card grid entrance */
+@keyframes staggerReveal {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)   scale(1);    }
+}
+.stagger-children > * {
+  animation: staggerReveal 500ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 70ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 140ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 210ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 280ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 350ms; }
+
+/* Spotlight-style search dropdown entrance */
+@keyframes spotlightIn {
+  from { opacity: 0; transform: scale(0.97) translateY(-6px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0);    }
+}
+.search-dropdown {
+  animation: spotlightIn 160ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: top center;
+}
+
 /* Film-grain noise overlay — adds tactile depth to the dark background */
 body::after {
   content: "";

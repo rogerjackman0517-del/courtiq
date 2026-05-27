@@ -183,9 +183,9 @@ export function TopNav() {
       <div ref={containerRef} className="relative flex-1 max-w-md mx-auto lg:mx-0">
         <div
           className={cn(
-            "flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-colors cursor-text",
+            "flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-200 cursor-text",
             searchOpen
-              ? "border-[#4B7BE8] bg-[#1A1A24]"
+              ? "border-[#D4B560]/35 bg-[#14141C] shadow-[0_0_0_3px_rgba(212,181,96,0.07)]"
               : "border-white/[0.06] bg-[#111118] hover:border-white/[0.12]"
           )}
           onClick={() => { setSearchOpen(true); inputRef.current?.focus(); }}
@@ -215,7 +215,7 @@ export function TopNav() {
 
         {/* Dropdown */}
         {searchOpen && query.trim() && (
-          <div className="absolute left-0 right-0 top-[calc(100%+4px)] rounded-lg border border-white/[0.08] bg-[#111118] shadow-xl shadow-black/50 overflow-hidden max-h-[400px] overflow-y-auto">
+          <div className="search-dropdown absolute left-0 right-0 top-[calc(100%+6px)] rounded-2xl border border-[#D4B560]/15 bg-[#0D0D14]/92 backdrop-blur-2xl shadow-2xl shadow-black/70 overflow-hidden max-h-[400px] overflow-y-auto">
             {allHits.length === 0 ? (
               <div className="px-4 py-6 text-center text-xs text-[#888899]">No results for &ldquo;{query}&rdquo;</div>
             ) : (
@@ -283,7 +283,7 @@ export function TopNav() {
 
         <Link href="/news" aria-label="News" className="relative p-2 text-[#888899] hover:text-[#F0F0F0] hover:bg-white/[0.04] rounded-lg transition-colors">
           <Bell size={16} />
-          <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-[#C8A84B]"></span>
+          <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-[#D4B560]"></span>
         </Link>
 
         {isSignedIn ? (
@@ -296,7 +296,7 @@ export function TopNav() {
             </Link>
             <UserButton
               appearance={{
-                variables: { colorPrimary: "#C8A84B" },
+                variables: { colorPrimary: "#D4B560" },
                 elements: { avatarBox: "h-8 w-8" },
               }}
             />
@@ -304,7 +304,7 @@ export function TopNav() {
         ) : (
           <Link
             href="/login"
-            className="flex items-center gap-1.5 text-xs font-semibold bg-[#C8A84B] text-black px-3 py-1.5 rounded-lg hover:bg-[#D4B55F] transition-colors"
+            className="flex items-center gap-1.5 text-xs font-semibold bg-[#D4B560] text-black px-3 py-1.5 rounded-lg hover:bg-[#D4B55F] transition-colors"
           >
             <Zap size={12} />
             Get Pro
