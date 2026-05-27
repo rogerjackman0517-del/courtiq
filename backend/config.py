@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     cron_secret: str = ""
     allowed_origins: str = "http://localhost:3000,http://localhost:3001"
     cache_ttl_live: int = 30
-    cache_ttl_stats: int = 3600
+    cache_ttl_stats: int = 21600   # 6 hours — stale-but-valid beats errors when NBA.com blocks Railway
     cache_ttl_roster: int = 86400
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")

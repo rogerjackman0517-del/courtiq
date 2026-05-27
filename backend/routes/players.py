@@ -18,6 +18,18 @@ router = APIRouter(prefix="/players", tags=["players"])
 
 CURRENT_SEASON = "2025-26"
 
+# Browser-like headers — required to avoid NBA.com blocking Railway IPs
+NBA_HEADERS = {
+    "Accept": "application/json, text/plain, */*",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Host": "stats.nba.com",
+    "Origin": "https://www.nba.com",
+    "Referer": "https://www.nba.com/",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+    "x-nba-stats-origin": "stats",
+    "x-nba-stats-token": "true",
+}
+
 # Build a lookup: team_id -> abbreviation
 _TEAM_BY_ID = {t["id"]: t["abbreviation"] for t in nba_teams.get_teams()}
 
@@ -30,6 +42,8 @@ async def get_all_players(season: str = Query(CURRENT_SEASON)):
         is_only_current_season=1,
         league_id="00",
         season=season,
+        headers=NBA_HEADERS,
+        timeout=30,
     )
     df = endpoint.get_data_frames()[0]
     return df.to_dict(orient="records")
@@ -38,12 +52,14 @@ async def get_all_players(season: str = Query(CURRENT_SEASON)):
 @router.get("/with-stats")
 @cached(ttl=settings.cache_ttl_stats, key_fn=lambda season="2025-26": f"players:with-stats:{season}")
 async def get_players_with_stats(season: str = Query(CURRENT_SEASON)):
-    """Top ~150 players (PTS leaders) with PPG/RPG/APG/FG% for the table page."""
+    """Top 300 players (PTS leaders) with PPG/RPG/APG/FG% for the table page."""
     leaders = leagueleaders.LeagueLeaders(
         season=season,
         season_type_all_star="Regular Season",
         per_mode48="PerGame",
         stat_category_abbreviation="PTS",
+        headers=NBA_HEADERS,
+        timeout=30,
     )
     df = leaders.get_data_frames()[0]
     rows = df.to_dict(orient="records")
@@ -52,7 +68,7 @@ async def get_players_with_stats(season: str = Query(CURRENT_SEASON)):
     all_players = {p["id"]: p for p in nba_players.get_players()}
 
     out = []
-    for r in rows[:150]:
+    for r in rows[:300]:
         pid = r.get("PLAYER_ID")
         meta = all_players.get(pid, {})
         out.append({
@@ -88,7 +104,7 @@ async def get_player_info(player_id: int):
         return cached_val
 
     try:
-        info = commonplayerinfo.CommonPlayerInfo(player_id=player_id)
+        info = commonplayerinfo.CommonPlayerInfo(player_id=player_id, headers=NBA_HEADERS, timeout=30)
         frames = info.get_data_frames()
         result = {
             "info": frames[0].to_dict(orient="records")[0],
@@ -109,7 +125,7 @@ async def get_player_stats(player_id: int, season: str = Query(CURRENT_SEASON)):
         return cached_val
 
     try:
-        career = playercareerstats.PlayerCareerStats(player_id=player_id, per_mode36="PerGame")
+        career = playercareerstats.PlayerCareerStats(player_id=player_id, per_mode36="PerGame", headers=NBA_HEADERS, timeout=30)
         frames = career.get_data_frames()
         result = {
             "season": frames[0][frames[0]["SEASON_ID"] == season].to_dict(orient="records"),
@@ -135,6 +151,8 @@ async def get_player_advanced(player_id: int, season: str = Query(CURRENT_SEASON
             player_id=player_id,
             season=season,
             per_mode_simple="PerGame",
+            headers=NBA_HEADERS,
+            timeout=30,
         )
         result = dash.get_data_frames()[0].to_dict(orient="records")
         await cache_set(cache_key, result, settings.cache_ttl_stats)
@@ -158,6 +176,8 @@ async def get_player_shotchart(player_id: int, season: str = Query(CURRENT_SEASO
             season_nullable=season,
             season_type_all_star="Regular Season",
             context_measure_simple="FGA",
+            headers=NBA_HEADERS,
+            timeout=30,
         )
         frames = chart.get_data_frames()
         result = {

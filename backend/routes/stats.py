@@ -11,6 +11,17 @@ router = APIRouter(prefix="/stats", tags=["stats"])
 
 CURRENT_SEASON = "2025-26"
 
+NBA_HEADERS = {
+    "Accept": "application/json, text/plain, */*",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Host": "stats.nba.com",
+    "Origin": "https://www.nba.com",
+    "Referer": "https://www.nba.com/",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+    "x-nba-stats-origin": "stats",
+    "x-nba-stats-token": "true",
+}
+
 
 @router.get("/leaders")
 async def get_stat_leaders(
@@ -29,6 +40,8 @@ async def get_stat_leaders(
             stat_category_abbreviation=stat_category,
             per_mode48=per_mode,
             scope="S",
+            headers=NBA_HEADERS,
+            timeout=30,
         )
         result = leaders.get_data_frames()[0].to_dict(orient="records")
         await cache_set(cache_key, result, settings.cache_ttl_stats)
@@ -53,6 +66,8 @@ async def get_player_stats(
             season=season,
             per_mode_simple=per_mode,
             measure_type_simple="Base",
+            headers=NBA_HEADERS,
+            timeout=30,
         )
         df = dash.get_data_frames()[0]
         if sort_by in df.columns:
@@ -95,6 +110,8 @@ async def get_team_stats(season: str = Query(CURRENT_SEASON)):
         dash = leaguedashteamstats.LeagueDashTeamStats(
             season=season,
             per_mode_simple="PerGame",
+            headers=NBA_HEADERS,
+            timeout=30,
         )
         result = dash.get_data_frames()[0].to_dict(orient="records")
         await cache_set(cache_key, result, settings.cache_ttl_stats)
