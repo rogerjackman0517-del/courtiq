@@ -99,7 +99,7 @@ export function Sidebar() {
                     className={cn(
                       "group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
                       active
-                        ? "bg-white/[0.06] text-[#F5F5F7]"
+                        ? "bg-white/[0.06] text-[#F5F5F7] font-semibold"
                         : "text-[#8A8A93] hover:text-[#F5F5F7] hover:bg-white/[0.03]"
                     )}
                   >

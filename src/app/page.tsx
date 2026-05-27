@@ -236,7 +236,7 @@ export default function HomePage() {
               return (
                 <Link
                   href={isLive || isFinal ? `/scores/${g.gameId}` : "/scores"}
-                  className="floating-card group relative overflow-hidden rounded-3xl block"
+                  className={`floating-card group relative overflow-hidden rounded-3xl block${isLive ? " gradient-border live-ring-pulse" : ""}`}
                 >
                   {/* Team color gradient backdrop */}
                   <div
@@ -627,6 +627,7 @@ export default function HomePage() {
                 <AnimatedNumber
                   value={ptsLeader.pts}
                   decimals={1}
+                  startOnView
                   className="block stat-gradient-text font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-7xl tabular-nums tracking-[-0.04em] mb-2"
                 />
                 <p className="text-[11px] text-[#8A8A93] mb-6 tracking-wide">PPG · {ptsLeader.gp} GP</p>
@@ -644,6 +645,7 @@ export default function HomePage() {
                 <AnimatedNumber
                   value={astLeader.ast}
                   decimals={1}
+                  startOnView
                   className="block stat-gradient-text font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-7xl tabular-nums tracking-[-0.04em] mb-2"
                 />
                 <p className="text-[11px] text-[#8A8A93] mb-6 tracking-wide">APG · {astLeader.gp} GP</p>
@@ -659,9 +661,9 @@ export default function HomePage() {
                   <p className="text-[10px] font-bold tracking-widest uppercase text-[#8A8A93]">Top Record</p>
                 </div>
                 <p className="stat-gradient-text font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-7xl tabular-nums tracking-[-0.04em] mb-2">
-                  <AnimatedNumber value={bestTeam.wins} />
+                  <AnimatedNumber value={bestTeam.wins} startOnView />
                   <span style={{ WebkitTextFillColor: "#6E6E76", color: "#6E6E76" }}>–</span>
-                  <AnimatedNumber value={bestTeam.losses} />
+                  <AnimatedNumber value={bestTeam.losses} startOnView />
                 </p>
                 <p className="text-[11px] text-[#8A8A93] mb-6 tracking-wide">
                   {((bestTeam.wins / (bestTeam.wins + bestTeam.losses)) * 100).toFixed(1)}% · {bestTeam.conference}
