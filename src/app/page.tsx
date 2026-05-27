@@ -11,6 +11,8 @@ import { MagneticButton } from "@/components/ui/MagneticButton";
 import { Sparkline } from "@/components/players/Sparkline";
 import { cn } from "@/lib/utils";
 import { useFavoriteTeam } from "@/lib/useFavoriteTeam";
+import { FirstVisitPrompt } from "@/components/ui/FirstVisitPrompt";
+import { Star } from "lucide-react";
 
 type PlayerRow = {
   id: number; fullName: string; slug: string; teamAbbr: string; teamId?: number;
@@ -483,75 +485,112 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto h-px divider-shimmer" />
       </div>
 
-      {/* TODAY'S GAMES */}
+      {/* TODAY'S GAMES — full slate */}
       {games.length > 0 && (
         <section className="px-4 lg:px-12 py-10 lg:py-20" data-reveal data-reveal-delay="1">
           <div className="max-w-6xl mx-auto">
             <div className="flex items-end justify-between mb-10">
               <div>
                 <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-2">
-                  Today
+                  Today · {games.length} game{games.length !== 1 ? "s" : ""}
                 </p>
                 <h2 className="font-[family-name:var(--font-barlow)] font-black text-4xl lg:text-5xl tracking-[-0.03em] text-[#F5F5F7]">
-                  Games on now.
+                  {games.some(g => g.gameStatus === 2) ? "Games on now." : "On the slate."}
                 </h2>
               </div>
               <Link href="/scores" className="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-[#8A8A93] hover:text-[#F5F5F7] transition-colors">
-                Full schedule <ArrowUpRight size={14} />
+                Full scoreboard <ArrowUpRight size={14} />
               </Link>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {games.slice(0, 3).map(game => {
-                const live = game.gameStatus === 2;
-                const final = game.gameStatus === 3;
-                const awayWin = game.awayTeam.score > game.homeTeam.score;
-                return (
-                  <Link
-                    key={game.gameId}
-                    href="/scores"
-                    className="group floating-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-6 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/40"
-                  >
-                    <div className="flex items-center justify-between mb-6">
-                      {live ? (
-                        <span className="flex items-center gap-1.5 text-[10px] font-bold tracking-widest uppercase text-[#34D399]">
-                          <span className="h-1.5 w-1.5 rounded-full bg-[#34D399] animate-pulse" />
-                          {game.gameStatusText}
-                        </span>
-                      ) : (
-                        <span className="text-[10px] font-bold tracking-widest uppercase text-[#8A8A93]">
-                          {final ? "Final" : game.gameStatusText}
+              {[...games]
+                .sort((a, b) => {
+                  // Favorite team's game first, then live, then final, then upcoming
+                  const aFav = favoriteTeam && (a.homeTeam.teamTricode === favoriteTeam || a.awayTeam.teamTricode === favoriteTeam) ? 1 : 0;
+                  const bFav = favoriteTeam && (b.homeTeam.teamTricode === favoriteTeam || b.awayTeam.teamTricode === favoriteTeam) ? 1 : 0;
+                  if (bFav !== aFav) return bFav - aFav;
+                  return a.gameStatus === 2 ? -1 : b.gameStatus === 2 ? 1 : 0;
+                })
+                .map(game => {
+                  const live = game.gameStatus === 2;
+                  const final = game.gameStatus === 3;
+                  const awayWin = game.awayTeam.score > game.homeTeam.score;
+                  const homeWin = game.homeTeam.score > game.awayTeam.score;
+                  const isFav = favoriteTeam && (game.homeTeam.teamTricode === favoriteTeam || game.awayTeam.teamTricode === favoriteTeam);
+                  const awayInfo = teamLookup[game.awayTeam.teamTricode];
+                  const homeInfo = teamLookup[game.homeTeam.teamTricode];
+                  const href = live || final ? `/scores/${game.gameId}` : "/scores";
+                  return (
+                    <Link
+                      key={game.gameId}
+                      href={href}
+                      className={cn(
+                        "group floating-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-5 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/40",
+                        isFav && "ring-1 ring-[#D4B560]/40"
+                      )}
+                    >
+                      {isFav && (
+                        <span className="absolute top-3 right-3 inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.15em] uppercase text-[#D4B560]">
+                          <Star size={9} fill="currentColor" /> Your team
                         </span>
                       )}
-                      {game.seriesText && <span className="text-[10px] text-[#6E6E76]">{game.seriesText}</span>}
-                    </div>
+                      <div className="flex items-center justify-between mb-5">
+                        {live ? (
+                          <span className="flex items-center gap-1.5 text-[10px] font-bold tracking-widest uppercase text-[#34D399]">
+                            <span className="h-1.5 w-1.5 rounded-full bg-[#34D399] animate-pulse" />
+                            {game.gameStatusText}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-bold tracking-widest uppercase text-[#8A8A93]">
+                            {final ? "Final" : game.gameStatusText}
+                          </span>
+                        )}
+                        {game.seriesText && <span className="text-[10px] text-[#6E6E76] max-w-[120px] truncate">{game.seriesText}</span>}
+                      </div>
 
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className={cn("text-base font-medium tracking-tight", awayWin ? "text-[#F5F5F7]" : "text-[#8A8A93]")}>
-                          {game.awayTeam.teamTricode}
-                        </span>
-                        <span className={cn(
-                          "font-[family-name:var(--font-barlow)] font-black text-4xl tabular-nums tracking-tight",
-                          live || final ? (awayWin ? "text-[#F5F5F7]" : "text-[#6E6E76]") : "text-[#3A3A42]"
-                        )}>
-                          {live || final ? game.awayTeam.score : "—"}
-                        </span>
+                      <div className="space-y-2.5">
+                        {/* Away */}
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <TeamLogo teamId={awayInfo?.id} abbreviation={game.awayTeam.teamTricode} primaryColor={awayInfo?.color} size="xs" />
+                            <div className="min-w-0">
+                              <p className={cn("text-sm font-semibold tracking-tight truncate", awayWin && (live || final) ? "text-[#F5F5F7]" : "text-[#8A8A93]")}>
+                                {game.awayTeam.teamTricode}
+                              </p>
+                              <p className="text-[10px] text-[#6E6E76]">{game.awayTeam.wins}-{game.awayTeam.losses}</p>
+                            </div>
+                          </div>
+                          <span className={cn(
+                            "font-[family-name:var(--font-barlow)] font-black text-3xl tabular-nums tracking-tight shrink-0",
+                            live || final ? (awayWin ? "text-[#F5F5F7]" : "text-[#6E6E76]") : "text-[#3A3A42]"
+                          )}>
+                            {live || final ? game.awayTeam.score : "—"}
+                          </span>
+                        </div>
+                        {/* Divider */}
+                        <div className="h-px bg-white/[0.04]" />
+                        {/* Home */}
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <TeamLogo teamId={homeInfo?.id} abbreviation={game.homeTeam.teamTricode} primaryColor={homeInfo?.color} size="xs" />
+                            <div className="min-w-0">
+                              <p className={cn("text-sm font-semibold tracking-tight truncate", homeWin && (live || final) ? "text-[#F5F5F7]" : "text-[#8A8A93]")}>
+                                {game.homeTeam.teamTricode}
+                              </p>
+                              <p className="text-[10px] text-[#6E6E76]">{game.homeTeam.wins}-{game.homeTeam.losses}</p>
+                            </div>
+                          </div>
+                          <span className={cn(
+                            "font-[family-name:var(--font-barlow)] font-black text-3xl tabular-nums tracking-tight shrink-0",
+                            live || final ? (homeWin ? "text-[#F5F5F7]" : "text-[#6E6E76]") : "text-[#3A3A42]"
+                          )}>
+                            {live || final ? game.homeTeam.score : "—"}
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className={cn("text-base font-medium tracking-tight", !awayWin && (live || final) ? "text-[#F5F5F7]" : "text-[#8A8A93]")}>
-                          {game.homeTeam.teamTricode}
-                        </span>
-                        <span className={cn(
-                          "font-[family-name:var(--font-barlow)] font-black text-4xl tabular-nums tracking-tight",
-                          live || final ? (!awayWin ? "text-[#F5F5F7]" : "text-[#6E6E76]") : "text-[#3A3A42]"
-                        )}>
-                          {live || final ? game.homeTeam.score : "—"}
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                );
+                    </Link>
+                  );
               })}
             </div>
           </div>
@@ -1007,6 +1046,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      <FirstVisitPrompt teams={teams} />
     </div>
   );
 }

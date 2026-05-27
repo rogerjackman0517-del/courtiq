@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { TeamCardSkeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
+import { Star } from "lucide-react";
+import { useFavoriteTeam } from "@/lib/useFavoriteTeam";
 
 type TeamRow = {
   id: number;
@@ -23,7 +25,7 @@ type TeamRow = {
   primaryColor: string;
 };
 
-function TeamCard({ team }: { team: TeamRow }) {
+function TeamCard({ team, isFav, onFav }: { team: TeamRow; isFav: boolean; onFav: () => void }) {
   const totalGames = team.wins + team.losses;
   const winPctDisplay = totalGames > 0 ? Math.round((team.wins / totalGames) * 100) : 0;
   const streakUp = team.streak?.startsWith("W");
@@ -73,6 +75,18 @@ function TeamCard({ team }: { team: TeamRow }) {
             </p>
           </div>
         </div>
+        <button
+          type="button"
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onFav(); }}
+          className={cn(
+            "p-1.5 rounded-full transition-colors shrink-0",
+            isFav ? "text-[#D4B560]" : "text-[#3A3A42] hover:text-[#D4B560]"
+          )}
+          aria-label={isFav ? "Remove from favorites" : "Set as favorite team"}
+          title={isFav ? "Your team" : "Follow this team"}
+        >
+          <Star size={14} fill={isFav ? "currentColor" : "none"} />
+        </button>
       </div>
 
       {/* Big record */}
@@ -113,6 +127,7 @@ export default function TeamsPage() {
   const [teams, setTeams] = useState<TeamRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { team: favoriteAbbr, setTeam: setFavorite } = useFavoriteTeam();
 
   useEffect(() => {
     let cancelled = false;
@@ -188,7 +203,7 @@ export default function TeamsPage() {
                 </h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {east.map(t => <TeamCard key={t.id} team={t} />)}
+                {east.map(t => <TeamCard key={t.id} team={t} isFav={favoriteAbbr === t.abbreviation} onFav={() => setFavorite(favoriteAbbr === t.abbreviation ? "" : t.abbreviation)} />)}
               </div>
             </div>
           </section>
@@ -210,7 +225,7 @@ export default function TeamsPage() {
                 </h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {west.map(t => <TeamCard key={t.id} team={t} />)}
+                {west.map(t => <TeamCard key={t.id} team={t} isFav={favoriteAbbr === t.abbreviation} onFav={() => setFavorite(favoriteAbbr === t.abbreviation ? "" : t.abbreviation)} />)}
               </div>
             </div>
           </section>
