@@ -15,23 +15,28 @@ const navGroups: NavGroup[] = [
   {
     label: null,
     items: [
-      { href: "/",       label: "Home",   icon: Home },
-      { href: "/scores",    label: "Scores",    icon: Calendar },
-      { href: "/live",      label: "Live",      icon: RadioTower },
-      { href: "/injuries",  label: "Injuries",  icon: HeartPulse },
-      { href: "/news",      label: "News",      icon: Newspaper },
+      { href: "/",       label: "Home",    icon: Home },
+      { href: "/scores", label: "Scores",  icon: Calendar },
+      { href: "/live",   label: "Live",    icon: RadioTower },
+      { href: "/players", label: "Players", icon: Users },
+      { href: "/teams",   label: "Teams",   icon: Shield },
     ],
   },
   {
-    label: "Stats",
+    label: "League",
     items: [
-      { href: "/players",        label: "Players",        icon: Users },
-      { href: "/teams",          label: "Teams",          icon: Shield },
       { href: "/standings",      label: "Standings",      icon: Trophy },
       { href: "/playoffs",       label: "Playoffs",       icon: GitBranch },
       { href: "/power-rankings", label: "Power Rankings", icon: Flame },
       { href: "/stats",          label: "Stat Leaders",   icon: BarChart2 },
-      { href: "/draft",          label: "Draft",          icon: Users },
+    ],
+  },
+  {
+    label: "Discover",
+    items: [
+      { href: "/news",      label: "News",     icon: Newspaper },
+      { href: "/injuries",  label: "Injuries", icon: HeartPulse },
+      { href: "/draft",     label: "Draft",    icon: Users },
     ],
   },
   {
