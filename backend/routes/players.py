@@ -33,11 +33,72 @@ NBA_HEADERS = {
 # Build a lookup: team_id -> abbreviation
 _TEAM_BY_ID = {t["id"]: t["abbreviation"] for t in nba_teams.get_teams()}
 
-# Build a lookup: player_id -> position from the bundled static data (no API call)
-_POSITION_BY_ID: dict = {
-    p["id"]: (p.get("position") or "—")
+# Build name → NBA ID from static data for position matching
+_NAME_TO_NBA_ID: dict = {
+    "".join(
+        c for c in unicodedata.normalize("NFD", p["full_name"])
+        if unicodedata.category(c) != "Mn"
+    ).lower().replace(".", "").replace("'", ""): p["id"]
     for p in nba_players.get_players()
 }
+
+# In-memory position cache: NBA_ID -> position abbreviation (G/F/C/G-F/F-C/—)
+# Populated async on first request via ESPN rosters.
+_position_cache: dict[int, str] = {}
+_position_cache_ready = False
+
+ESPN_TEAMS_URL = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams?limit=40"
+ESPN_ROSTER_URL = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/{tid}/roster"
+
+async def _load_positions_from_espn() -> None:
+    """Fetch all 30 ESPN team rosters concurrently and build NBA_ID → position map."""
+    global _position_cache, _position_cache_ready
+    import asyncio
+
+    # Check Redis first so we only do the 30 requests once per day
+    cached_pos = await cache_get("positions:all")
+    if cached_pos and isinstance(cached_pos, dict):
+        _position_cache = {int(k): v for k, v in cached_pos.items()}
+        _position_cache_ready = True
+        return
+
+    async with httpx.AsyncClient(timeout=10, headers={"User-Agent": "CourtIQ/1.0"}) as client:
+        # Get all team IDs
+        try:
+            r = await client.get(ESPN_TEAMS_URL)
+            r.raise_for_status()
+            sports = r.json().get("sports", [])
+            team_ids = [
+                t["team"]["id"]
+                for t in sports[0].get("leagues", [{}])[0].get("teams", [])
+            ] if sports else []
+        except Exception:
+            team_ids = [str(i) for i in [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]]
+
+        async def fetch_roster(tid: str):
+            try:
+                rr = await client.get(ESPN_ROSTER_URL.format(tid=tid))
+                rr.raise_for_status()
+                for a in rr.json().get("athletes", []):
+                    pos = (a.get("position") or {}).get("abbreviation") or "—"
+                    full = a.get("fullName", "")
+                    norm = "".join(
+                        c for c in unicodedata.normalize("NFD", full)
+                        if unicodedata.category(c) != "Mn"
+                    ).lower().replace(".", "").replace("'", "")
+                    nba_id = _NAME_TO_NBA_ID.get(norm)
+                    if nba_id:
+                        _position_cache[nba_id] = pos
+            except Exception:
+                pass
+
+        import asyncio
+        await asyncio.gather(*[fetch_roster(tid) for tid in team_ids])
+
+    _position_cache_ready = True
+    # Cache for 24 hours
+    if _position_cache:
+        await cache_set("positions:all", {str(k): v for k, v in _position_cache.items()}, 86400)
 
 
 @router.get("")
@@ -66,10 +127,20 @@ def _slugify(name: str) -> str:
 
 
 @router.get("/with-stats")
-@cached(ttl=settings.cache_ttl_stats, key_fn=lambda season="2025-26": f"players:with-stats:{season}")
 async def get_players_with_stats(season: str = Query(CURRENT_SEASON)):
     """Players with season stats via LeagueLeaders (reliable on Railway).
-    Returns ~230+ qualifying players sorted by PPG."""
+    Returns ~230+ qualifying players sorted by PPG. Positions from ESPN rosters."""
+    import asyncio
+
+    cache_key = f"players:with-stats:{season}"
+    hit = await cache_get(cache_key)
+    if hit:
+        return hit
+
+    # Ensure position map is loaded (lazy, once per process)
+    if not _position_cache_ready:
+        asyncio.create_task(_load_positions_from_espn())
+
     leaders = leagueleaders.LeagueLeaders(
         season=season,
         stat_category_abbreviation="PTS",
@@ -86,7 +157,6 @@ async def get_players_with_stats(season: str = Query(CURRENT_SEASON)):
     for r in rows:
         pid = r.get("PLAYER_ID")
         name = r.get("PLAYER") or ""
-        # TEAM column in LeagueLeaders is the abbreviation
         team_abbr = str(r.get("TEAM") or "")
         team_id = int(r.get("TEAM_ID") or 0)
         out.append({
@@ -95,7 +165,7 @@ async def get_players_with_stats(season: str = Query(CURRENT_SEASON)):
             "slug": _slugify(name),
             "teamId": team_id,
             "teamAbbr": team_abbr,
-            "position": _POSITION_BY_ID.get(pid, "—"),
+            "position": _position_cache.get(pid, "—"),
             "pts": float(r.get("PTS") or 0),
             "reb": float(r.get("REB") or 0),
             "ast": float(r.get("AST") or 0),
@@ -109,6 +179,8 @@ async def get_players_with_stats(season: str = Query(CURRENT_SEASON)):
             "salary": None,
             "injuryStatus": "Healthy",
         })
+
+    await cache_set(cache_key, out, settings.cache_ttl_stats)
     return out
 
 
