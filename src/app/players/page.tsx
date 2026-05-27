@@ -77,6 +77,7 @@ export default function PlayersPage() {
   const [sortKey, setSortKey] = useState<SortKey>("pts");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [dense, setDense] = useState(false);
+  const [posFilter, setPosFilter] = useState<"All" | "G" | "F" | "C">("All");
   const [players, setPlayers] = useState<PlayerRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -107,7 +108,14 @@ export default function PlayersPage() {
   const rows = useMemo(() => {
     const filtered = players.filter(p => {
       const q = query.toLowerCase().trim();
-      return !q || p.fullName.toLowerCase().includes(q) || p.teamAbbr.toLowerCase().includes(q);
+      const matchQuery = !q || p.fullName.toLowerCase().includes(q) || p.teamAbbr.toLowerCase().includes(q);
+      const pos = p.position ?? "—";
+      const matchPos =
+        posFilter === "All" ||
+        (posFilter === "G" && pos.startsWith("G")) ||
+        (posFilter === "F" && pos.startsWith("F")) ||
+        (posFilter === "C" && (pos === "C" || pos === "F-C"));
+      return matchQuery && matchPos;
     });
     const sorted = [...filtered].sort((a, b) => {
       if (sortKey === "name") {
@@ -146,7 +154,7 @@ export default function PlayersPage() {
             </span>
           </h1>
           <p className="text-base lg:text-lg text-[#8A8A93] max-w-xl leading-relaxed">
-            {loading ? "Loading the league…" : `${rows.length} players in the 2025-26 season.`}
+            {loading ? "Loading the league…" : `${players.length} players in the 2025-26 season.`}
           </p>
         </div>
       </section>
@@ -219,6 +227,33 @@ export default function PlayersPage() {
             </div>
           </div>
 
+          {/* Position filter pills */}
+          {!loading && (
+            <div className="flex items-center gap-2 mb-5 flex-wrap">
+              <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#6E6E76] mr-1">Position</span>
+              {(["All", "G", "F", "C"] as const).map(pos => (
+                <button
+                  key={pos}
+                  type="button"
+                  onClick={() => setPosFilter(pos)}
+                  className={cn(
+                    "px-4 py-1.5 rounded-full text-xs font-bold tracking-wide transition-all duration-200",
+                    posFilter === pos
+                      ? "bg-[#D4B560] text-[#0A0A0E]"
+                      : "bg-[#1C1C24] border border-white/[0.06] text-[#8A8A93] hover:text-[#F5F5F7] hover:border-white/[0.12]"
+                  )}
+                >
+                  {pos === "All" ? "All" : pos === "G" ? "Guards" : pos === "F" ? "Forwards" : "Centers"}
+                </button>
+              ))}
+              {posFilter !== "All" && (
+                <span className="text-[10px] text-[#6E6E76] ml-1">
+                  {rows.length} {posFilter === "G" ? "guard" : posFilter === "F" ? "forward" : "center"}{rows.length !== 1 ? "s" : ""}
+                </span>
+              )}
+            </div>
+          )}
+
           {error && (
             <div className="rounded-2xl border border-[#F87171]/30 bg-[#F87171]/10 px-5 py-4 mb-6 text-sm text-[#F87171]">
               Failed to load: {error}
@@ -226,7 +261,7 @@ export default function PlayersPage() {
           )}
 
           {/* Active filter chips */}
-          {(query || sortKey !== "pts" || sortDir !== "desc") && (
+          {(query || sortKey !== "pts" || sortDir !== "desc" || posFilter !== "All") && (
             <div className="flex flex-wrap items-center gap-2 mb-4">
               <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#6E6E76]">Active</span>
               {query && (
@@ -334,7 +369,14 @@ export default function PlayersPage() {
                           <Link href={`/players/${p.slug}`} className="flex items-center gap-3 group/name">
                             <PlayerAvatar playerId={p.id} fullName={p.fullName} size="sm" />
                             <div className="min-w-0">
-                              <span className="font-semibold text-[#F5F5F7] group-hover/name:text-[#D4B560] tracking-tight transition-colors">{p.fullName}</span>
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="font-semibold text-[#F5F5F7] group-hover/name:text-[#D4B560] tracking-tight transition-colors">{p.fullName}</span>
+                                {p.position && p.position !== "—" && (
+                                  <span className="text-[8px] font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-white/[0.05] text-[#6E6E76]">
+                                    {p.position}
+                                  </span>
+                                )}
+                              </div>
                               {(() => {
                                 const status = injuryMap[p.fullName.toLowerCase()];
                                 if (!status || status === "Probable" || status === "Available") return null;

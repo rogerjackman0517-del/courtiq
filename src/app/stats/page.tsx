@@ -107,6 +107,55 @@ export default function StatsPage() {
         </div>
       </section>
 
+      {/* LEADER SPOTLIGHT — top player in 5 key categories */}
+      {!loading && players.length > 0 && (() => {
+        type Cat = { key: "pts" | "reb" | "ast" | "stl" | "blk"; label: string; stat: string; color: string };
+        const categories: Cat[] = [
+          { key: "pts", label: "Scoring",  stat: "PPG", color: "#D4B560" },
+          { key: "reb", label: "Rebounds", stat: "RPG", color: "#5B8DEF" },
+          { key: "ast", label: "Assists",  stat: "APG", color: "#34D399" },
+          { key: "stl", label: "Steals",   stat: "SPG", color: "#A855F7" },
+          { key: "blk", label: "Blocks",   stat: "BPG", color: "#F87171" },
+        ];
+        return (
+          <section className="px-4 lg:px-12 pt-8 pb-6" data-reveal data-reveal-delay="1">
+            <div className="max-w-6xl mx-auto">
+              <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#6E6E76] mb-4">League Leaders</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                {categories.map(cat => {
+                  const leader = [...players].sort((a, b) => b[cat.key] - a[cat.key])[0];
+                  if (!leader) return null;
+                  return (
+                    <Link
+                      key={cat.key}
+                      href={`/players/${leader.slug}`}
+                      className="floating-card group rounded-2xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-4 hover:scale-[1.02] transition-transform duration-300 flex flex-col items-center gap-3 text-center"
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span className="text-[9px] font-black tracking-[0.2em] uppercase" style={{ color: cat.color }}>
+                          #1 {cat.stat}
+                        </span>
+                        <span className="text-[9px] font-medium text-[#6E6E76] uppercase tracking-wider">{cat.label}</span>
+                      </div>
+                      <PlayerAvatar playerId={leader.id} fullName={leader.fullName} size="lg" />
+                      <div>
+                        <p className="font-[family-name:var(--font-barlow)] font-black text-3xl tabular-nums tracking-tight" style={{ color: cat.color }}>
+                          {leader[cat.key].toFixed(1)}
+                        </p>
+                        <p className="text-xs font-semibold text-[#F5F5F7] mt-0.5 truncate group-hover:text-[#D4B560] transition-colors">
+                          {leader.fullName.split(" ").slice(-1)[0]}
+                        </p>
+                        <p className="text-[10px] text-[#6E6E76]">{leader.teamAbbr}</p>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+        );
+      })()}
+
       {/* DIVIDER */}
       <div className="px-4 lg:px-12">
         <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
