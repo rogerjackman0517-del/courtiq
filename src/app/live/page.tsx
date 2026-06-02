@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, RadioTower } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { CourtEmpty } from "@/components/ui/CourtEmpty";
@@ -67,6 +68,47 @@ function LiveBadge() {
   );
 }
 
+function QuarterTrack({ statusText }: { statusText: string }) {
+  const s = statusText ?? "";
+  const isOT = /\bOT\b|overtime/i.test(s);
+  const isHalf = /half/i.test(s);
+  let q = 0;
+  const m = s.match(/Q(\d)|(\d)(st|nd|rd|th)/i);
+  if (m) q = parseInt(m[1] || m[2]);
+  if (isHalf) q = 2;
+  if (q === 0 && !isOT) return null;
+
+  return (
+    <div className="flex items-center justify-center gap-3 mt-5">
+      {[1, 2, 3, 4].map(n => (
+        <div key={n} className="flex flex-col items-center gap-1.5">
+          <div
+            className="h-1 w-7 rounded-full transition-all duration-300"
+            style={{
+              background:
+                !isOT && n < q ? "rgba(52,211,153,0.35)" :
+                !isOT && n === q ? "#34D399" :
+                "rgba(255,255,255,0.07)",
+              boxShadow: !isOT && n === q ? "0 0 8px rgba(52,211,153,0.45)" : "none",
+            }}
+          />
+          <p className={cn("text-[8px] font-bold tracking-wider",
+            !isOT && n === q ? "text-[#34D399]" : "text-[#3F3F46]"
+          )}>
+            Q{n}
+          </p>
+        </div>
+      ))}
+      {isOT && (
+        <div className="flex flex-col items-center gap-1.5">
+          <div className="h-1 w-7 rounded-full bg-[#D4B560]" style={{ boxShadow: "0 0 8px rgba(212,181,96,0.45)" }} />
+          <p className="text-[8px] font-bold tracking-wider text-[#D4B560]">OT</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function MarqueeCard({ game }: { game: Game }) {
   const awayWinning = game.awayTeam.score > game.homeTeam.score;
   const homeWinning = game.homeTeam.score > game.awayTeam.score;
@@ -93,7 +135,9 @@ function MarqueeCard({ game }: { game: Game }) {
           )}
         </div>
 
-        <div className="grid grid-cols-[1fr_auto_1fr] gap-4 lg:gap-12 items-center">
+        <QuarterTrack statusText={game.gameStatusText} />
+
+        <div className="grid grid-cols-[1fr_auto_1fr] gap-4 lg:gap-12 items-center mt-5">
           {/* Away */}
           <div className="flex flex-col items-center text-center gap-3">
             <TeamLogo teamId={game.awayTeam.teamId} abbreviation={game.awayTeam.teamTricode} size="xl" />

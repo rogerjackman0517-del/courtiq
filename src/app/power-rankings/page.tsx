@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import Link from "next/link";
 import { TrendingUp, Flame } from "lucide-react";
 import { TeamLogo } from "@/components/teams/TeamLogo";
@@ -46,6 +46,13 @@ export default function PowerRankingsPage() {
 
   const top5 = teams.slice(0, 5);
   const rest = teams.slice(5);
+
+  const TIER_META: Record<string, { label: string; color: string }> = {
+    alive:    { label: "Contenders",                   color: "#34D399" },
+    "out-r2": { label: "Conference Finals Eliminated",  color: "#D4B560" },
+    "out-r1": { label: "First Round Eliminated",        color: "#8A8A93" },
+    missed:   { label: "Missed Playoffs",               color: "#6E6E76" },
+  };
 
   return (
     <div className="pb-24 lg:pb-12 premium-fade-in">
@@ -156,9 +163,31 @@ export default function PowerRankingsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {rest.map((t) => (
+                    {rest.map((t, idx) => {
+                      const prevStatus = idx === 0
+                        ? (top5.at(-1)?.playoffStatus ?? t.playoffStatus)
+                        : rest[idx - 1].playoffStatus;
+                      const tierChanged = t.playoffStatus !== prevStatus;
+                      const tier = TIER_META[t.playoffStatus];
+                      return (
+                      <Fragment key={t.id}>
+                      {tierChanged && tier && (
+                        <tr>
+                          <td colSpan={7} className="px-4 lg:px-6 pt-5 pb-2">
+                            <div className="flex items-center gap-3">
+                              <span className="h-px flex-1 bg-white/[0.05]" />
+                              <span
+                                className="text-[9px] font-bold tracking-[0.2em] uppercase"
+                                style={{ color: tier.color }}
+                              >
+                                {tier.label}
+                              </span>
+                              <span className="h-px flex-1 bg-white/[0.05]" />
+                            </div>
+                          </td>
+                        </tr>
+                      )}
                       <tr
-                        key={t.id}
                         className="border-b border-white/[0.04] last:border-0 hover:bg-white/[0.02] transition-colors"
                       >
                         <td className="px-4 lg:px-6 py-3 text-[#8A8A93] tabular-nums font-medium">
@@ -203,7 +232,9 @@ export default function PowerRankingsPage() {
                           {t.power.toFixed(1)}
                         </td>
                       </tr>
-                    ))}
+                      </Fragment>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

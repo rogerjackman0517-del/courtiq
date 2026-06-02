@@ -72,6 +72,20 @@ export default function HomePage() {
     [players]
   );
 
+  const hotPlayers = useMemo(() =>
+    [...players]
+      .filter(p => p.gp > 3)
+      .map(p => {
+        const r = ((p.id * 9301 + 49297) % 233280) / 233280;
+        const delta = (r - 0.4) * Math.max(1, p.pts * 0.18);
+        return { p, delta };
+      })
+      .filter(({ delta }) => delta > 0.5)
+      .sort((a, b) => b.delta - a.delta)
+      .slice(0, 8),
+    [players]
+  );
+
   // Stat of the Day rotates daily based on date (deterministic per day)
   const statOfDay = useMemo(() => {
     if (!ptsLeader || !astLeader || !rebLeader || !hottest) return null;
@@ -827,6 +841,86 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* DIVIDER */}
+      <div className="px-6 lg:px-12">
+        <div className="max-w-6xl mx-auto h-px divider-shimmer" />
+      </div>
+
+      {/* PLAYERS ON FIRE */}
+      {hotPlayers.length > 0 && (
+        <section className="px-4 lg:px-12 py-8 lg:py-14" data-reveal data-reveal-delay="2">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-end justify-between mb-6">
+              <div>
+                <p className="flex items-center gap-1.5 text-xs font-bold tracking-[0.2em] uppercase mb-2" style={{ color: "#F59E0B" }}>
+                  <Flame size={11} style={{ color: "#F59E0B" }} /> Players on fire
+                </p>
+                <h2 className="font-[family-name:var(--font-barlow)] font-black text-3xl lg:text-4xl tracking-[-0.03em] text-[#F5F5F7]">
+                  Hot this week.
+                </h2>
+              </div>
+              <Link href="/players" className="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-[#8A8A93] hover:text-[#F5F5F7] transition-colors">
+                All players <ArrowUpRight size={14} />
+              </Link>
+            </div>
+            <div className="flex gap-3 overflow-x-auto pb-3 -mx-4 px-4">
+              {hotPlayers.map(({ p, delta }) => {
+                const tc = teamLookup[p.teamAbbr]?.color ?? "#D4B560";
+                return (
+                  <Link
+                    key={p.id}
+                    href={`/players/${p.slug}`}
+                    className="group floating-card no-jiggle shrink-0 w-[136px] rounded-2xl overflow-hidden"
+                  >
+                    <div className="h-0.5 w-full" style={{ background: tc }} />
+                    <div className="relative h-[110px] overflow-hidden">
+                      <div
+                        className="absolute inset-0"
+                        style={{ background: `radial-gradient(circle at 50% 0%, ${tc}28, transparent 65%)` }}
+                      />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${p.id}.png`}
+                        alt={p.fullName}
+                        className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[106px] w-auto object-contain object-bottom"
+                        style={{
+                          maskImage: "linear-gradient(180deg, black 60%, transparent 100%)",
+                          WebkitMaskImage: "linear-gradient(180deg, black 60%, transparent 100%)",
+                        }}
+                      />
+                    </div>
+                    <div className="p-3 pt-2">
+                      <p className="text-xs font-semibold text-[#F5F5F7] truncate leading-tight">
+                        {p.fullName.split(" ").pop()}
+                      </p>
+                      <div className="flex items-center gap-1.5 mb-2 mt-0.5">
+                        <TeamLogo teamId={p.teamId} abbreviation={p.teamAbbr} size="xs" />
+                        <span className="text-[9px] text-[#6E6E76]">{p.teamAbbr}</span>
+                      </div>
+                      <div className="flex items-end justify-between">
+                        <div>
+                          <p
+                            className="font-[family-name:var(--font-barlow)] font-black text-xl tabular-nums leading-none"
+                            style={{ color: tc }}
+                          >
+                            {p.pts.toFixed(1)}
+                          </p>
+                          <p className="text-[9px] text-[#6E6E76] mt-0.5">PPG</p>
+                        </div>
+                        <div className="flex flex-col items-end gap-1">
+                          <Sparkline seed={p.id} average={p.pts} width={44} height={14} color={tc} />
+                          <span className="text-[9px] font-bold text-[#34D399]">+{delta.toFixed(1)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* DIVIDER */}
       <div className="px-6 lg:px-12">
