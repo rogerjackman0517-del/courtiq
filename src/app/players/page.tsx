@@ -141,17 +141,14 @@ export default function PlayersPage() {
   return (
     <div className="pb-24 lg:pb-12 premium-fade-in">
       {/* Hero header */}
-      <section className="brand-glow px-4 lg:px-12 pt-10 lg:pt-20 pb-8" data-reveal>
+      <section className="brand-glow px-4 lg:px-12 pt-10 lg:pt-20 pb-8">
         <div className="max-w-6xl mx-auto">
           <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-3">
             Database
           </p>
-          <h1 className="font-[family-name:var(--font-barlow)] font-black text-5xl lg:text-7xl tracking-[-0.04em] text-[#F5F5F7] mb-4 leading-[0.95]">
-            <AnimatedHeading text="Every player." />
-            <br />
-            <span className="text-[#D4B560]">
-              <AnimatedHeading text="Every stat." startDelay={250} />
-            </span>
+          <h1 className="font-[family-name:var(--font-barlow)] font-black text-5xl lg:text-7xl tracking-[-0.04em] text-[#F5F5F7] text-shine mb-4 leading-[0.95]">
+            Every player.<br />
+            <span className="text-[#D4B560]" style={{ WebkitTextFillColor: "#D4B560" }}>Every stat.</span>
           </h1>
           <p className="text-base lg:text-lg text-[#8A8A93] max-w-xl leading-relaxed">
             {loading ? "Loading the league…" : `${players.length} players in the 2025-26 season.`}
@@ -343,8 +340,17 @@ export default function PlayersPage() {
                   {rows.map((p, i) => (
                     <tr
                       key={p.id}
-                      className="stat-row row-reveal border-b border-white/[0.03] last:border-b-0 group"
-                      style={{ animationDelay: `${Math.min(i, 20) * 20}ms`, ["--stat-row-color" as string]: TEAM_COLORS[p.teamAbbr] ?? "#D4B560" }}
+                      className={cn(
+                        "stat-row border-b border-white/[0.03] last:border-b-0 group",
+                        // Only animate the first 20 rows. Otherwise 234 simultaneous
+                        // compositing layers makes the table feel glitchy on lower-end devices.
+                        i < 20 && "row-reveal"
+                      )}
+                      style={
+                        i < 20
+                          ? { animationDelay: `${i * 20}ms`, ["--stat-row-color" as string]: TEAM_COLORS[p.teamAbbr] ?? "#D4B560" }
+                          : { ["--stat-row-color" as string]: TEAM_COLORS[p.teamAbbr] ?? "#D4B560" }
+                      }
                     >
                       <td className="px-5 py-3.5 text-[#6E6E76] text-xs tabular-nums">
                         <div className="flex items-center gap-2">

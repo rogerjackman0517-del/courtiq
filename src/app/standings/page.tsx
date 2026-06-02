@@ -6,6 +6,7 @@ import { ArrowUp, ArrowDown, Flame, Snowflake } from "lucide-react";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { StandingsRowSkeleton } from "@/components/ui/Skeleton";
 import { AnimatedHeading } from "@/components/ui/AnimatedHeading";
+import { StatLabel } from "@/components/ui/StatLabel";
 import { cn } from "@/lib/utils";
 
 function parseStreakLen(s: string | undefined): { dir: "W" | "L" | null; n: number } {
@@ -84,19 +85,19 @@ function StandingsTable({ teams, conference }: { teams: TeamRow[]; conference: "
 
   return (
     <div className="floating-card rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] overflow-x-auto">
-      <table className="w-full text-sm min-w-[680px]">
+      <table className="sticky-thead w-full text-sm min-w-[680px]">
         <thead>
           <tr className="border-b border-white/[0.06]">
             <th className="text-left px-5 py-4 w-12 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">#</th>
             <th className="text-left px-5 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">Team</th>
-            <th className="text-right px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">W</th>
-            <th className="text-right px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">L</th>
-            <th className="text-right px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">PCT</th>
+            <th className="text-right px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]"><StatLabel abbr="W" /></th>
+            <th className="text-right px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]"><StatLabel abbr="L" /></th>
+            <th className="text-right px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]"><StatLabel abbr="PCT" /></th>
             <th className="text-center px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">W/L</th>
-            <th className="text-right px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">GB</th>
-            <th className="text-center px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]" title="Remaining schedule difficulty">SOS</th>
-            <th className="text-right px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">L10</th>
-            <th className="text-right px-3 py-4 pr-6 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">STRK</th>
+            <th className="text-right px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]"><StatLabel abbr="GB" /></th>
+            <th className="text-center px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]"><StatLabel abbr="SOS" /></th>
+            <th className="text-right px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]"><StatLabel abbr="L10" /></th>
+            <th className="text-right px-3 py-4 pr-6 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]"><StatLabel abbr="STRK" /></th>
           </tr>
         </thead>
         <tbody>
@@ -116,11 +117,11 @@ function StandingsTable({ teams, conference }: { teams: TeamRow[]; conference: "
               <tr
                 key={team.id}
                 className={cn(
-                  "border-b border-white/[0.03] last:border-b-0 group relative",
+                  "stat-row border-b border-white/[0.03] last:border-b-0 group relative",
                   i === 5 && "border-b border-b-[#34D399]/20",
                   i === 9 && "border-b border-b-[#F87171]/20",
                 )}
-                style={heatmapStyle(team.winPct)}
+                style={{ ...heatmapStyle(team.winPct), ["--stat-row-color" as string]: team.primaryColor ?? "#D4B560" }}
               >
                 <td className="px-5 py-4">
                   <span

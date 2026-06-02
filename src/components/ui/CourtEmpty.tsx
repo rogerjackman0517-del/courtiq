@@ -2,15 +2,17 @@ type Props = {
   title: string;
   subtitle?: string;
   className?: string;
+  /** Compact variant for use in narrow column slots (sidebars, small cards) */
+  compact?: boolean;
 };
 
-export function CourtEmpty({ title, subtitle, className }: Props) {
+export function CourtEmpty({ title, subtitle, className, compact = false }: Props) {
   return (
     <div
-      className={`floating-card no-jiggle rounded-3xl p-10 lg:p-14 text-center relative overflow-hidden ${className ?? ""}`}
+      className={`floating-card no-jiggle rounded-3xl ${compact ? "p-6 lg:p-8" : "p-10 lg:p-14"} text-center relative overflow-hidden ${className ?? ""}`}
     >
       {/* Court illustration */}
-      <div className="relative mx-auto mb-6 w-[220px] h-[140px] opacity-90">
+      <div className={`relative mx-auto opacity-90 ${compact ? "mb-4 w-[140px] h-[88px]" : "mb-6 w-[220px] h-[140px]"}`}>
         <svg
           viewBox="0 0 220 140"
           className="absolute inset-0 w-full h-full"
@@ -43,7 +45,7 @@ export function CourtEmpty({ title, subtitle, className }: Props) {
         {/* Floating basketball */}
         <svg
           viewBox="0 0 24 24"
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-9 h-9 opacity-95 court-empty-bounce"
+          className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-95 court-empty-bounce ${compact ? "w-7 h-7" : "w-9 h-9"}`}
         >
           <circle cx="12" cy="12" r="10" fill="#D4B560" />
           <path
@@ -56,14 +58,14 @@ export function CourtEmpty({ title, subtitle, className }: Props) {
         </svg>
       </div>
 
-      <p className="text-sm font-bold tracking-[0.2em] uppercase text-[#D4B560] mb-2">
+      <p className={`font-bold tracking-[0.2em] uppercase text-[#D4B560] mb-2 ${compact ? "text-[10px]" : "text-sm"}`}>
         Off the clock
       </p>
-      <p className="text-xl lg:text-2xl font-[family-name:var(--font-barlow)] font-bold text-[#F5F5F7] mb-2 tracking-tight">
+      <p className={`font-[family-name:var(--font-barlow)] font-bold text-[#F5F5F7] mb-2 tracking-tight ${compact ? "text-lg" : "text-xl lg:text-2xl"}`}>
         {title}
       </p>
       {subtitle && (
-        <p className="text-sm text-[#8A8A93] max-w-md mx-auto leading-relaxed">
+        <p className={`text-[#8A8A93] max-w-md mx-auto leading-relaxed ${compact ? "text-xs" : "text-sm"}`}>
           {subtitle}
         </p>
       )}

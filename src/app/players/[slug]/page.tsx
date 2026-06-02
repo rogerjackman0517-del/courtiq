@@ -98,7 +98,9 @@ export default function PlayerProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [loadedAt, setLoadedAt] = useState<Date | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [photoSource, setPhotoSource] = useState<"nba" | "espn">("nba");
+  // NOTE: ESPN headshot toggle removed — ESPN uses different player IDs than
+  // NBA, so the URL pattern (which uses the NBA id) always 404s. Re-add when
+  // we have an NBA→ESPN ID mapping in the backend.
   const copy = useCopyToClipboard();
   const injuryMap = useInjuryMap();
 
@@ -255,19 +257,27 @@ export default function PlayerProfilePage() {
 
       <ScrollRail sections={sections} />
 
-      {/* HERO — cinematic */}
-      <section id="hero" className="relative overflow-hidden pt-10 lg:pt-16 pb-12 lg:pb-20" data-reveal>
-        {/* Background team-color wash */}
+      {/* HERO — cinematic, magazine-cover style */}
+      <section id="hero" className="relative overflow-hidden pt-10 lg:pt-16 pb-12 lg:pb-20 min-h-[600px] lg:min-h-[680px]" data-reveal>
+        {/* Background team-color wash — stronger ellipse anchored to the right */}
         <div
           className="pointer-events-none absolute inset-0"
           style={{
-            background: `radial-gradient(ellipse 70% 55% at 75% 45%, ${teamColor}38 0%, transparent 65%)`,
+            background: `radial-gradient(ellipse 80% 70% at 80% 50%, ${teamColor}55 0%, ${teamColor}1A 40%, transparent 70%)`,
           }}
         />
+        {/* Diagonal team color sweep — adds "lit from upper right" feel */}
         <div
-          className="pointer-events-none absolute inset-0 opacity-[0.07]"
+          className="pointer-events-none absolute inset-0 opacity-[0.10]"
           style={{
-            background: `linear-gradient(135deg, ${teamColor} 0%, transparent 50%)`,
+            background: `linear-gradient(135deg, ${teamColor} 0%, transparent 55%)`,
+          }}
+        />
+        {/* Bottom dark vignette to ground the player */}
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3"
+          style={{
+            background: "linear-gradient(180deg, transparent 0%, rgba(10,10,14,0.6) 100%)",
           }}
         />
         {/* Watermark last name */}
@@ -410,61 +420,64 @@ export default function PlayerProfilePage() {
               </div>
             </div>
 
-            {/* RIGHT: cinematic headshot */}
-            <div className="flex justify-center lg:justify-end">
-              <div className="relative h-64 w-64 lg:h-80 lg:w-80">
-                {/* Big team-color halo */}
+            {/* RIGHT: magazine-cover headshot — cut-out style, bleeds off frame */}
+            <div className="relative flex justify-center lg:justify-end self-end">
+              <div className="relative w-[280px] h-[360px] sm:w-[340px] sm:h-[440px] lg:w-[420px] lg:h-[540px]">
+                {/* Atmospheric team-color halo behind player */}
                 <div
-                  className="pointer-events-none absolute inset-[-30%] rounded-full blur-3xl"
+                  className="pointer-events-none absolute inset-[-20%] blur-3xl"
                   style={{
-                    background: `radial-gradient(circle, ${teamColor}66 0%, ${teamColor}1A 35%, transparent 70%)`,
+                    background: `radial-gradient(ellipse 60% 70% at 50% 40%, ${teamColor}55 0%, ${teamColor}1A 40%, transparent 75%)`,
+                  }}
+                />
+                {/* Cone of light from above */}
+                <div
+                  className="pointer-events-none absolute inset-x-0 -top-10 h-[80%]"
+                  style={{
+                    background: `linear-gradient(180deg, ${teamColor}40 0%, transparent 70%)`,
+                    mask: "linear-gradient(180deg, rgba(0,0,0,0.6) 0%, transparent 100%)",
+                    WebkitMask: "linear-gradient(180deg, rgba(0,0,0,0.6) 0%, transparent 100%)",
                   }}
                 />
                 {/* Dust particles behind */}
                 <DustParticles seed={player.id} />
-                {/* Sharper inner glow */}
-                <div
-                  className="pointer-events-none absolute inset-[-10px] rounded-full opacity-70 blur-md"
-                  style={{
-                    background: `linear-gradient(135deg, ${teamColor} 0%, transparent 70%)`,
-                  }}
-                />
+
+                {/* Cut-out player image — no circle, fades at bottom to blend into hero */}
                 <button
                   type="button"
                   onClick={() => setLightboxOpen(true)}
-                  className="cursor-zoom relative !h-64 !w-64 lg:!h-80 lg:!w-80 block no-jiggle rounded-full"
+                  className="cursor-zoom no-jiggle absolute inset-0 w-full h-full"
                   aria-label={`View ${player.fullName} headshot larger`}
                 >
-                  <PlayerAvatar
-                    playerId={player.id}
-                    fullName={player.fullName}
-                    size="xl"
-                    source={photoSource}
-                    className="!h-64 !w-64 lg:!h-80 lg:!w-80 shadow-2xl"
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${player.id}.png`}
+                    alt={player.fullName}
+                    loading="eager"
+                    decoding="async"
+                    className="absolute inset-0 w-full h-full object-contain object-bottom avatar-morph"
+                    style={{
+                      filter: `drop-shadow(0 30px 40px ${teamColor}55) drop-shadow(0 10px 20px rgba(0,0,0,0.5))`,
+                      maskImage:
+                        "linear-gradient(180deg, black 0%, black 88%, transparent 100%)",
+                      WebkitMaskImage:
+                        "linear-gradient(180deg, black 0%, black 88%, transparent 100%)",
+                    }}
                   />
                 </button>
-                {/* Photo source toggle */}
-                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 inline-flex items-center rounded-full border border-white/[0.08] bg-[#13131C]/90 backdrop-blur-md p-0.5 shadow-lg">
-                  {(["nba", "espn"] as const).map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => setPhotoSource(s)}
-                      className={`px-3 py-1 text-[10px] font-bold tracking-[0.15em] uppercase rounded-full transition-colors ${
-                        photoSource === s
-                          ? "bg-white/[0.08] text-[#D4B560]"
-                          : "text-[#6E6E76] hover:text-[#F5F5F7]"
-                      }`}
-                      title={s === "nba" ? "NBA.com headshot" : "ESPN action photo"}
-                    >
-                      {s === "nba" ? "Headshot" : "Action"}
-                    </button>
-                  ))}
-                </div>
-                <div
-                  className="pointer-events-none absolute inset-0 rounded-full"
-                  style={{ boxShadow: `inset 0 0 0 2px ${teamColor}80, 0 30px 60px -20px ${teamColor}40` }}
-                />
+
+                {/* Player jersey number, watermark behind player (huge) */}
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute -top-2 left-0 right-0 text-center font-[family-name:var(--font-barlow)] font-black leading-none tracking-[-0.06em] select-none opacity-[0.12] mix-blend-screen"
+                  style={{
+                    color: teamColor,
+                    fontSize: "clamp(7rem, 16vw, 14rem)",
+                  }}
+                >
+                  {(playerTeam?.abbreviation || player.teamAbbr).slice(0, 3)}
+                </span>
+
               </div>
             </div>
           </div>
@@ -628,11 +641,7 @@ export default function PlayerProfilePage() {
       <Lightbox
         open={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
-        src={
-          photoSource === "espn"
-            ? `https://a.espncdn.com/i/headshots/nba/players/full/${player.id}.png`
-            : `https://cdn.nba.com/headshots/nba/latest/1040x760/${player.id}.png`
-        }
+        src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${player.id}.png`}
         alt={player.fullName}
       />
 

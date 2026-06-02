@@ -12,6 +12,7 @@ import { Sparkline } from "@/components/players/Sparkline";
 import { cn } from "@/lib/utils";
 import { useFavoriteTeam } from "@/lib/useFavoriteTeam";
 import { FirstVisitPrompt } from "@/components/ui/FirstVisitPrompt";
+import { CourtEmpty } from "@/components/ui/CourtEmpty";
 import { Star } from "lucide-react";
 
 type PlayerRow = {
@@ -90,7 +91,7 @@ export default function HomePage() {
       photoName: string;
       isTeam?: boolean;
       teamLogoId?: number;
-      teamAbbr?: string;
+      teamAbbr?: string;          // Populated for ALL stories so hero can resolve team color
     };
     const stories: Story[] = [
       {
@@ -104,6 +105,7 @@ export default function HomePage() {
         ctaHref: "/players/" + ptsLeader.slug,
         photoId: ptsLeader.id,
         photoName: ptsLeader.fullName,
+        teamAbbr: ptsLeader.teamAbbr,
       },
       {
         kind: "ast",
@@ -116,6 +118,7 @@ export default function HomePage() {
         ctaHref: "/players/" + astLeader.slug,
         photoId: astLeader.id,
         photoName: astLeader.fullName,
+        teamAbbr: astLeader.teamAbbr,
       },
       {
         kind: "reb",
@@ -128,6 +131,7 @@ export default function HomePage() {
         ctaHref: "/players/" + rebLeader.slug,
         photoId: rebLeader.id,
         photoName: rebLeader.fullName,
+        teamAbbr: rebLeader.teamAbbr,
       },
       {
         kind: "team",
@@ -157,6 +161,7 @@ export default function HomePage() {
         ctaHref: "/players/" + tripleThreat.slug,
         photoId: tripleThreat.id,
         photoName: tripleThreat.fullName,
+        teamAbbr: tripleThreat.teamAbbr,
       });
     }
     return stories[dayOfYear % stories.length];
@@ -224,7 +229,7 @@ export default function HomePage() {
 
       {/* FEATURED GAME — scoreboard-style with team color gradients */}
       {featuredGame && (
-        <section className="px-4 lg:px-12 pt-6 lg:pt-10 -mb-6 lg:-mb-10 relative z-10" data-reveal>
+        <section className="px-4 lg:px-12 pt-6 lg:pt-10 relative z-10" data-reveal>
           <div className="max-w-6xl mx-auto">
             {(() => {
               const g = featuredGame;
@@ -399,24 +404,44 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* HERO — Apple-style massive display type */}
-      <section className="brand-glow relative px-4 lg:px-12 pt-10 lg:pt-24 pb-10 lg:pb-24 overflow-hidden" data-reveal>
+      {/* HERO — magazine-cover layout */}
+      <section className="brand-glow relative px-4 lg:px-12 pt-10 lg:pt-16 pb-10 lg:pb-20 overflow-hidden min-h-[640px] lg:min-h-[720px]" data-reveal>
+        {(() => {
+          const heroTeamColor = statOfDay?.teamAbbr
+            ? teamLookup[statOfDay.teamAbbr]?.color ?? "#D4B560"
+            : "#D4B560";
+          return (
+            <>
+              {/* Team-color ambient wash anchored to the right edge */}
+              <div
+                className="pointer-events-none absolute inset-0"
+                style={{
+                  background: `radial-gradient(ellipse 75% 70% at 80% 50%, ${heroTeamColor}45 0%, ${heroTeamColor}15 40%, transparent 70%)`,
+                }}
+                aria-hidden="true"
+              />
+              {/* Diagonal team-color sweep — lit from upper right */}
+              <div
+                className="pointer-events-none absolute inset-0 opacity-[0.10]"
+                style={{
+                  background: `linear-gradient(135deg, ${heroTeamColor} 0%, transparent 60%)`,
+                }}
+                aria-hidden="true"
+              />
+              {/* Bottom dark vignette grounds the player */}
+              <div
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3"
+                style={{
+                  background: "linear-gradient(180deg, transparent 0%, rgba(10,10,14,0.55) 100%)",
+                }}
+                aria-hidden="true"
+              />
+            </>
+          );
+        })()}
         {/* Animated court grid backdrop */}
-        <div className="court-grid-bg pointer-events-none absolute inset-0 opacity-60" aria-hidden="true" />
+        <div className="court-grid-bg pointer-events-none absolute inset-0 opacity-40" aria-hidden="true" />
         <div className="max-w-6xl mx-auto">
-
-          {/* First-time visitor intro chip */}
-          <div className="flex flex-wrap items-center gap-2 mb-6 text-[10px] sm:text-[11px] tracking-[0.15em] uppercase">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#D4B560]/30 bg-[#D4B560]/[0.08] text-[#D4B560] px-2.5 py-1 font-bold">
-              New here?
-            </span>
-            <span className="text-[#8A8A93] font-medium normal-case tracking-normal text-xs sm:text-sm">
-              CourtIQ is a free NBA stats site — scores, profiles, trade machine, playoff bracket. Made by{" "}
-              <Link href="/about" className="text-[#F5F5F7] underline decoration-dotted underline-offset-2 hover:text-[#D4B560]">
-                one Knicks fan
-              </Link>.
-            </span>
-          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-12 lg:gap-16 items-center">
             <div>
@@ -485,27 +510,94 @@ export default function HomePage() {
               All Stat Leaders →
             </Link>
             </div>
+
+            {/* Quiet intro line — sits beneath the CTAs */}
+            <p className="mt-8 text-xs text-[#6E6E76] leading-relaxed max-w-xl">
+              CourtIQ is a free NBA stats site — scores, profiles, trade machine, playoff bracket. Made by{" "}
+              <Link href="/about" className="text-[#8A8A93] underline decoration-dotted underline-offset-2 hover:text-[#F5F5F7] transition-colors">
+                one Knicks fan
+              </Link>.
+            </p>
             </div>
-            <div className="hidden lg:block">
-              {statOfDay ? (
-                <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#D4B560]/30 via-[#D4B560]/10 to-transparent blur-3xl scale-110" />
-                  <div className="absolute inset-[-4px] rounded-full bg-gradient-to-br from-[#D4B560] via-[#D4B560]/40 to-transparent opacity-60 blur-md" />
-                  {statOfDay.isTeam && statOfDay.teamLogoId ? (
-                    <div className="relative !h-80 !w-80 rounded-full ring-2 ring-[#D4B560]/40 shadow-2xl bg-[#0A0A0E] flex items-center justify-center overflow-hidden">
-                      <TeamLogo teamId={statOfDay.teamLogoId} abbreviation={statOfDay.teamAbbr ?? ""} size="xl" className="!h-56 !w-56" />
+            <div className="hidden lg:flex justify-end items-end self-end">
+              {statOfDay ? (() => {
+                const heroTeamColor = statOfDay.teamAbbr
+                  ? teamLookup[statOfDay.teamAbbr]?.color ?? "#D4B560"
+                  : "#D4B560";
+                if (statOfDay.isTeam && statOfDay.teamLogoId) {
+                  // Team story: oversized logo with team-color halo
+                  return (
+                    <div className="relative w-[380px] h-[480px] flex items-center justify-center">
+                      <div
+                        className="pointer-events-none absolute inset-[-20%] blur-3xl"
+                        style={{
+                          background: `radial-gradient(ellipse 60% 70% at 50% 40%, ${heroTeamColor}66 0%, ${heroTeamColor}22 40%, transparent 75%)`,
+                        }}
+                      />
+                      <TeamLogo
+                        teamId={statOfDay.teamLogoId}
+                        abbreviation={statOfDay.teamAbbr ?? ""}
+                        size="xl"
+                        className="relative !h-72 !w-72 drop-shadow-2xl"
+                      />
                     </div>
-                  ) : (
-                    <PlayerAvatar
-                      playerId={statOfDay.photoId}
-                      fullName={statOfDay.photoName}
-                      size="xl"
-                      className="relative !h-80 !w-80 ring-2 ring-[#D4B560]/40 shadow-2xl"
+                  );
+                }
+                // Player story: cut-out headshot bleeds off the bottom-right
+                return (
+                  <div className="relative w-[380px] h-[500px]">
+                    {/* Atmospheric team-color halo */}
+                    <div
+                      className="pointer-events-none absolute inset-[-15%] blur-3xl"
+                      style={{
+                        background: `radial-gradient(ellipse 60% 70% at 50% 45%, ${heroTeamColor}66 0%, ${heroTeamColor}22 40%, transparent 75%)`,
+                      }}
                     />
-                  )}
-                </div>
-              ) : (
-                <Skeleton className="h-80 w-80 rounded-full" />
+                    {/* Cone of light from above */}
+                    <div
+                      className="pointer-events-none absolute inset-x-0 -top-8 h-3/4"
+                      style={{
+                        background: `linear-gradient(180deg, ${heroTeamColor}3A 0%, transparent 65%)`,
+                      }}
+                    />
+                    {/* Watermark team abbreviation behind player */}
+                    {statOfDay.teamAbbr && (
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute -top-4 left-0 right-0 text-center font-[family-name:var(--font-barlow)] font-black leading-none tracking-[-0.07em] select-none mix-blend-screen"
+                        style={{
+                          color: heroTeamColor,
+                          fontSize: "12rem",
+                          opacity: 0.14,
+                        }}
+                      >
+                        {statOfDay.teamAbbr}
+                      </span>
+                    )}
+                    {/* Cut-out player headshot — no circle frame, fades at bottom */}
+                    <Link
+                      href={statOfDay.ctaHref}
+                      className="absolute inset-0 block no-jiggle"
+                      aria-label={`View ${statOfDay.photoName} profile`}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${statOfDay.photoId}.png`}
+                        alt={statOfDay.photoName}
+                        loading="eager"
+                        decoding="async"
+                        className="absolute inset-0 w-full h-full object-contain object-bottom avatar-morph"
+                        style={{
+                          filter: `drop-shadow(0 30px 40px ${heroTeamColor}55) drop-shadow(0 10px 20px rgba(0,0,0,0.5))`,
+                          maskImage: "linear-gradient(180deg, black 0%, black 88%, transparent 100%)",
+                          WebkitMaskImage: "linear-gradient(180deg, black 0%, black 88%, transparent 100%)",
+                        }}
+                      />
+                    </Link>
+                  </div>
+                );
+              })() : (
+                <Skeleton className="h-[500px] w-[380px] rounded-3xl" />
               )}
             </div>
           </div>
@@ -526,11 +618,11 @@ export default function HomePage() {
                 <p className="section-label text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-2">
                   Today · {games.length} game{games.length !== 1 ? "s" : ""}
                 </p>
-                <h2 className="font-[family-name:var(--font-barlow)] font-black text-4xl lg:text-5xl tracking-[-0.03em] text-[#F5F5F7]">
+                <h2 className="font-[family-name:var(--font-barlow)] font-black text-4xl lg:text-5xl tracking-[-0.03em] text-[#F5F5F7] text-shine">
                   {games.some(g => g.gameStatus === 2) ? "Games on now." : "On the slate."}
                 </h2>
               </div>
-              <Link href="/scores" className="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-[#8A8A93] hover:text-[#F5F5F7] transition-colors">
+              <Link href="/scores" className="hidden sm:inline-flex items-center gap-1 min-h-[44px] px-3 -mr-3 text-sm font-semibold text-[#8A8A93] hover:text-[#F5F5F7] transition-colors">
                 Full scoreboard <ArrowUpRight size={14} />
               </Link>
             </div>
@@ -558,7 +650,7 @@ export default function HomePage() {
                       key={game.gameId}
                       href={href}
                       className={cn(
-                        "group floating-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-5 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/40",
+                        "group floating-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-5 transition-shadow duration-500 hover:shadow-2xl hover:shadow-black/40",
                         isFav && "ring-1 ring-[#D4B560]/40"
                       )}
                     >
@@ -642,7 +734,7 @@ export default function HomePage() {
               <p className="section-label text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-2">
                 League Pulse
               </p>
-              <h2 className="font-[family-name:var(--font-barlow)] font-black text-4xl lg:text-5xl tracking-[-0.03em] text-[#F5F5F7]">
+              <h2 className="font-[family-name:var(--font-barlow)] font-black text-4xl lg:text-5xl tracking-[-0.03em] text-[#F5F5F7] text-shine">
                 The numbers that matter.
               </h2>
             </div>
@@ -650,8 +742,9 @@ export default function HomePage() {
 
           <div className="stagger-children grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {players.length === 0 && Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={"pulse-skel-" + i} />)}
+            {/* PTS — THE signature card: gradient border + gold sheen (the one gold moment) */}
             {ptsLeader && (
-              <Link href={`/players/${ptsLeader.slug}`} className="floating-card gradient-border gold-sweep group block rounded-3xl p-6 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-[#D4B560]/10">
+              <Link href={`/players/${ptsLeader.slug}`} className="floating-card gradient-border group block rounded-3xl p-6 transition-shadow duration-500 hover:shadow-2xl hover:shadow-[#D4B560]/15">
                 <div className="flex items-center gap-1.5 mb-6">
                   <Flame size={11} className="text-[#D4B560]" />
                   <p className="text-[10px] font-bold tracking-widest uppercase text-[#D4B560]">Scoring</p>
@@ -660,7 +753,7 @@ export default function HomePage() {
                   value={ptsLeader.pts}
                   decimals={1}
                   startOnView
-                  className="block stat-gradient-text font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-7xl tabular-nums tracking-[-0.04em] mb-2"
+                  className="block stat-gold font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-7xl tabular-nums tracking-[-0.04em] mb-2"
                 />
                 <p className="text-[11px] text-[#8A8A93] mb-6 tracking-wide">PPG · {ptsLeader.gp} GP</p>
                 <div>
@@ -668,17 +761,18 @@ export default function HomePage() {
                 </div>
               </Link>
             )}
+            {/* AST — quiet, clean: just floating-card + soft blue accent */}
             {astLeader && (
-              <Link href={`/players/${astLeader.slug}`} className="floating-card gradient-border gold-sweep group block rounded-3xl p-6 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/40">
+              <Link href={`/players/${astLeader.slug}`} className="floating-card group block rounded-3xl p-6 transition-shadow duration-500 hover:shadow-2xl hover:shadow-black/40">
                 <div className="flex items-center gap-1.5 mb-6">
-                  <TrendingUp size={11} className="text-[#8A8A93]" />
-                  <p className="text-[10px] font-bold tracking-widest uppercase text-[#8A8A93]">Assists</p>
+                  <TrendingUp size={11} className="text-[#5B8DEF]" />
+                  <p className="text-[10px] font-bold tracking-widest uppercase text-[#5B8DEF]">Assists</p>
                 </div>
                 <AnimatedNumber
                   value={astLeader.ast}
                   decimals={1}
                   startOnView
-                  className="block stat-gradient-text font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-7xl tabular-nums tracking-[-0.04em] mb-2"
+                  className="block font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-7xl tabular-nums tracking-[-0.04em] mb-2 text-[#F5F5F7]"
                 />
                 <p className="text-[11px] text-[#8A8A93] mb-6 tracking-wide">APG · {astLeader.gp} GP</p>
                 <div>
@@ -686,33 +780,41 @@ export default function HomePage() {
                 </div>
               </Link>
             )}
+            {/* Top Record — champion trophy: bronze radial flourish, no gradient-border */}
             {bestTeam && (
-              <Link href={`/teams/${bestTeam.slug}`} className="floating-card gradient-border gold-sweep group block rounded-3xl p-6 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/40">
-                <div className="flex items-center gap-1.5 mb-6">
-                  <Trophy size={11} className="text-[#8A8A93]" />
-                  <p className="text-[10px] font-bold tracking-widest uppercase text-[#8A8A93]">Top Record</p>
-                </div>
-                <p className="stat-gradient-text font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-7xl tabular-nums tracking-[-0.04em] mb-2">
-                  <AnimatedNumber value={bestTeam.wins} startOnView />
-                  <span style={{ WebkitTextFillColor: "#6E6E76", color: "#6E6E76" }}>–</span>
-                  <AnimatedNumber value={bestTeam.losses} startOnView />
-                </p>
-                <p className="text-[11px] text-[#8A8A93] mb-6 tracking-wide">
-                  {((bestTeam.wins / (bestTeam.wins + bestTeam.losses)) * 100).toFixed(1)}% · {bestTeam.conference}
-                </p>
-                <div>
-                  <p className="text-sm font-semibold text-[#F5F5F7] tracking-tight truncate">{bestTeam.city} {bestTeam.name}</p>
-                  <p className="text-xs text-[#8A8A93]">{bestTeam.abbreviation}</p>
+              <Link href={`/teams/${bestTeam.slug}`} className="floating-card group block rounded-3xl p-6 relative overflow-hidden transition-shadow duration-500 hover:shadow-2xl hover:shadow-[#B89548]/15">
+                <div
+                  className="absolute -top-12 -right-12 h-40 w-40 rounded-full opacity-40 pointer-events-none"
+                  style={{ background: "radial-gradient(circle, rgba(184,149,72,0.35) 0%, transparent 70%)" }}
+                />
+                <div className="relative">
+                  <div className="flex items-center gap-1.5 mb-6">
+                    <Trophy size={11} className="text-[#B89548]" />
+                    <p className="text-[10px] font-bold tracking-widest uppercase text-[#B89548]">Top Record</p>
+                  </div>
+                  <p className="font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-7xl tabular-nums tracking-[-0.04em] mb-2 text-[#F5F5F7]">
+                    <AnimatedNumber value={bestTeam.wins} startOnView />
+                    <span className="text-[#6E6E76]">–</span>
+                    <AnimatedNumber value={bestTeam.losses} startOnView />
+                  </p>
+                  <p className="text-[11px] text-[#8A8A93] mb-6 tracking-wide">
+                    {((bestTeam.wins / (bestTeam.wins + bestTeam.losses)) * 100).toFixed(1)}% · {bestTeam.conference}
+                  </p>
+                  <div>
+                    <p className="text-sm font-semibold text-[#F5F5F7] tracking-tight truncate">{bestTeam.city} {bestTeam.name}</p>
+                    <p className="text-xs text-[#8A8A93]">{bestTeam.abbreviation}</p>
+                  </div>
                 </div>
               </Link>
             )}
+            {/* Hottest — green theme retained, no gold-sweep (let green own this card) */}
             {hottest && (
-              <Link href={`/teams/${hottest.slug}`} className="floating-card gold-sweep group block rounded-3xl bg-gradient-to-br from-[#34D399]/15 via-[#1C1C24] to-[#131318] p-6 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-[#34D399]/10">
+              <Link href={`/teams/${hottest.slug}`} className="floating-card group block rounded-3xl bg-gradient-to-br from-[#34D399]/15 via-[#1C1C24] to-[#131318] p-6 transition-shadow duration-500 hover:shadow-2xl hover:shadow-[#34D399]/15">
                 <div className="flex items-center gap-1.5 mb-6">
                   <Zap size={11} className="text-[#34D399]" />
                   <p className="text-[10px] font-bold tracking-widest uppercase text-[#34D399]">Hottest</p>
                 </div>
-                <p className="stat-gradient-text font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-7xl tabular-nums tracking-[-0.04em] mb-2">
+                <p className="font-[family-name:var(--font-barlow)] font-black text-6xl lg:text-7xl tabular-nums tracking-[-0.04em] mb-2 text-[#34D399]">
                   {hottest.streak}
                 </p>
                 <p className="text-[11px] text-[#8A8A93] mb-6 tracking-wide">{hottest.l10} last 10</p>
@@ -742,11 +844,11 @@ export default function HomePage() {
                 <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-2">
                   Leaderboard
                 </p>
-                <h2 className="font-[family-name:var(--font-barlow)] font-black text-3xl lg:text-4xl tracking-[-0.03em] text-[#F5F5F7]">
+                <h2 className="font-[family-name:var(--font-barlow)] font-black text-3xl lg:text-4xl tracking-[-0.03em] text-[#F5F5F7] text-shine">
                   Top scorers.
                 </h2>
               </div>
-              <Link href="/players" className="text-sm font-semibold text-[#8A8A93] hover:text-[#F5F5F7] transition-colors">
+              <Link href="/players" className="inline-flex items-center min-h-[44px] px-3 -mr-3 text-sm font-semibold text-[#8A8A93] hover:text-[#F5F5F7] transition-colors">
                 See all →
               </Link>
             </div>
@@ -772,7 +874,13 @@ export default function HomePage() {
                     i !== 5 && "border-b border-white/[0.04]"
                   )}
                 >
-                  <span className="font-[family-name:var(--font-barlow)] font-black text-2xl tabular-nums w-8 text-[#6E6E76]">
+                  <span className={cn(
+                    "font-[family-name:var(--font-barlow)] font-black text-2xl tabular-nums w-8",
+                    i === 0 && "text-[#D4B560] drop-shadow-[0_0_10px_rgba(212,181,96,0.45)]",
+                    i === 1 && "text-[#B8B8BD]",
+                    i === 2 && "text-[#A07C46]",
+                    i > 2 && "text-[#6E6E76]"
+                  )}>
                     {i + 1}
                   </span>
                   <PlayerAvatar playerId={p.id} fullName={p.fullName} size="sm" />
@@ -805,7 +913,7 @@ export default function HomePage() {
                 <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-2">
                   News
                 </p>
-                <h2 className="font-[family-name:var(--font-barlow)] font-black text-3xl lg:text-4xl tracking-[-0.03em] text-[#F5F5F7]">
+                <h2 className="font-[family-name:var(--font-barlow)] font-black text-3xl lg:text-4xl tracking-[-0.03em] text-[#F5F5F7] text-shine">
                   Latest.
                 </h2>
               </div>
@@ -818,7 +926,7 @@ export default function HomePage() {
                   href={n.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="floating-card gold-sweep group block rounded-2xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-4 transition-all duration-300 hover:scale-[1.02]"
+                  className="floating-card group block rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-4 transition-shadow duration-300"
                 >
                   <p className="text-sm font-semibold text-[#F5F5F7] group-hover:text-[#D4B560] leading-snug line-clamp-2 transition-colors tracking-tight">
                     {n.title}
@@ -827,7 +935,7 @@ export default function HomePage() {
                 </a>
               ))}
             </div>
-            <Link href="/news" className="block text-sm font-semibold text-[#8A8A93] hover:text-[#F5F5F7] transition-colors mt-6 text-center">
+            <Link href="/news" className="flex items-center justify-center min-h-[44px] text-sm font-semibold text-[#8A8A93] hover:text-[#F5F5F7] transition-colors mt-6">
               All news →
             </Link>
           </div>
@@ -836,7 +944,7 @@ export default function HomePage() {
 
       {/* LAST NIGHT'S RECAP */}
       {topFinishYesterday && (
-        <section className="px-4 lg:px-12 py-6 lg:py-8" data-reveal>
+        <section className="px-4 lg:px-12 py-5 lg:py-10" data-reveal>
           <div className="max-w-6xl mx-auto">
             <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-3">
               Last night
@@ -907,12 +1015,12 @@ export default function HomePage() {
       )}
 
       {/* TRENDING + MATCHUP OF THE DAY */}
-      <section className="px-4 lg:px-12 pt-4 pb-10 lg:pb-20" data-reveal data-reveal-delay="3">
+      <section className="px-4 lg:px-12 pt-5 pb-10 lg:pt-10 lg:pb-20" data-reveal data-reveal-delay="3">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
           {/* Trending */}
           <div>
             <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-2">Trending</p>
-            <h2 className="font-[family-name:var(--font-barlow)] font-black text-3xl lg:text-4xl tracking-[-0.03em] text-[#F5F5F7] mb-6">
+            <h2 className="font-[family-name:var(--font-barlow)] font-black text-3xl lg:text-4xl tracking-[-0.03em] text-[#F5F5F7] text-shine mb-6">
               Heating up.
             </h2>
             <div className="floating-card rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] divide-y divide-white/[0.04]">
@@ -960,7 +1068,7 @@ export default function HomePage() {
           {/* Matchup of the Day */}
           <div>
             <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-2">Matchup of the day</p>
-            <h2 className="font-[family-name:var(--font-barlow)] font-black text-3xl lg:text-4xl tracking-[-0.03em] text-[#F5F5F7] mb-6">
+            <h2 className="font-[family-name:var(--font-barlow)] font-black text-3xl lg:text-4xl tracking-[-0.03em] text-[#F5F5F7] text-shine mb-6">
               Must-watch.
             </h2>
             {(() => {
@@ -970,9 +1078,11 @@ export default function HomePage() {
                 games[0];
               if (!pick) {
                 return (
-                  <div className="floating-card no-jiggle rounded-3xl p-8 text-center">
-                    <p className="text-sm text-[#8A8A93]">No games on the slate today.</p>
-                  </div>
+                  <CourtEmpty
+                    compact
+                    title="No games on the slate today."
+                    subtitle="Check back tomorrow for the next tip-off."
+                  />
                 );
               }
               const awayInfo = teamLookup[pick.awayTeam.teamTricode];
@@ -1021,13 +1131,13 @@ export default function HomePage() {
       </section>
 
       {/* Newsletter — minimal Apple style */}
-      <section className="px-6 lg:px-12 py-20 lg:py-32" data-reveal data-reveal-delay="4">
+      <section className="px-6 lg:px-12 py-16 lg:py-28" data-reveal data-reveal-delay="4">
         <div className="max-w-3xl mx-auto text-center">
           <div className="inline-flex items-center gap-1.5 mb-6">
             <Sparkles size={11} className="text-[#D4B560]" />
             <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#D4B560]">Newsletter</p>
           </div>
-          <h2 className="font-[family-name:var(--font-barlow)] font-black text-4xl lg:text-6xl tracking-[-0.04em] text-[#F5F5F7] mb-6 leading-[1.05]">
+          <h2 className="font-[family-name:var(--font-barlow)] font-black text-4xl lg:text-6xl tracking-[-0.04em] text-[#F5F5F7] mb-6 leading-[1.05] text-shine">
             NBA intel,<br />every morning.
           </h2>
           <p className="text-base lg:text-lg text-[#8A8A93] max-w-md mx-auto mb-10 leading-relaxed">

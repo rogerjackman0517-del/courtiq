@@ -171,7 +171,7 @@ export function TopNav() {
           {streak}
         </span>
       )}
-      <Link href="/scores" className="hidden lg:flex items-center gap-1.5 text-xs font-semibold text-[#22C55E] bg-[#22C55E]/10 border border-[#22C55E]/20 px-2.5 py-1 rounded-full hover:bg-[#22C55E]/20 transition-colors">
+      <Link href="/scores" className="shine hidden lg:flex items-center gap-1.5 text-xs font-semibold text-[#22C55E] bg-[#22C55E]/10 border border-[#22C55E]/20 px-2.5 py-1 rounded-full hover:bg-[#22C55E]/20 transition-colors">
         <span className="relative flex h-1.5 w-1.5">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#22C55E] opacity-75"></span>
           <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#22C55E]"></span>
@@ -304,7 +304,7 @@ export function TopNav() {
         ) : (
           <Link
             href="/login"
-            className="flex items-center gap-1.5 text-xs font-semibold bg-[#D4B560] text-black px-3 py-1.5 rounded-lg hover:bg-[#D4B55F] transition-colors"
+            className="shine flex items-center gap-1.5 text-xs font-semibold bg-[#D4B560] text-black px-3 py-1.5 rounded-lg hover:bg-[#D4B55F] transition-colors"
           >
             <Zap size={12} />
             Get Pro

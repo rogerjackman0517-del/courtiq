@@ -83,7 +83,7 @@ export function Sidebar() {
         {navGroups.map((group, gi) => (
           <div key={gi} className={cn(gi > 0 && "mt-4")}>
             {group.label && (
-              <p className="px-3 mb-1.5 text-[9px] font-bold tracking-[0.2em] uppercase text-[#6E6E76]">
+              <p className="section-label ml-3 mb-1.5 text-[9px] font-bold tracking-[0.2em] uppercase text-[#6E6E76]">
                 {group.label}
               </p>
             )}
@@ -104,8 +104,8 @@ export function Sidebar() {
                     className={cn(
                       "group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
                       active
-                        ? "bg-white/[0.06] text-[#F5F5F7] font-semibold"
-                        : "text-[#8A8A93] hover:text-[#F5F5F7] hover:bg-white/[0.03]"
+                        ? "bg-white/[0.06] text-[#F5F5F7] font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+                        : "text-[#8A8A93] hover:text-[#F5F5F7] hover:bg-white/[0.03] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
                     )}
                   >
                     {active && (

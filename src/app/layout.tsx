@@ -11,6 +11,7 @@ import { CommandPalette } from "@/components/layout/CommandPalette";
 import { Splash } from "@/components/ui/Splash";
 import { ToastProvider } from "@/components/ui/Toast";
 import { TiltProvider } from "@/components/ui/TiltProvider";
+import { CursorSpotlight } from "@/components/ui/CursorSpotlight";
 import { HelpModal } from "@/components/layout/HelpModal";
 import { OnboardingTooltip } from "@/components/ui/OnboardingTooltip";
 import { Analytics } from "@vercel/analytics/next";
@@ -76,6 +77,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <HelpModal />
           <OnboardingTooltip />
           <TiltProvider />
+          <CursorSpotlight />
           </ToastProvider>
           <Analytics />
           <SpeedInsights />

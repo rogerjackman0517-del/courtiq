@@ -26,64 +26,67 @@ function LinkedinMark() {
 
 export function Footer() {
   return (
-    <footer className="mt-16 lg:mt-24 border-t border-white/[0.06] bg-[#0A0A0E]">
+    <footer className="relative mt-16 lg:mt-24 border-t border-white/[0.06] bg-[#0A0A0E]">
+      {/* Gold gradient shimmer line at the top, matching section dividers */}
+      <div className="absolute top-0 left-0 right-0 h-px divider-shimmer" />
+
       <div className="max-w-6xl mx-auto px-6 lg:px-12 py-12 lg:py-16">
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-10">
 
           {/* Brand */}
           <div className="max-w-md">
             <Link href="/" className="inline-flex items-center gap-2.5 group no-jiggle">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0A0A0E] border border-[#D4B560]/40">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0A0A0E] border border-[#D4B560]/40 shadow-lg shadow-[#D4B560]/10 group-hover:border-[#D4B560]/80 group-hover:shadow-[#D4B560]/25 transition-all">
                 <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="#D4B560" strokeWidth="2.5" strokeLinecap="round">
                   <path d="M17 4 A9 9 0 1 0 17 20" />
                   <circle cx="12" cy="12" r="2" fill="#D4B560" stroke="none" />
                 </svg>
               </div>
-              <span className="font-[family-name:var(--font-barlow)] font-bold text-xl tracking-[-0.04em] text-[#F5F5F7]">
-                Court<span className="text-[#D4B560]">IQ</span>
+              <span className="font-[family-name:var(--font-barlow)] font-bold text-xl tracking-[-0.04em] text-[#F5F5F7] text-shine">
+                Court<span className="text-[#D4B560]" style={{ WebkitTextFillColor: "#D4B560" }}>IQ</span>
               </span>
             </Link>
-            <p className="text-sm text-[#8A8A93] mt-4 leading-relaxed">
+            <p className="text-sm text-[#8A8A93] mt-4 leading-relaxed max-w-sm">
               Real-time NBA stats, scores, and league insights. Built for fans who love the numbers.
             </p>
           </div>
 
           {/* Links */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-12 gap-y-3">
-            <div className="space-y-3">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76]">Explore</p>
-              <Link href="/players" className="block text-sm text-[#8A8A93] hover:text-[#F5F5F7]">Players</Link>
-              <Link href="/teams" className="block text-sm text-[#8A8A93] hover:text-[#F5F5F7]">Teams</Link>
-              <Link href="/scores" className="block text-sm text-[#8A8A93] hover:text-[#F5F5F7]">Scores</Link>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-12 gap-y-2">
+            <div>
+              <p className="section-label ml-2.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76] mb-3">Explore</p>
+              <Link href="/players" className="flex items-center min-h-[36px] text-sm text-[#8A8A93] hover:text-[#F5F5F7] transition-colors">Players</Link>
+              <Link href="/teams" className="flex items-center min-h-[36px] text-sm text-[#8A8A93] hover:text-[#F5F5F7] transition-colors">Teams</Link>
+              <Link href="/scores" className="flex items-center min-h-[36px] text-sm text-[#8A8A93] hover:text-[#F5F5F7] transition-colors">Scores</Link>
             </div>
-            <div className="space-y-3">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76]">Stats</p>
-              <Link href="/standings" className="block text-sm text-[#8A8A93] hover:text-[#F5F5F7]">Standings</Link>
-              <Link href="/stats" className="block text-sm text-[#8A8A93] hover:text-[#F5F5F7]">Stat Leaders</Link>
-              <Link href="/draft" className="block text-sm text-[#8A8A93] hover:text-[#F5F5F7]">Draft</Link>
+            <div>
+              <p className="section-label ml-2.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76] mb-3">Stats</p>
+              <Link href="/standings" className="flex items-center min-h-[36px] text-sm text-[#8A8A93] hover:text-[#F5F5F7] transition-colors">Standings</Link>
+              <Link href="/stats" className="flex items-center min-h-[36px] text-sm text-[#8A8A93] hover:text-[#F5F5F7] transition-colors">Stat Leaders</Link>
+              <Link href="/draft" className="flex items-center min-h-[36px] text-sm text-[#8A8A93] hover:text-[#F5F5F7] transition-colors">Draft</Link>
             </div>
-            <div className="space-y-3">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76]">Account</p>
-              <Link href="/billing" className="block text-sm text-[#8A8A93] hover:text-[#F5F5F7]">Pro</Link>
-              <Link href="/news" className="block text-sm text-[#8A8A93] hover:text-[#F5F5F7]">News</Link>
-              <Link href="/login" className="block text-sm text-[#8A8A93] hover:text-[#F5F5F7]">Sign in</Link>
+            <div>
+              <p className="section-label ml-2.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76] mb-3">Account</p>
+              <Link href="/billing" className="flex items-center min-h-[36px] text-sm text-[#8A8A93] hover:text-[#F5F5F7] transition-colors">Pro</Link>
+              <Link href="/news" className="flex items-center min-h-[36px] text-sm text-[#8A8A93] hover:text-[#F5F5F7] transition-colors">News</Link>
+              <Link href="/login" className="flex items-center min-h-[36px] text-sm text-[#8A8A93] hover:text-[#F5F5F7] transition-colors">Sign in</Link>
             </div>
           </div>
         </div>
 
         {/* Bottom strip */}
         <div className="mt-12 pt-6 border-t border-white/[0.04] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             <p className="text-xs text-[#6E6E76] tracking-wide">
               © {new Date().getFullYear()} CourtIQ. Built by{" "}
               <span className="text-[#F5F5F7] font-medium">Roger Jackman</span>.
             </p>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <a
                 href="https://github.com/rogerjackman0517-del/courtiq"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#6E6E76] hover:text-[#D4B560] transition-colors"
+                className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-[#6E6E76] hover:text-[#D4B560] hover:bg-[#D4B560]/[0.08] hover:shadow-[0_0_12px_rgba(212,181,96,0.18)] transition-all"
                 aria-label="GitHub"
               >
                 <GithubMark />
@@ -92,7 +95,7 @@ export function Footer() {
                 href="https://twitter.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#6E6E76] hover:text-[#D4B560] transition-colors"
+                className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-[#6E6E76] hover:text-[#D4B560] hover:bg-[#D4B560]/[0.08] hover:shadow-[0_0_12px_rgba(212,181,96,0.18)] transition-all"
                 aria-label="Twitter"
               >
                 <TwitterMark />
@@ -101,7 +104,7 @@ export function Footer() {
                 href="https://linkedin.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#6E6E76] hover:text-[#D4B560] transition-colors"
+                className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-[#6E6E76] hover:text-[#D4B560] hover:bg-[#D4B560]/[0.08] hover:shadow-[0_0_12px_rgba(212,181,96,0.18)] transition-all"
                 aria-label="LinkedIn"
               >
                 <LinkedinMark />

@@ -225,30 +225,36 @@ export default function TeamProfilePage() {
   const topBlocker = [...roster].sort((a, b) => b.blk - a.blk)[0];
 
   return (
-    <div className="pb-24 lg:pb-12">
+    <div
+      className="pb-24 lg:pb-12"
+      style={{ ["--team-glow" as string]: `${color}66` }}
+    >
 
-      {/* HERO with subtle team color wash */}
+      {/* HERO — magazine-cover layout with full team identity */}
       <section
-        className="relative px-6 lg:px-12 pt-16 lg:pt-20 pb-12 overflow-hidden"
+        className="relative px-6 lg:px-12 pt-16 lg:pt-20 pb-12 overflow-hidden min-h-[600px] lg:min-h-[680px]"
         data-reveal
       >
-        {/* Team color radial glow background */}
+        {/* Team color ambient wash — anchored to the right */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-30"
+          className="absolute inset-0 pointer-events-none"
           style={{
-            background: `radial-gradient(circle at 80% 20%, ${color}40 0%, transparent 50%)`,
+            background: `radial-gradient(ellipse 80% 70% at 78% 50%, ${color}55 0%, ${color}18 40%, transparent 70%)`,
           }}
         />
+        {/* Diagonal team color sweep */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-20"
+          className="absolute inset-0 pointer-events-none opacity-[0.10]"
           style={{
-            background: `radial-gradient(circle at 20% 80%, ${color}30 0%, transparent 60%)`,
+            background: `linear-gradient(135deg, ${color} 0%, transparent 55%)`,
           }}
         />
+        {/* Bottom dark vignette */}
         <div
-          className="absolute inset-0 opacity-[0.06] pointer-events-none"
-          style={{ background: `radial-gradient(ellipse at top left, ${color}, transparent 60%)` }}
+          className="absolute inset-x-0 bottom-0 h-1/3 pointer-events-none"
+          style={{ background: "linear-gradient(180deg, transparent 0%, rgba(10,10,14,0.55) 100%)" }}
         />
+
         <div className="relative max-w-6xl mx-auto">
 
           {/* Back link + favorite */}
@@ -275,50 +281,106 @@ export default function TeamProfilePage() {
             </button>
           </div>
 
-          {/* Eyebrow */}
-          <div className="flex flex-wrap items-center gap-3 mb-6">
-            <span
-              className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em]"
-              style={{ color }}
-            >
-              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: color }} />
-              {team.conference}ern Conference {team.confRank ? `· #${team.confRank}` : ""}
-            </span>
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76]">
-              · {tier}
-            </span>
-          </div>
-
-          {/* Big team display */}
-          <div className="flex flex-col lg:flex-row lg:items-center gap-8 mb-10">
-            <TeamLogo teamId={team.id} abbreviation={team.abbreviation} primaryColor={color} size="xl" className="h-32 w-32 shrink-0" />
-            <h1 className="font-[family-name:var(--font-barlow)] font-black text-[clamp(2.25rem,8vw,7rem)] leading-[0.9] tracking-[-0.045em] text-[#F5F5F7]">
-              {team.city}<br />
-              <span style={{ color }}>{team.name}</span>
-            </h1>
-          </div>
-
-          {/* Record block */}
-          <div className="flex flex-wrap items-end gap-x-12 gap-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-8 lg:gap-12 items-end">
+            {/* LEFT: eyebrow + name + record */}
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76] mb-2">Record</p>
-              <p className="font-[family-name:var(--font-barlow)] font-black text-6xl tabular-nums tracking-[-0.04em] text-[#F5F5F7]">
-                {team.wins}<span className="text-[#3A3A42]">–{team.losses}</span>
-              </p>
-              <p className="text-xs text-[#8A8A93] mt-1">{winPct}% win rate</p>
-            </div>
-            {team.streak && (
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76] mb-2">Streak</p>
-                <p className={cn(
-                  "font-[family-name:var(--font-barlow)] font-black text-6xl tabular-nums tracking-[-0.04em]",
-                  streakUp ? "text-[#34D399]" : "text-[#F87171]"
-                )}>
-                  {team.streak}
-                </p>
-                <p className="text-xs text-[#8A8A93] mt-1">{team.l10 ? `${team.l10} last 10` : "current"}</p>
+              {/* Eyebrow */}
+              <div className="flex flex-wrap items-center gap-3 mb-6">
+                <span
+                  className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em]"
+                  style={{ color }}
+                >
+                  <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: color }} />
+                  {team.conference}ern Conference {team.confRank ? `· #${team.confRank}` : ""}
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76]">
+                  · {tier}
+                </span>
               </div>
-            )}
+
+              {/* Big team name — magazine title style */}
+              <h1 className="font-[family-name:var(--font-barlow)] font-black leading-[0.85] tracking-[-0.045em] mb-8">
+                <span className="mask-reveal block text-[clamp(2.25rem,9vw,6rem)] text-[#F5F5F7]">{team.city}</span>
+                <span
+                  className="mask-reveal block text-[clamp(2.25rem,9vw,6rem)]"
+                  style={{ color, animationDelay: "150ms" }}
+                >
+                  {team.name}
+                </span>
+              </h1>
+
+              {/* Record + streak stat columns */}
+              <div className="flex flex-wrap items-end gap-x-10 gap-y-4">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76] mb-2">Record</p>
+                  <p className="font-[family-name:var(--font-barlow)] font-black text-5xl lg:text-6xl tabular-nums tracking-[-0.04em] text-[#F5F5F7]">
+                    {team.wins}<span className="text-[#3A3A42]">–{team.losses}</span>
+                  </p>
+                  <p className="text-xs text-[#8A8A93] mt-1">{winPct}% win rate</p>
+                </div>
+                {team.streak && (
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76] mb-2">Streak</p>
+                    <p className={cn(
+                      "font-[family-name:var(--font-barlow)] font-black text-5xl lg:text-6xl tabular-nums tracking-[-0.04em]",
+                      streakUp ? "text-[#34D399]" : "text-[#F87171]"
+                    )}>
+                      {team.streak}
+                    </p>
+                    <p className="text-xs text-[#8A8A93] mt-1">{team.l10 ? `${team.l10} last 10` : "current"}</p>
+                  </div>
+                )}
+                {team.confRank && (
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76] mb-2">Seed</p>
+                    <p className="font-[family-name:var(--font-barlow)] font-black text-5xl lg:text-6xl tabular-nums tracking-[-0.04em]" style={{ color }}>
+                      #{team.confRank}
+                    </p>
+                    <p className="text-xs text-[#8A8A93] mt-1">in {team.conference[0]}.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* RIGHT: oversized team logo with halo + abbreviation watermark */}
+            <div className="relative flex justify-center lg:justify-end self-end">
+              <div className="relative w-[280px] h-[360px] sm:w-[340px] sm:h-[420px] lg:w-[400px] lg:h-[480px] flex items-center justify-center">
+                {/* Atmospheric team color halo */}
+                <div
+                  className="pointer-events-none absolute inset-[-15%] blur-3xl"
+                  style={{
+                    background: `radial-gradient(ellipse 60% 70% at 50% 45%, ${color}77 0%, ${color}22 40%, transparent 75%)`,
+                  }}
+                />
+                {/* Cone of light from above */}
+                <div
+                  className="pointer-events-none absolute inset-x-0 -top-10 h-3/4"
+                  style={{
+                    background: `linear-gradient(180deg, ${color}45 0%, transparent 70%)`,
+                  }}
+                />
+                {/* Abbreviation watermark behind logo */}
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 text-center font-[family-name:var(--font-barlow)] font-black leading-none tracking-[-0.07em] select-none mix-blend-screen"
+                  style={{
+                    color,
+                    fontSize: "clamp(8rem, 18vw, 18rem)",
+                    opacity: 0.10,
+                  }}
+                >
+                  {team.abbreviation}
+                </span>
+                {/* The logo itself */}
+                <TeamLogo
+                  teamId={team.id}
+                  abbreviation={team.abbreviation}
+                  primaryColor={color}
+                  size="xl"
+                  className="relative !h-56 !w-56 lg:!h-72 lg:!w-72 drop-shadow-2xl"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -334,7 +396,7 @@ export default function TeamProfilePage() {
           <div className="max-w-6xl mx-auto">
             <div className="mb-10">
               <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-2">Team Leaders</p>
-              <h2 className="font-[family-name:var(--font-barlow)] font-black text-4xl lg:text-5xl tracking-[-0.03em] text-[#F5F5F7]">
+              <h2 className="font-[family-name:var(--font-barlow)] font-black text-4xl lg:text-5xl tracking-[-0.03em] text-[#F5F5F7] text-shine">
                 The franchise.
               </h2>
             </div>
@@ -344,7 +406,9 @@ export default function TeamProfilePage() {
                 <Link href={`/players/${topScorer.slug}`} className="floating-card no-jiggle group block rounded-3xl p-5 transition-transform hover:scale-[1.02]">
                   <div className="flex items-start justify-between mb-3">
                     <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color }}>Top Scorer</p>
-                    <PlayerAvatar playerId={topScorer.id} fullName={topScorer.fullName} size="md" className="ring-2 ring-[#D4B560]/30" />
+                    <div className="rounded-full p-[2px]" style={{ background: `${color}55` }}>
+                      <PlayerAvatar playerId={topScorer.id} fullName={topScorer.fullName} size="md" />
+                    </div>
                   </div>
                   <p className="font-[family-name:var(--font-barlow)] font-black text-5xl tabular-nums tracking-[-0.04em] stat-gold mb-1">
                     {topScorer.pts.toFixed(1)}
@@ -417,7 +481,7 @@ export default function TeamProfilePage() {
           <div className="flex items-end justify-between mb-10">
             <div>
               <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-2">Roster</p>
-              <h2 className="font-[family-name:var(--font-barlow)] font-black text-4xl lg:text-5xl tracking-[-0.03em] text-[#F5F5F7]">
+              <h2 className="font-[family-name:var(--font-barlow)] font-black text-4xl lg:text-5xl tracking-[-0.03em] text-[#F5F5F7] text-shine">
                 Every player.
               </h2>
             </div>

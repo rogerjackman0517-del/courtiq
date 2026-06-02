@@ -41,7 +41,8 @@ export function Lightbox({ src, alt, open, onClose }: Props) {
       <img
         src={src}
         alt={alt}
-        className="max-h-[85vh] max-w-[90vw] rounded-2xl shadow-2xl object-contain"
+        decoding="async"
+        className="max-h-[85vh] max-w-[90vw] rounded-2xl shadow-2xl object-contain avatar-morph"
         onClick={(e) => e.stopPropagation()}
       />
     </div>

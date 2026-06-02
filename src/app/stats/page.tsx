@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { PlayerAvatar } from "@/components/players/PlayerAvatar";
 import { TeamLogo } from "@/components/teams/TeamLogo";
+import { TEAM_COLORS } from "@/lib/teamColors";
+import { StatLabel } from "@/components/ui/StatLabel";
 import { Search, X } from "lucide-react";
 
 type PlayerRow = {
@@ -84,6 +86,38 @@ export default function StatsPage() {
   function formatVal(val: number, col: ColDef): string {
     if (col.pct) return (val * 100).toFixed(1) + "%";
     return val.toFixed(col.decimals);
+  }
+
+  /**
+   * Per-column percentile map: for each stat column, rank every visible
+   * player so we can tint each cell as a heatmap (top 10% gold, bottom 10%
+   * blue, etc.). All COLS happen to be "higher is better"; if a "lower is
+   * better" col is ever added (e.g. TOV), invert the ranking for that col.
+   */
+  const columnPercentiles = useMemo(() => {
+    const result: Record<string, Map<number, number>> = {};
+    if (rows.length === 0) return result;
+    COLS.forEach((col) => {
+      const sorted = [...rows].sort(
+        (a, b) => ((b[col.key] as number) ?? 0) - ((a[col.key] as number) ?? 0)
+      );
+      const map = new Map<number, number>();
+      const max = Math.max(1, sorted.length - 1);
+      sorted.forEach((p, i) => {
+        // 0 = worst, 1 = best
+        map.set(p.id, 1 - i / max);
+      });
+      result[col.key as string] = map;
+    });
+    return result;
+  }, [rows]);
+
+  function heatmapBg(pctile: number): string {
+    if (pctile >= 0.90) return "rgba(212, 181, 96, 0.22)";    // top 10% — gold
+    if (pctile >= 0.75) return "rgba(212, 181, 96, 0.10)";    // top 25% — warm
+    if (pctile <= 0.10) return "rgba(91, 141, 239, 0.20)";    // bottom 10% — blue
+    if (pctile <= 0.25) return "rgba(91, 141, 239, 0.08)";    // bottom 25% — cool
+    return "transparent";
   }
 
   const activeCol = COLS.find(c => c.key === sortKey);
@@ -206,6 +240,27 @@ export default function StatsPage() {
             )}
           </div>
 
+          {/* Heatmap legend */}
+          <div className="flex flex-wrap items-center gap-2 mb-6 text-[10px] tracking-wider uppercase text-[#6E6E76]">
+            <span>Heatmap:</span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="inline-block h-2 w-4 rounded" style={{ background: "rgba(91, 141, 239, 0.20)" }} />
+              Bottom 10%
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="inline-block h-2 w-4 rounded" style={{ background: "rgba(91, 141, 239, 0.08)" }} />
+              Bottom 25%
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="inline-block h-2 w-4 rounded" style={{ background: "rgba(212, 181, 96, 0.10)" }} />
+              Top 25%
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="inline-block h-2 w-4 rounded" style={{ background: "rgba(212, 181, 96, 0.22)" }} />
+              Top 10%
+            </span>
+          </div>
+
           {error && (
             <div className="rounded-2xl border border-[#F87171]/30 bg-[#F87171]/10 px-5 py-4 mb-6 text-sm text-[#F87171]">
               Failed to load: {error}
@@ -215,13 +270,15 @@ export default function StatsPage() {
           {/* Table */}
           <div className="floating-card rounded-3xl bg-gradient-to-br from-[#1C1C24] to-[#131318] overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="sticky-thead w-full text-sm">
                 <thead>
                   <tr className="border-b border-white/[0.06]">
                     <th className="text-left px-5 py-4 w-12 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">#</th>
                     <th className="text-left px-5 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">Player</th>
                     <th className="text-left px-5 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">Team</th>
-                    <th className="text-right px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">GP</th>
+                    <th className="text-right px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">
+                      <StatLabel abbr="GP" />
+                    </th>
                     {COLS.map(col => (
                       <th key={col.key as string} className={cn("text-right px-3 py-4", COLS[COLS.length - 1].key === col.key && "pr-6")}>
                         <button
@@ -231,7 +288,7 @@ export default function StatsPage() {
                             sortKey === col.key ? "text-[#D4B560]" : "text-[#6E6E76] hover:text-[#F5F5F7]"
                           )}
                         >
-                          {col.label}
+                          <StatLabel abbr={col.label} noHint />
                         </button>
                       </th>
                     ))}
@@ -240,10 +297,26 @@ export default function StatsPage() {
                 <tbody>
                   {loading && Array.from({ length: 10 }).map((_, i) => <PlayerRowSkeleton key={"stat-skel-" + i} />)}
                   {!loading && rows.length === 0 && !error && (
-                    <tr><td colSpan={4 + COLS.length} className="px-5 py-16 text-center text-[#6E6E76] text-sm">No players found.</td></tr>
+                    <tr>
+                      <td colSpan={4 + COLS.length} className="px-5 py-16 text-center">
+                        <div className="flex flex-col items-center gap-3">
+                          <svg viewBox="0 0 24 24" className="h-10 w-10 opacity-30" fill="none" stroke="#D4B560" strokeWidth="1.5" strokeLinecap="round">
+                            <circle cx="11" cy="11" r="7" />
+                            <path d="M16.5 16.5 L21 21" />
+                            <line x1="8" y1="11" x2="14" y2="11" />
+                          </svg>
+                          <p className="text-sm text-[#8A8A93] font-medium">No players found</p>
+                          <p className="text-xs text-[#6E6E76]">Try adjusting filters or stat thresholds</p>
+                        </div>
+                      </td>
+                    </tr>
                   )}
                   {rows.map((p, i) => (
-                    <tr key={p.id} className="border-b border-white/[0.03] last:border-b-0 group">
+                    <tr
+                      key={p.id}
+                      className="stat-row border-b border-white/[0.03] last:border-b-0 group"
+                      style={{ ["--stat-row-color" as string]: TEAM_COLORS[p.teamAbbr] ?? "#D4B560" }}
+                    >
                       <td className="px-5 py-3.5">
                         <span className={cn(
                           "font-[family-name:var(--font-barlow)] font-black text-xs tabular-nums",
@@ -267,12 +340,17 @@ export default function StatsPage() {
                       <td className="px-3 py-3.5 text-right text-xs text-[#8A8A93] tabular-nums">{p.gp}</td>
                       {COLS.map(col => {
                         const isActive = sortKey === col.key;
+                        const pctile = columnPercentiles[col.key as string]?.get(p.id) ?? 0.5;
                         return (
-                          <td key={col.key as string} className={cn(
-                            "px-3 py-3.5 text-right font-[family-name:var(--font-barlow)] font-bold tabular-nums",
-                            COLS[COLS.length - 1].key === col.key && "pr-6",
-                            isActive ? "text-[#D4B560]" : "text-[#F5F5F7]"
-                          )}>
+                          <td
+                            key={col.key as string}
+                            className={cn(
+                              "px-3 py-3.5 text-right font-[family-name:var(--font-barlow)] font-bold tabular-nums transition-colors",
+                              COLS[COLS.length - 1].key === col.key && "pr-6",
+                              isActive ? "text-[#D4B560]" : "text-[#F5F5F7]"
+                            )}
+                            style={{ background: heatmapBg(pctile) }}
+                          >
                             {formatVal(p[col.key] as number, col)}
                           </td>
                         );

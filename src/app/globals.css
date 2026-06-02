@@ -19,19 +19,30 @@
     --muted: #8A8A93;
     --muted-strong: #6E6E76;
 
-    /* Accent — used sparingly */
+    /* Accent palette — used sparingly. Each has a semantic role:
+       - gold:       brand / elite / signature stat / above league avg
+       - blue:       below-avg comparison / secondary / scheduled
+       - green:      positive trend / make / hot
+       - green-live: "happening now" — live game indicator (more vibrant than green)
+       - amber:      warning / below-avg / play-in zone
+       - red:        loss / miss / poor stat / injury */
     --gold: #D4B560;
     --gold-soft: rgba(212, 181, 96, 0.1);
     --blue: #5B8DEF;
     --green: #34D399;
+    --green-live: #22C55E;
+    --amber: #F59E0B;
     --red: #F87171;
 
-    /* Motion */
-    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    /* Motion — single source of truth. Use these tokens everywhere. */
+    --ease-out: var(--ease-out);
     --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    --ease-bounce: var(--ease-bounce);
     --duration-fast: 150ms;
     --duration-base: 250ms;
-    --duration-slow: 400ms;
+    --duration-mid: 400ms;
+    --duration-slow: 600ms;
+    --duration-slower: 900ms;
 
     /* Type scale */
     --font-display: "Barlow Condensed", system-ui, sans-serif;
@@ -53,12 +64,26 @@
 
 html {
   color-scheme: dark;
+  scroll-behavior: smooth;
+}
+
+/* Programmatic anchor jumps inside the main scroller (e.g. clicking nav
+   to a section) also use smooth behavior as a fallback when Lenis is off
+   (touch devices, prefers-reduced-motion). */
+main {
+  scroll-behavior: smooth;
 }
 
 body {
+  /* Layered ambient light: overhead white wash + corner color washes.
+     The overhead light gives the whole page a "lit from above" feel so
+     every surface reads as lacquered, not flat. */
   background:
-    radial-gradient(ellipse 70% 55% at 10% 0%, rgba(91, 141, 239, 0.07) 0%, transparent 60%),
-    radial-gradient(ellipse 55% 45% at 90% 100%, rgba(212, 181, 96, 0.06) 0%, transparent 55%),
+    /* Overhead light — subtle white wash from above the viewport */
+    radial-gradient(ellipse 95% 28% at 50% -8%, rgba(255, 255, 255, 0.035) 0%, transparent 70%),
+    /* Existing corner color washes */
+    radial-gradient(ellipse 70% 55% at 10% 0%, rgba(91, 141, 239, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 45% at 90% 100%, rgba(212, 181, 96, 0.07) 0%, transparent 55%),
     var(--background);
   background-attachment: fixed;
   color: var(--foreground);
@@ -92,7 +117,7 @@ body {
   to   { opacity: 1; transform: translateY(0)   scale(1);    }
 }
 .stagger-children > * {
-  animation: staggerReveal 500ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation: staggerReveal 500ms var(--ease-out) backwards;
 }
 .stagger-children > *:nth-child(1) { animation-delay: 0ms; }
 .stagger-children > *:nth-child(2) { animation-delay: 70ms; }
@@ -107,7 +132,7 @@ body {
   to   { opacity: 1; transform: scale(1)    translateY(0);    }
 }
 .search-dropdown {
-  animation: spotlightIn 160ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: spotlightIn 160ms var(--ease-out) both;
   transform-origin: top center;
 }
 
@@ -178,14 +203,14 @@ a, button {
               box-shadow var(--duration-base) var(--ease-out);
 }
 
-/* Hover: subtle lift + slight zoom for interactive elements */
+/* Hover: subtle lift for interactive elements (calmed from 1.06) */
 button:hover, a:hover {
-  transform: scale(1.06);
+  transform: scale(1.02);
 }
 
 /* Press: snap inward for tactile feedback */
 button:active, a:active {
-  transform: scale(0.92);
+  transform: scale(0.96);
   transition-duration: 80ms;
 }
 
@@ -221,14 +246,20 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 .stat-elite  { color: var(--gold); }
 .stat-great  { color: var(--green); }
 .stat-avg    { color: var(--foreground); }
-.stat-below  { color: #F59E0B; }
+.stat-below  { color: var(--amber); }
 .stat-poor   { color: var(--red); }
 
-/* Glass surface — used in nav, headers */
+/* Glass surface — used in nav, headers. Light frost + polished top hairline. */
 .glass {
-  background: var(--surface-glass);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0) 30%
+  ),
+  var(--surface-glass);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset;
 }
 
 /* Subtle gradient on hover for interactive surfaces */
@@ -253,20 +284,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 .text-display { line-height: 1.05; }
 .text-body { line-height: 1.6; }
 
-/* Subtle reveal on scroll-into-view (used by sections) */
-@keyframes revealUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-[data-reveal] {
-  animation: revealUp var(--duration-slow) var(--ease-out) backwards;
-}
-
-[data-reveal-delay="1"] { animation-delay: 50ms; }
-[data-reveal-delay="2"] { animation-delay: 100ms; }
-[data-reveal-delay="3"] { animation-delay: 150ms; }
-[data-reveal-delay="4"] { animation-delay: 200ms; }
+/* Reveal-on-scroll: canonical definition lives near end of file under "sectionEntry" */
 
 /* Remove default link underlines, we control with classes */
 a { text-decoration: none; }
@@ -281,52 +299,62 @@ a { text-decoration: none; }
 
 /* Every clickable element gets a press effect */
 button, a, [role="button"] {
-  transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1),
-              background-color 250ms cubic-bezier(0.16, 1, 0.3, 1),
-              color 250ms cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 250ms cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 250ms cubic-bezier(0.16, 1, 0.3, 1),
-              opacity 250ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform var(--duration-base) var(--ease-out),
+              background-color var(--duration-base) var(--ease-out),
+              color var(--duration-base) var(--ease-out),
+              border-color var(--duration-base) var(--ease-out),
+              box-shadow var(--duration-base) var(--ease-out),
+              opacity var(--duration-base) var(--ease-out);
 }
 
 button:active, a:active, [role="button"]:active {
-  transform: scale(0.96);
+  transform: scale(0.98);
 }
 
-/* Stronger floating card hover — every card now gets the
-   /teams cards treatment: 3D parallax tilt + team-color halo.
+/* Floating card transform + transition foundation.
+   Visual surface (background, border, box-shadow) is defined in the
+   "LIQUID GLASS" block lower in this file.
    JS in TiltProvider sets --tilt-x / --tilt-y / --tilt-z on hover;
    --team-glow can be overridden inline (e.g. team primary color). */
 .floating-card {
-  --team-glow: rgba(212, 181, 96, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.2),
-    0 8px 24px -12px rgba(0, 0, 0, 0.4);
+  /* --team-glow inherits from a parent if set (e.g. on a team page root
+     element) so the whole page can pick up that team's color. Falls back
+     to gold via var()'s second arg at every use site. */
   transform-style: preserve-3d;
   /* !important to beat Tailwind hover:scale utilities applied via classes */
   transform: perspective(900px)
     rotateX(var(--tilt-x, 0deg))
     rotateY(var(--tilt-y, 0deg))
     translateY(var(--tilt-z, 0)) !important;
-  transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 400ms cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 400ms cubic-bezier(0.16, 1, 0.3, 1),
-              background 400ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition: transform var(--duration-base) var(--ease-out),
+              border-color var(--duration-slow) var(--ease-out),
+              box-shadow var(--duration-slow) var(--ease-out),
+              background var(--duration-slow) var(--ease-out) !important;
 }
 
 .floating-card:hover {
-  border-color: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.13);
+  /* Same 3-layer structure as base — every value interpolates smoothly. */
+  background:
+    radial-gradient(140% 60% at 50% -10%,
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0) 50%),
+    linear-gradient(180deg,
+      rgba(255, 255, 255, 0.09) 0%,
+      rgba(255, 255, 255, 0.02) 18%,
+      rgba(255, 255, 255, 0) 42%),
+    linear-gradient(180deg, #16161D 0%, #16161D 100%);
   box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.3),
-    0 16px 32px -8px rgba(0, 0, 0, 0.5),
-    0 18px 40px -16px var(--team-glow),
-    0 0 0 1px rgba(212, 181, 96, 0.05) inset;
+    0 1px 0 rgba(255, 255, 255, 0.16) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.20) inset,
+    0 2px 4px rgba(0, 0, 0, 0.30),
+    0 16px 32px -8px rgba(0, 0, 0, 0.50),
+    0 18px 40px -16px var(--team-glow, rgba(212, 181, 96, 0.35));
 }
 
 /* Table rows get the same treatment */
 tbody tr {
-  transition: background-color 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 200ms var(--ease-out);
 }
 
 tbody tr:hover {
@@ -342,12 +370,7 @@ input:focus, textarea:focus, select:focus {
 
 /* Smoother image renders */
 img {
-  transition: opacity 300ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Section reveal stagger */
-[data-reveal] {
-  animation: revealUp 500ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  transition: opacity 300ms var(--ease-out);
 }
 
 @keyframes shimmer {
@@ -374,7 +397,7 @@ img {
    PREMIUM AESTHETIC POLISH
    ============================================================ */
 
-/* Custom scrollbar — thin, gold-tinted, dark theme */
+/* Custom scrollbar — thin, neutral white-alpha (gold reserved for accents) */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -383,34 +406,50 @@ img {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(212, 181, 96, 0.2);
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 10px;
   border: 2px solid transparent;
   background-clip: padding-box;
-  transition: background 200ms ease;
+  transition: background var(--duration-base) var(--ease-out);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(212, 181, 96, 0.5);
+  background: rgba(255, 255, 255, 0.18);
   background-clip: padding-box;
   border: 2px solid transparent;
 }
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(212, 181, 96, 0.25) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.10) transparent;
 }
 
-/* Floating cards — top-lit surface with subtle edge highlight */
+/* ============================================================
+   FLOATING CARD — polished dark slab (no white-wash frost)
+   ============================================================
+   Solid dark base + a subtle top-edge specular gradient + a bright
+   1px top hairline. Feels "lacquered" without losing contrast. */
 .floating-card {
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.055) 0%,
-    rgba(255, 255, 255, 0) 35%
-  ),
-  #131318;
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  /* IMPORTANT: base and :hover use the SAME 3-layer gradient structure
+     so CSS can interpolate every value smoothly — no "snap to frosted look."
+     Layer 1 (radial bloom) is transparent in base, visible on hover.
+     Layer 2 (top sheen) gets slightly brighter on hover.
+     Layer 3 (solid base) shifts to a hair lighter shade. */
+  background:
+    radial-gradient(140% 60% at 50% -10%,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0) 50%),
+    linear-gradient(180deg,
+      rgba(255, 255, 255, 0.07) 0%,
+      rgba(255, 255, 255, 0.015) 18%,
+      rgba(255, 255, 255, 0) 42%),
+    linear-gradient(180deg, #131318 0%, #131318 100%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   box-shadow:
+    /* Top hairline — the polished edge */
     0 1px 0 rgba(255, 255, 255, 0.10) inset,
-    0 8px 24px -8px rgba(0, 0, 0, 0.4);
+    /* Bottom inner vignette — gives weight */
+    0 -1px 0 rgba(0, 0, 0, 0.18) inset,
+    /* Lifted drop shadow */
+    0 8px 24px -10px rgba(0, 0, 0, 0.45);
 }
 
 /* Stat-number sheen — gold gradient for hero/leader numbers */
@@ -428,7 +467,7 @@ img {
   to { opacity: 1; transform: translateY(0); }
 }
 .premium-fade-in {
-  animation: premiumFadeIn 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: premiumFadeIn 280ms var(--ease-out) both;
 }
 
 /* Number ticker — count-up effect */
@@ -438,7 +477,7 @@ img {
 }
 .ticker-number {
   display: inline-block;
-  animation: tickerIn 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: tickerIn 600ms var(--ease-out) both;
 }
 
 /* Gold sweep — animated gradient shimmer across cards on hover */
@@ -458,7 +497,7 @@ img {
     transparent 70%
   );
   transform: translateX(-110%);
-  transition: transform 850ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 850ms var(--ease-out);
   pointer-events: none;
   border-radius: inherit;
   z-index: 1;
@@ -478,7 +517,7 @@ img {
   100% { opacity: 1; transform: translateY(0); filter: blur(0); }
 }
 .route-fade {
-  animation: routeFade 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: routeFade 360ms var(--ease-out) both;
 }
 
 /* Empty-state basketball bounce */
@@ -516,7 +555,7 @@ img {
 /* Table row hover — team-color accent border on left */
 .stat-row {
   position: relative;
-  transition: background-color 200ms ease;
+  transition: background-color var(--duration-base) var(--ease-out);
 }
 .stat-row::before {
   content: "";
@@ -528,7 +567,7 @@ img {
   background: var(--stat-row-color, #D4B560);
   border-radius: 0 2px 2px 0;
   opacity: 0;
-  transition: opacity 200ms ease;
+  transition: opacity var(--duration-base) var(--ease-out);
 }
 .stat-row:hover::before {
   opacity: 1;
@@ -633,22 +672,32 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
   50% { opacity: 1; transform: scale(1.1); }
 }
 
-/* TopNav scroll-blur effect */
+/* TopNav scroll-blur effect — light frost + polished top hairline */
 .topnav-blur {
-  background: rgba(10, 10, 14, 0.55);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 70%),
+    rgba(10, 10, 14, 0.60);
   backdrop-filter: blur(14px) saturate(160%);
   -webkit-backdrop-filter: blur(14px) saturate(160%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-  transition: background 250ms ease, backdrop-filter 250ms ease, border-color 250ms ease, box-shadow 250ms ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset;
+  transition:
+    background var(--duration-base) var(--ease-out),
+    backdrop-filter var(--duration-base) var(--ease-out),
+    border-color var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out);
 }
 /* Stronger frosted glass when the page has scrolled */
 .topnav-blur.topnav-scrolled {
-  background: rgba(10, 10, 14, 0.85);
-  backdrop-filter: blur(28px) saturate(220%);
-  -webkit-backdrop-filter: blur(28px) saturate(220%);
-  border-bottom-color: rgba(212, 181, 96, 0.18);
-  box-shadow: 0 8px 32px -16px rgba(0, 0, 0, 0.7),
-              0 1px 0 rgba(212, 181, 96, 0.06) inset;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 60%),
+    rgba(10, 10, 14, 0.85);
+  backdrop-filter: blur(22px) saturate(190%);
+  -webkit-backdrop-filter: blur(22px) saturate(190%);
+  border-bottom-color: rgba(212, 181, 96, 0.16);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 8px 32px -16px rgba(0, 0, 0, 0.7);
 }
 
 /* Live ticker scrolling marquee */
@@ -671,8 +720,19 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
   100% { color: #F5F5F7; text-shadow: 0 0 0 rgba(212, 181, 96, 0); transform: scale(1); }
 }
 .score-pulse {
-  animation: scorePulse 1.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: scorePulse 1.6s var(--ease-out) both;
   display: inline-block;
+}
+
+/* Display heading sheen — subtle white-to-off-white vertical gradient so
+   headlines feel "lit from above" without changing perceived color. Apply
+   alongside (or after) any text-[#F5F5F7] Tailwind class. */
+.text-shine {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F5F5F7 55%, #E5E5E8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent;
 }
 
 /* Gradient hero numbers — gold-to-white vertical sweep */
@@ -686,7 +746,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
 
 /* Magnetic buttons — bump toward cursor on hover */
 .magnetic-btn {
-  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 200ms var(--ease-out);
 }
 
 /* Logo loading shimmer — pulse the placeholder until image loads */
@@ -704,13 +764,13 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
   to   { opacity: 1; transform: scale(1); filter: blur(0); }
 }
 .avatar-morph {
-  animation: avatarMorph 480ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: avatarMorph 480ms var(--ease-out) both;
 }
 
 /* 3D parallax tilt — sets transform from JS-provided CSS vars */
 .tilt-3d {
   transform-style: preserve-3d;
-  transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 250ms var(--ease-out);
 }
 .floating-card.tilt-3d,
 .floating-card.tilt-3d:hover {
@@ -727,7 +787,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
   height: 8px;
   border-radius: 9999px;
   background: rgba(255, 255, 255, 0.12);
-  transition: background 250ms ease, transform 250ms ease, box-shadow 250ms ease;
+  transition: background var(--duration-base) var(--ease-out), transform var(--duration-base) var(--ease-out), box-shadow var(--duration-base) var(--ease-out);
 }
 .scroll-dot.active {
   background: #D4B560;
@@ -745,6 +805,64 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
   outline: 2px solid rgba(212, 181, 96, 0.7);
   outline-offset: 2px;
   border-radius: 6px;
+}
+
+/* ============================================================
+   SITE-WIDE POLISH — every interactive surface feels "lacquered"
+   ============================================================
+   A subtle inset top hairline on form fields, buttons, and any
+   element that opts in via .shine. Cheap CSS, big perceived polish. */
+
+/* Form fields: polished top hairline + barely-there top sheen.
+   Invisible on light backgrounds, visible on dark — so we can apply
+   it globally without worrying about light-bg input variants. */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+select,
+textarea {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* Default polish on every <button>: subtle top-edge highlight.
+   Buttons that already declare box-shadow via Tailwind utilities
+   (shadow-xl, etc.) override this — that's fine. */
+button {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+button:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 4px 12px -2px rgba(0, 0, 0, 0.22);
+}
+
+/* .shine — opt-in utility for any element. Adds a polished top sheen
+   via background-image (layers over existing bg-color) plus a hairline.
+   Apply to chips, pills, or other small surfaces that want the gloss. */
+.shine {
+  background-image: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.07) 0%,
+    rgba(255, 255, 255, 0) 45%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.10),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.12);
+}
+
+/* Touch-device minimum tap targets — Apple HIG 44pt guideline.
+   Applied only on coarse pointers so desktop layouts stay tight. */
+@media (pointer: coarse) {
+  button,
+  [role="button"],
+  input[type="submit"],
+  input[type="button"] {
+    min-height: 44px;
+  }
+  /* Anchor-as-button: only enforce when it's already a flex/inline-flex pill,
+     so inline text links inside paragraphs are not stretched. */
+  a.inline-flex,
+  a.flex {
+    min-height: 44px;
+  }
 }
 
 /* Respect reduced-motion preference: shut off heavy animations. */
@@ -801,7 +919,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
     rgba(212, 181, 96, 0.25) 0%,
     rgba(212, 181, 96, 0) 60%);
   opacity: 0;
-  transition: opacity 600ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 600ms var(--ease-out);
   pointer-events: none;
 }
 .ripple:active::after {
@@ -827,17 +945,18 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
   animation: dividerShimmer 6s ease-in-out infinite;
 }
 
-/* Section entry parallax — slides up + fades on reveal. */
-[data-reveal] {
-  animation: sectionEntry 700ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
-}
+/* Section entry parallax — slides up + fades on reveal. Canonical [data-reveal]. */
 @keyframes sectionEntry {
   0%   { opacity: 0; transform: translateY(18px); }
   100% { opacity: 1; transform: translateY(0); }
 }
+[data-reveal] {
+  animation: sectionEntry var(--duration-slow) var(--ease-out) backwards;
+}
 [data-reveal-delay="1"] { animation-delay: 80ms; }
 [data-reveal-delay="2"] { animation-delay: 160ms; }
 [data-reveal-delay="3"] { animation-delay: 240ms; }
+[data-reveal-delay="4"] { animation-delay: 320ms; }
 
 /* Toast container + cards */
 @keyframes toastIn {
@@ -848,8 +967,8 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
   0%   { opacity: 1; transform: translateY(0) scale(1); }
   100% { opacity: 0; transform: translateY(20px) scale(0.95); }
 }
-.toast-enter { animation: toastIn 280ms cubic-bezier(0.16, 1, 0.3, 1) both; }
-.toast-leave { animation: toastOut 220ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.toast-enter { animation: toastIn 280ms var(--ease-out) both; }
+.toast-leave { animation: toastOut 220ms var(--ease-out) both; }
 
 /* Sparkle burst on score change */
 @keyframes sparklePop {
@@ -864,7 +983,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
   border-radius: 9999px;
   background: #D4B560;
   pointer-events: none;
-  animation: sparklePop 900ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: sparklePop 900ms var(--ease-out) forwards;
   box-shadow: 0 0 6px rgba(212, 181, 96, 0.8);
 }
 
@@ -907,7 +1026,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
 }
 .mask-reveal {
   display: inline-block;
-  animation: maskReveal 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: maskReveal 900ms var(--ease-out) both;
 }
 
 /* Cursor affordances */
@@ -927,7 +1046,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
 .flip-inner {
   position: relative;
   transform-style: preserve-3d;
-  transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 600ms var(--ease-out);
 }
 .flip-flipped { transform: rotateY(180deg); }
 .flip-face {
@@ -958,7 +1077,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
 .odometer-stack {
   display: flex;
   flex-direction: column;
-  transition: transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 700ms var(--ease-out);
 }
 .odometer-stack > span {
   flex: 0 0 100%;
@@ -991,7 +1110,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
 .word-fade {
   display: inline-block;
   opacity: 0;
-  animation: wordFadeIn 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: wordFadeIn 600ms var(--ease-out) both;
 }
 
 /* Staggered row reveal — used on /players rows */
@@ -1000,7 +1119,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
   100% { opacity: 1; transform: translateY(0); }
 }
 .row-reveal {
-  animation: rowReveal 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: rowReveal 420ms var(--ease-out) both;
 }
 
 /* Rank-badge pulse — soft golden breathe on the top-rank pill */
@@ -1036,7 +1155,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
 /* Team color glow on team card hover */
 .team-color-glow {
   position: relative;
-  transition: box-shadow 350ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: box-shadow 350ms var(--ease-out);
 }
 .team-color-glow:hover {
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06),
@@ -1058,12 +1177,12 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
   100% { transform: scale(1); }
 }
 .splash-overlay {
-  animation: splashFadeOut 360ms cubic-bezier(0.16, 1, 0.3, 1) 1100ms forwards;
+  animation: splashFadeOut 360ms var(--ease-out) 1100ms forwards;
 }
 .splash-ball {
   animation:
     splashLogoSpin 900ms cubic-bezier(0.34, 1.4, 0.64, 1) both,
-    splashLogoSettle 220ms cubic-bezier(0.16, 1, 0.3, 1) 900ms both;
+    splashLogoSettle 220ms var(--ease-out) 900ms both;
 }
 
 /* Compact density toggle for tables */
@@ -1080,7 +1199,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
 .radar-morph {
   transform-origin: center;
   transform-box: fill-box;
-  animation: radarMorph 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: radarMorph 700ms var(--ease-out) both;
 }
 
 /* Gamelog cell heatmap */
@@ -1107,6 +1226,6 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
   width: 8px;
   height: 14px;
   border-radius: 2px;
-  animation: confettiFall var(--cd, 3.2s) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: confettiFall var(--cd, 3.2s) var(--ease-out) forwards;
   will-change: transform, opacity;
 }
