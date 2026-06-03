@@ -138,6 +138,27 @@ export default function BoxscorePage({
       .catch(() => {});
   }, []);
 
+  // Top performers + lead timeline must be computed BEFORE any conditional
+  // return, otherwise hook order changes between renders (rules of hooks).
+  const awayTop = useMemo(() => getTopPerformer(data?.awayPlayers ?? null), [data?.awayPlayers]);
+  const homeTop = useMemo(() => getTopPerformer(data?.homePlayers ?? null), [data?.homePlayers]);
+  const leadByQuarter = useMemo(() => {
+    const aLines = data?.awayTeam.linescores ?? [];
+    const hLines = data?.homeTeam.linescores ?? [];
+    const aQ = aLines.map((s) => parseStatNum(s));
+    const hQ = hLines.map((s) => parseStatNum(s));
+    const n = Math.min(aQ.length, hQ.length);
+    const points: { quarter: number; aTotal: number; hTotal: number; lead: number }[] = [];
+    let aSum = 0;
+    let hSum = 0;
+    for (let i = 0; i < n; i++) {
+      aSum += aQ[i];
+      hSum += hQ[i];
+      points.push({ quarter: i + 1, aTotal: aSum, hTotal: hSum, lead: hSum - aSum });
+    }
+    return points;
+  }, [data?.awayTeam.linescores, data?.homeTeam.linescores]);
+
   if (error) {
     return (
       <div className="px-4 lg:px-12 py-16 max-w-6xl mx-auto">
@@ -172,26 +193,6 @@ export default function BoxscorePage({
     : "";
 
   const activeBlock = activeTeam === "away" ? data.awayPlayers : data.homePlayers;
-
-  // Top performers (computed only when boxscore data is present)
-  const awayTop = useMemo(() => getTopPerformer(data.awayPlayers), [data.awayPlayers]);
-  const homeTop = useMemo(() => getTopPerformer(data.homePlayers), [data.homePlayers]);
-
-  // Lead-change timeline: compute lead (home - away) at end of each quarter
-  const leadByQuarter = useMemo(() => {
-    const aQ = data.awayTeam.linescores.map((s) => parseStatNum(s));
-    const hQ = data.homeTeam.linescores.map((s) => parseStatNum(s));
-    const n = Math.min(aQ.length, hQ.length);
-    const points: { quarter: number; aTotal: number; hTotal: number; lead: number }[] = [];
-    let aSum = 0;
-    let hSum = 0;
-    for (let i = 0; i < n; i++) {
-      aSum += aQ[i];
-      hSum += hQ[i];
-      points.push({ quarter: i + 1, aTotal: aSum, hTotal: hSum, lead: hSum - aSum });
-    }
-    return points;
-  }, [data.awayTeam.linescores, data.homeTeam.linescores]);
 
   // Team colors
   const awayColor = TEAM_COLORS[data.awayTeam.tricode] ?? "#5B8DEF";
