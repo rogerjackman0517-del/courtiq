@@ -17,7 +17,11 @@ export async function GET() {
     if (!r.ok) return NextResponse.json({ teams: [] });
     const data = await r.json();
     type EspnInjury = {
-      athlete?: { displayName?: string; position?: { abbreviation?: string } };
+      athlete?: {
+        displayName?: string;
+        position?: { abbreviation?: string };
+        headshot?: { href?: string };
+      };
       status?: string;
       details?: { type?: string; detail?: string; returnDate?: string };
       shortComment?: string;
@@ -37,6 +41,7 @@ export async function GET() {
           type: i.details?.type ?? "",
           detail: i.details?.detail ?? "",
           returnDate: i.details?.returnDate ?? "",
+          headshot: i.athlete?.headshot?.href ?? "",
         })),
       }));
     return NextResponse.json({ teams: out });
