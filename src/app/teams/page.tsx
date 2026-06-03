@@ -151,7 +151,7 @@ export default function TeamsPage() {
     <div className="pb-24 lg:pb-12 premium-fade-in">
 
       {/* HERO */}
-      <section className="court-grid-bg relative overflow-hidden px-6 lg:px-12 pt-16 lg:pt-20 pb-12" data-reveal>
+      <section className="px-6 lg:px-12 pt-16 lg:pt-20 pb-12" data-reveal>
 <div className="max-w-6xl mx-auto relative">
           {/* Icon + eyebrow */}
           <div className="flex items-center gap-3 mb-5">

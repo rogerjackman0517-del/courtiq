@@ -353,7 +353,7 @@ export default function ComparePage() {
 
   return (
     <div className="pb-24 lg:pb-12 premium-fade-in">
-      <section className="court-grid-bg relative overflow-hidden px-4 lg:px-12 pt-10 lg:pt-16 max-w-6xl mx-auto" data-reveal>
+      <section className="px-4 lg:px-12 pt-10 lg:pt-16 max-w-6xl mx-auto" data-reveal>
 {/* Header */}
         <div className="mb-10 lg:mb-14 relative">
           <p className="text-xs font-bold tracking-[0.2em] uppercase text-[#D4B560] mb-3">
