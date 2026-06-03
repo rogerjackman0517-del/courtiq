@@ -122,9 +122,7 @@ export default function DashboardPage() {
   return (
     <div className="pb-24 lg:pb-12 premium-fade-in">
       <section className="court-grid-bg relative overflow-hidden px-4 lg:px-12 pt-10 lg:pt-16 pb-8" data-reveal>
-        {/* Ambient */}
-        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 60% 40% at 20% 0%, rgba(212,181,96,0.08) 0%, transparent 65%)" }} />
-        <div className="max-w-6xl mx-auto relative">
+<div className="max-w-6xl mx-auto relative">
           <p className="text-xs font-bold tracking-[0.2em] uppercase text-[#D4B560] mb-3">
             Welcome back
           </p>

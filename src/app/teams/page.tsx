@@ -152,9 +152,7 @@ export default function TeamsPage() {
 
       {/* HERO */}
       <section className="court-grid-bg relative overflow-hidden px-6 lg:px-12 pt-16 lg:pt-20 pb-12" data-reveal>
-        {/* Ambient glow */}
-        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 70% 50% at 15% 0%, rgba(212,181,96,0.08) 0%, transparent 65%)" }} />
-        <div className="max-w-6xl mx-auto relative">
+<div className="max-w-6xl mx-auto relative">
           {/* Icon + eyebrow */}
           <div className="flex items-center gap-3 mb-5">
             <div className="p-2.5 rounded-2xl bg-[#D4B560]/10">
