@@ -11,53 +11,127 @@ import { PlayerCard } from "@/components/players/PlayerCard";
 import { ArrowLeft, ArrowUpRight, Star } from "lucide-react";
 import { useFavoriteTeam } from "@/lib/useFavoriteTeam";
 
-function PlayerGallery({ players, color }: { players: Array<{ id: number; fullName: string; slug: string; pts: number; reb: number; ast: number }>; color: string }) {
+function PlayerGallery({ players, color }: {
+  players: Array<{ id: number; fullName: string; slug: string; teamAbbr: string; pts: number; reb: number; ast: number; blk: number; stl: number; gp: number; min: number }>;
+  color: string;
+}) {
   const [active, setActive] = useState(0);
+  const [failedIds, setFailedIds] = useState<Set<number>>(new Set());
+
   useEffect(() => {
     if (players.length <= 1) return;
     const t = setInterval(() => setActive((i) => (i + 1) % players.length), 4200);
     return () => clearInterval(t);
   }, [players.length]);
+
   if (players.length === 0) return null;
+  const p = players[active];
+
+  const STATS = [
+    { label: "PTS", value: p.pts.toFixed(1), accent: true },
+    { label: "REB", value: p.reb.toFixed(1) },
+    { label: "AST", value: p.ast.toFixed(1) },
+    { label: "STL", value: p.stl.toFixed(1) },
+    { label: "BLK", value: p.blk.toFixed(1) },
+    { label: "MIN", value: p.min.toFixed(1) },
+  ];
+
+  const showPhoto = !failedIds.has(p.id);
+
   return (
-    <div className="floating-card no-jiggle rounded-3xl p-6 lg:p-10 relative overflow-hidden">
-      <div
-        className="absolute inset-0 opacity-30 pointer-events-none"
-        style={{ background: `radial-gradient(ellipse 70% 60% at 75% 50%, ${color}66 0%, transparent 65%)` }}
-      />
-      <div className="relative grid grid-cols-1 md:grid-cols-[1fr_auto] gap-6 items-center">
-        <div>
-          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#6E6E76] mb-2">Spotlight</p>
-          {players.map((p, i) => (
-            <Link
-              key={p.id}
-              href={`/players/${p.slug}`}
-              className={`block transition-all duration-700 ${i === active ? "opacity-100 max-h-40" : "opacity-0 max-h-0 overflow-hidden"}`}
-              aria-hidden={i !== active}
-            >
-              <h3 className="font-[family-name:var(--font-barlow)] font-black text-3xl lg:text-5xl tracking-[-0.03em] text-[#F5F5F7] hover:text-[#D4B560] transition-colors">
+    <div className="floating-card no-jiggle rounded-3xl overflow-hidden relative">
+      {/* Team-colour left accent bar */}
+      <div className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ backgroundColor: color }} />
+
+      <div className="relative flex items-stretch">
+
+        {/* ── Content ── */}
+        <div className="flex-1 pl-8 pr-6 py-8 lg:py-10 flex flex-col gap-6 min-w-0">
+
+          {/* Name */}
+          <div>
+            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#6E6E76] mb-3">
+              Spotlight
+            </p>
+            <Link href={`/players/${p.slug}`} className="group block">
+              <h3 className="font-[family-name:var(--font-barlow)] font-black text-4xl lg:text-5xl tracking-[-0.03em] text-[#F5F5F7] group-hover:text-[#D4B560] transition-colors leading-[1.05] mb-2">
                 {p.fullName}
               </h3>
-              <p className="mt-2 text-sm text-[#8A8A93] tabular-nums">
-                {p.pts.toFixed(1)} pts · {p.reb.toFixed(1)} reb · {p.ast.toFixed(1)} ast
-              </p>
             </Link>
-          ))}
-        </div>
-        <div className="flex items-center gap-3 md:flex-col">
-          {players.map((p, i) => (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => setActive(i)}
-              className={`rounded-full transition-all ${i === active ? "ring-2 scale-110" : "opacity-50 hover:opacity-100"}`}
-              style={{ ["--tw-ring-color" as string]: color }}
-              aria-label={`Show ${p.fullName}`}
+            <p className="text-xs text-[#8A8A93] tracking-wide tabular-nums">
+              {p.teamAbbr} &middot; {p.min.toFixed(1)} MPG &middot; {p.gp} GP
+            </p>
+          </div>
+
+          {/* 6 stat chips */}
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+            {STATS.map((s) => (
+              <div
+                key={s.label}
+                className="rounded-2xl bg-white/[0.04] border border-white/[0.04] p-3 text-center"
+                style={s.accent ? { borderColor: `${color}50`, background: `${color}12` } : {}}
+              >
+                <p
+                  className="font-[family-name:var(--font-barlow)] font-black text-2xl tabular-nums leading-none"
+                  style={{ color: s.accent ? color : "#F5F5F7" }}
+                >
+                  {s.value}
+                </p>
+                <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-[#6E6E76] mt-1.5">
+                  {s.label}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* Selectors + profile link */}
+          <div className="flex items-center gap-2.5 flex-wrap">
+            {players.map((pl, i) => (
+              <button
+                key={pl.id}
+                type="button"
+                onClick={() => setActive(i)}
+                className={cn(
+                  "rounded-full transition-all duration-300 no-jiggle",
+                  i === active ? "ring-2 scale-110" : "opacity-40 hover:opacity-80"
+                )}
+                style={i === active ? { ["--tw-ring-color" as string]: color } : {}}
+                aria-label={`Show ${pl.fullName}`}
+              >
+                <PlayerAvatar playerId={pl.id} fullName={pl.fullName} size="sm" />
+              </button>
+            ))}
+            <Link
+              href={`/players/${p.slug}`}
+              className="ml-auto no-jiggle text-xs font-semibold text-[#D4B560] hover:text-[#F5F5F7] inline-flex items-center gap-1 transition-colors"
             >
-              <PlayerAvatar playerId={p.id} fullName={p.fullName} size="md" />
-            </button>
-          ))}
+              View profile <ArrowUpRight size={11} />
+            </Link>
+          </div>
         </div>
+
+        {/* ── Photo panel ── */}
+        {showPhoto && (
+          <div className="hidden md:block relative w-44 lg:w-60 shrink-0 self-stretch overflow-hidden">
+            {/* Team colour glow at base of photo */}
+            <div
+              className="absolute inset-0 pointer-events-none z-10"
+              style={{ background: `radial-gradient(ellipse 100% 50% at 50% 100%, ${color}55 0%, transparent 55%)` }}
+            />
+            {/* Left-side fade into card bg */}
+            <div
+              className="absolute inset-0 pointer-events-none z-10"
+              style={{ background: "linear-gradient(to right, #131318 0%, transparent 38%)" }}
+            />
+            <img
+              key={p.id}
+              src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${p.id}.png`}
+              alt={p.fullName}
+              className="w-full h-full object-cover object-top"
+              onError={() => setFailedIds((prev) => new Set([...prev, p.id]))}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -458,10 +532,22 @@ export default function TeamProfilePage() {
               )}
             </div>
 
-            {/* Rotating gallery */}
+            {/* Spotlight gallery */}
             <div className="mt-8">
               <PlayerGallery
-                players={roster.slice(0, Math.min(4, roster.length))}
+                players={roster.slice(0, Math.min(5, roster.length)).map(p => ({
+                  id: p.id,
+                  fullName: p.fullName,
+                  slug: p.slug,
+                  teamAbbr: team.abbreviation,
+                  pts: p.pts,
+                  reb: p.reb,
+                  ast: p.ast,
+                  blk: p.blk,
+                  stl: p.stl,
+                  gp: p.gp,
+                  min: p.min,
+                }))}
                 color={color}
               />
             </div>
