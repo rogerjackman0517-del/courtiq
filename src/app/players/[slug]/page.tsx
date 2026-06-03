@@ -15,7 +15,7 @@ import { PlayerRadar } from "@/components/charts/PlayerRadar";
 import { ScrollRail } from "@/components/ui/ScrollRail";
 import { useCopyToClipboard } from "@/components/ui/Toast";
 import { PLAYER_NICKNAMES } from "@/lib/playerNicknames";
-import { Share2, TrendingUp as TrendingUpIcon, TrendingDown as TrendingDownIcon, Award } from "lucide-react";
+import { Share2, TrendingUp as TrendingUpIcon, TrendingDown as TrendingDownIcon, Award, Scale } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { DustParticles } from "@/components/ui/DustParticles";
 import { Lightbox } from "@/components/ui/Lightbox";
@@ -343,14 +343,28 @@ export default function PlayerProfilePage() {
                 { label: player.fullName },
               ]}
             />
-            <button
-              type="button"
-              onClick={() => copy(window.location.href, `${player.fullName} link copied`)}
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-[#6E6E76] hover:text-[#F5F5F7] tracking-wide transition-colors ripple px-2 py-1 rounded-md"
-              aria-label="Copy link to this player"
-            >
-              <Share2 size={12} /> Share
-            </button>
+            <div className="flex items-center gap-1">
+              <Link
+                href={`/compare?a=${player.slug}`}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold tracking-wide ripple px-3 py-1.5 rounded-full transition-all"
+                style={{
+                  color: teamColor,
+                  background: `${teamColor}14`,
+                  border: `1px solid ${teamColor}33`,
+                }}
+                aria-label={`Compare ${player.fullName} with another player`}
+              >
+                <Scale size={12} /> Compare
+              </Link>
+              <button
+                type="button"
+                onClick={() => copy(window.location.href, `${player.fullName} link copied`)}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-[#6E6E76] hover:text-[#F5F5F7] tracking-wide transition-colors ripple px-2 py-1 rounded-md"
+                aria-label="Copy link to this player"
+              >
+                <Share2 size={12} /> Share
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-8 lg:gap-14 items-center">
