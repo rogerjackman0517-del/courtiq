@@ -126,9 +126,11 @@ export default function StatsPage() {
     <div className="pb-24 lg:pb-12 premium-fade-in">
 
       {/* HERO */}
-      <section className="px-6 lg:px-12 pt-16 lg:pt-20 pb-12" data-reveal>
-        <div className="max-w-6xl mx-auto">
-          <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-3">
+      <section className="court-grid-bg relative overflow-hidden px-6 lg:px-12 pt-16 lg:pt-20 pb-12" data-reveal>
+        {/* Ambient gold glow */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 70% 50% at 15% 0%, rgba(212,181,96,0.08) 0%, transparent 65%)" }} />
+        <div className="max-w-6xl mx-auto relative">
+          <p className="text-xs font-bold tracking-[0.2em] uppercase text-[#D4B560] mb-3">
             Leaderboard
           </p>
           <h1 className="font-[family-name:var(--font-barlow)] font-black text-5xl lg:text-7xl tracking-[-0.04em] text-[#F5F5F7] mb-4 leading-[0.95]">
@@ -136,8 +138,21 @@ export default function StatsPage() {
             <span className="text-[#D4B560]">the league?</span>
           </h1>
           <p className="text-base lg:text-lg text-[#8A8A93] max-w-xl leading-relaxed">
-            {loading ? "Loading…" : `Top ${rows.length} players sorted by ${activeCol?.label ?? "PPG"}.`}
+            {loading ? "Loading player stats…" : `${rows.length} players ranked by ${activeCol?.label ?? "PPG"}.`}
           </p>
+          {!loading && players.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-6">
+              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#D4B560]/10 border border-[#D4B560]/20 text-[#D4B560] text-xs font-bold">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#D4B560]" />{players.length} Players
+              </span>
+              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-[#8A8A93] text-xs font-bold">
+                9 Stat Categories
+              </span>
+              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-[#8A8A93] text-xs font-bold">
+                Percentile heatmap
+              </span>
+            </div>
+          )}
         </div>
       </section>
 
@@ -192,7 +207,7 @@ export default function StatsPage() {
 
       {/* DIVIDER */}
       <div className="px-4 lg:px-12">
-        <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="max-w-6xl mx-auto h-px divider-shimmer" />
       </div>
 
       <section className="px-4 lg:px-12 py-8 lg:py-16" data-reveal data-reveal-delay="1">

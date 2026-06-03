@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowUp, ArrowDown, Flame, Snowflake } from "lucide-react";
+import { ArrowUp, ArrowDown, Flame, Snowflake, TrendingUp } from "lucide-react";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { StandingsRowSkeleton } from "@/components/ui/Skeleton";
-import { AnimatedHeading } from "@/components/ui/AnimatedHeading";
 import { StatLabel } from "@/components/ui/StatLabel";
 import { cn } from "@/lib/utils";
 
@@ -251,33 +250,42 @@ export default function StandingsPage() {
     <div className="pb-24 lg:pb-12 premium-fade-in">
 
       {/* HERO */}
-      <section className="px-6 lg:px-12 pt-16 lg:pt-20 pb-12" data-reveal>
-        <div className="max-w-6xl mx-auto">
-          <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-3">
-            Standings
-          </p>
+      <section className="court-grid-bg relative overflow-hidden px-6 lg:px-12 pt-16 lg:pt-20 pb-12" data-reveal>
+        {/* Ambient gold glow */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 70% 50% at 15% 0%, rgba(212,181,96,0.08) 0%, transparent 65%)" }} />
+        <div className="max-w-6xl mx-auto relative">
+          {/* Icon + eyebrow */}
+          <div className="flex items-center gap-3 mb-5">
+            <div className="p-2.5 rounded-2xl bg-[#D4B560]/10">
+              <TrendingUp size={20} className="text-[#D4B560]" />
+            </div>
+            <p className="text-xs font-bold tracking-[0.2em] uppercase text-[#D4B560]">
+              Standings
+            </p>
+          </div>
           <h1 className="font-[family-name:var(--font-barlow)] font-black text-5xl lg:text-7xl tracking-[-0.04em] text-[#F5F5F7] mb-4 leading-[0.95]">
-            <AnimatedHeading text="The race to" />
-            <br />
-            <span className="text-[#D4B560]">
-              <AnimatedHeading text="the playoffs." startDelay={250} />
-            </span>
+            The race to<br />
+            <span className="text-[#D4B560]">the playoffs.</span>
           </h1>
           <p className="text-base lg:text-lg text-[#8A8A93] max-w-xl leading-relaxed">
             2025-26 NBA standings, games back, and playoff positioning.
           </p>
 
+          {/* Count pills */}
+          <div className="flex flex-wrap gap-2 mt-6 mb-2">
+            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#34D399]/10 border border-[#34D399]/20 text-[#34D399] text-xs font-bold">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#34D399]" />12 Playoff
+            </span>
+            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F59E0B]/10 border border-[#F59E0B]/20 text-[#F59E0B] text-xs font-bold">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#F59E0B]" />8 Play-In
+            </span>
+            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#6E6E76]/10 border border-[#6E6E76]/20 text-[#6E6E76] text-xs font-bold">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#6E6E76]" />10 Lottery
+            </span>
+          </div>
+
           {/* Legend */}
-          <div className="flex flex-wrap items-center gap-4 mt-8">
-            <span className="inline-flex items-center gap-1.5 text-[11px] tracking-wide text-[#8A8A93]">
-              <span className="h-2 w-2 rounded-full bg-[#34D399]" /> Playoffs · 1-6
-            </span>
-            <span className="inline-flex items-center gap-1.5 text-[11px] tracking-wide text-[#8A8A93]">
-              <span className="h-2 w-2 rounded-full bg-[#F59E0B]" /> Play-In · 7-10
-            </span>
-            <span className="inline-flex items-center gap-1.5 text-[11px] tracking-wide text-[#8A8A93]">
-              <span className="h-2 w-2 rounded-full bg-[#6E6E76]" /> Lottery
-            </span>
+          <div className="flex flex-wrap items-center gap-4 mt-5">
             <span className="inline-flex items-center gap-1.5 text-[11px] tracking-wide text-[#8A8A93]">
               <Flame size={11} className="text-[#F59E0B]" /> Hot streak (W4+)
             </span>

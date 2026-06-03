@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { TeamCardSkeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
-import { Star } from "lucide-react";
+import { Star, Shield } from "lucide-react";
 import { useFavoriteTeam } from "@/lib/useFavoriteTeam";
 
 type TeamRow = {
@@ -151,11 +151,19 @@ export default function TeamsPage() {
     <div className="pb-24 lg:pb-12 premium-fade-in">
 
       {/* HERO */}
-      <section className="px-6 lg:px-12 pt-16 lg:pt-20 pb-12" data-reveal>
-        <div className="max-w-6xl mx-auto">
-          <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-3">
-            Teams
-          </p>
+      <section className="court-grid-bg relative overflow-hidden px-6 lg:px-12 pt-16 lg:pt-20 pb-12" data-reveal>
+        {/* Ambient glow */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 70% 50% at 15% 0%, rgba(212,181,96,0.08) 0%, transparent 65%)" }} />
+        <div className="max-w-6xl mx-auto relative">
+          {/* Icon + eyebrow */}
+          <div className="flex items-center gap-3 mb-5">
+            <div className="p-2.5 rounded-2xl bg-[#D4B560]/10">
+              <Shield size={20} className="text-[#D4B560]" />
+            </div>
+            <p className="text-xs font-bold tracking-[0.2em] uppercase text-[#D4B560]">
+              Teams
+            </p>
+          </div>
           <h1 className="font-[family-name:var(--font-barlow)] font-black text-5xl lg:text-7xl tracking-[-0.04em] text-[#F5F5F7] mb-4 leading-[0.95]">
             All 30 teams.<br />
             <span className="text-[#D4B560]">2025-26 season.</span>
@@ -163,6 +171,18 @@ export default function TeamsPage() {
           <p className="text-base lg:text-lg text-[#8A8A93] max-w-xl leading-relaxed">
             Current records, win streaks, and playoff positioning.
           </p>
+          {/* Count pills */}
+          <div className="flex flex-wrap gap-2 mt-6">
+            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#D4B560]/10 border border-[#D4B560]/20 text-[#D4B560] text-xs font-bold">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#D4B560]" />30 Teams
+            </span>
+            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#5B8DEF]/10 border border-[#5B8DEF]/20 text-[#5B8DEF] text-xs font-bold">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#5B8DEF]" />15 Eastern
+            </span>
+            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#34D399]/10 border border-[#34D399]/20 text-[#34D399] text-xs font-bold">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#34D399]" />15 Western
+            </span>
+          </div>
         </div>
       </section>
 
@@ -188,7 +208,7 @@ export default function TeamsPage() {
         <>
           {/* DIVIDER */}
           <div className="px-4 lg:px-12">
-            <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+            <div className="max-w-6xl mx-auto h-px divider-shimmer" />
           </div>
 
           {/* EAST */}
@@ -210,7 +230,7 @@ export default function TeamsPage() {
 
           {/* DIVIDER */}
           <div className="px-4 lg:px-12">
-            <div className="max-w-6xl mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+            <div className="max-w-6xl mx-auto h-px divider-shimmer" />
           </div>
 
           {/* WEST */}

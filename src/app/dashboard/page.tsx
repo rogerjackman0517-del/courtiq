@@ -121,14 +121,29 @@ export default function DashboardPage() {
 
   return (
     <div className="pb-24 lg:pb-12 premium-fade-in">
-      <section className="brand-glow px-4 lg:px-12 pt-10 lg:pt-16 pb-8" data-reveal>
-        <div className="max-w-6xl mx-auto">
-          <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#D4B560] mb-3">
+      <section className="court-grid-bg relative overflow-hidden px-4 lg:px-12 pt-10 lg:pt-16 pb-8" data-reveal>
+        {/* Ambient */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 60% 40% at 20% 0%, rgba(212,181,96,0.08) 0%, transparent 65%)" }} />
+        <div className="max-w-6xl mx-auto relative">
+          <p className="text-xs font-bold tracking-[0.2em] uppercase text-[#D4B560] mb-3">
             Welcome back
           </p>
           <h1 className="font-[family-name:var(--font-barlow)] font-black text-4xl lg:text-6xl tracking-[-0.04em] text-[#F5F5F7] mb-3 leading-[0.95]">
             {user?.firstName ?? "Your"}&apos;s <span className="text-[#D4B560]">dashboard.</span>
           </h1>
+          {/* Quick stat pills */}
+          <div className="flex flex-wrap gap-2 mt-4">
+            {pinnedPlayers.length > 0 && (
+              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#D4B560]/10 border border-[#D4B560]/20 text-[#D4B560] text-xs font-bold">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#D4B560]" />{pinnedPlayers.length} pinned player{pinnedPlayers.length !== 1 ? "s" : ""}
+              </span>
+            )}
+            {totalPicks > 0 && (
+              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#34D399]/10 border border-[#34D399]/20 text-[#34D399] text-xs font-bold">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#34D399]" />{totalPicks} bracket picks
+              </span>
+            )}
+          </div>
         </div>
       </section>
 

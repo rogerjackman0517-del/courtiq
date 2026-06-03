@@ -305,9 +305,15 @@ export default function ScoresPage() {
     <div className="pb-24 lg:pb-12 premium-fade-in">
 
       {/* HERO */}
-      <section className="px-6 lg:px-12 pt-16 lg:pt-20 pb-12" data-reveal>
-        <div className="max-w-6xl mx-auto">
-          <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-3">
+      <section className="court-grid-bg relative overflow-hidden px-6 lg:px-12 pt-16 lg:pt-20 pb-12" data-reveal>
+        {/* Ambient — green when live, gold otherwise */}
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: liveCount > 0
+            ? "radial-gradient(ellipse 70% 50% at 15% 0%, rgba(52,211,153,0.08) 0%, transparent 65%)"
+            : "radial-gradient(ellipse 70% 50% at 15% 0%, rgba(212,181,96,0.07) 0%, transparent 65%)",
+        }} />
+        <div className="max-w-6xl mx-auto relative">
+          <p className={`text-xs font-bold tracking-[0.2em] uppercase mb-3 ${liveCount > 0 ? "text-[#34D399]" : "text-[#D4B560]"}`}>
             {dateStr || "Today"}
           </p>
           <h1 className="font-[family-name:var(--font-barlow)] font-black text-5xl lg:text-7xl tracking-[-0.04em] text-[#F5F5F7] mb-4 leading-[0.95]">
@@ -329,6 +335,26 @@ export default function ScoresPage() {
               : "All games and final scores for the day."
             }
           </p>
+          {games.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-6">
+              {liveCount > 0 && (
+                <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#34D399]/10 border border-[#34D399]/20 text-[#34D399] text-xs font-bold">
+                  <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full rounded-full bg-[#34D399] opacity-75 animate-pulse" /><span className="relative inline-flex h-2 w-2 rounded-full bg-[#34D399]" /></span>
+                  {liveCount} Live
+                </span>
+              )}
+              {games.filter(g => statusBucket(g) === "final").length > 0 && (
+                <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-[#8A8A93] text-xs font-bold">
+                  {games.filter(g => statusBucket(g) === "final").length} Final
+                </span>
+              )}
+              {games.filter(g => statusBucket(g) === "scheduled").length > 0 && (
+                <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-[#8A8A93] text-xs font-bold">
+                  {games.filter(g => statusBucket(g) === "scheduled").length} Upcoming
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </section>
 
