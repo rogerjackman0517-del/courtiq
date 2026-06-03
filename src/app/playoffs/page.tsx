@@ -158,14 +158,30 @@ function SeriesCard({
 
   return (
     <div
-      className="floating-card no-jiggle rounded-2xl overflow-hidden w-full relative bg-gradient-to-br from-[#1C1C24] to-[#131318]"
+      className="floating-card no-jiggle rounded-2xl w-full relative bg-gradient-to-br from-[#1C1C24] to-[#131318]"
       style={hasFavorite ? { boxShadow: "0 0 0 1px rgba(212,181,96,0.4), 0 18px 40px -16px rgba(212,181,96,0.3)" } : undefined}
     >
       {/* Left accent bar */}
       <div
-        className="absolute left-0 top-0 bottom-0 w-[3px]"
+        className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-2xl"
         style={{ background: isLive ? "#34D399" : accentColor, opacity: isLive || series.winner ? 1 : 0.35 }}
       />
+
+      {/* Winner advancement chevron — points inward toward the Finals trophy */}
+      {series.winner && round !== "finals" && (
+        <span
+          aria-hidden="true"
+          className={`hidden lg:block absolute top-1/2 -translate-y-1/2 ${align === "right" ? "-left-3" : "-right-3"} z-10 pointer-events-none`}
+        >
+          <svg width="14" height="22" viewBox="0 0 14 22" fill="none">
+            <path
+              d={align === "right" ? "M14 1 L0 11 L14 21 L14 14 L8 11 L14 8 Z" : "M0 1 L14 11 L0 21 L0 14 L6 11 L0 8 Z"}
+              fill={accentColor}
+              style={{ filter: `drop-shadow(0 0 6px ${accentColor}88)` }}
+            />
+          </svg>
+        </span>
+      )}
 
       {hasFavorite && (
         <span className="absolute -top-2 -right-2 rounded-full bg-[#D4B560] text-[#0A0A0E] text-[9px] font-bold tracking-[0.15em] uppercase px-2 py-0.5">
@@ -493,66 +509,114 @@ export default function PlayoffsPage() {
                 onPick={pick}
               />
 
-              {/* The Finals */}
-              <div className="flex flex-col items-center justify-center min-w-[180px] lg:min-w-[220px]">
-                <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#D4B560] mb-3">
+              {/* The Finals — centerpiece with trophy, oversized type, and team-color glow */}
+              <div className="flex flex-col items-center justify-center min-w-[200px] lg:min-w-[260px]">
+                <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#D4B560] mb-3 inline-flex items-center gap-2">
+                  <span className="h-px w-6 bg-[#D4B560]/40" />
                   NBA Finals
+                  <span className="h-px w-6 bg-[#D4B560]/40" />
                 </p>
-                <div className="floating-card no-jiggle rounded-3xl p-6 text-center bg-gradient-to-br from-[#D4B560]/15 via-[#1C1C24] to-[#131318] relative overflow-hidden">
-                  <div className="absolute inset-0 opacity-30 pointer-events-none"
-                    style={{ background: "radial-gradient(ellipse 60% 60% at 50% 0%, rgba(212,181,96,0.4) 0%, transparent 70%)" }}
+                <div
+                  className="floating-card no-jiggle rounded-3xl p-7 text-center relative overflow-hidden w-full"
+                  style={{
+                    background: "linear-gradient(160deg, rgba(212,181,96,0.18) 0%, #1C1C24 45%, #131318 100%)",
+                    boxShadow: "0 0 0 1px rgba(212,181,96,0.18), 0 24px 60px -20px rgba(212,181,96,0.35)",
+                  }}
+                >
+                  {/* Cinematic light cone from top */}
+                  <div
+                    className="absolute inset-0 opacity-50 pointer-events-none"
+                    style={{ background: "radial-gradient(ellipse 70% 50% at 50% 0%, rgba(212,181,96,0.45) 0%, transparent 65%)" }}
                   />
+                  {/* Bottom dark vignette */}
+                  <div
+                    className="absolute inset-x-0 bottom-0 h-1/2 opacity-60 pointer-events-none"
+                    style={{ background: "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.5) 100%)" }}
+                  />
+                  {/* Trophy with shimmer */}
+                  <div className="relative mb-3">
+                    <Trophy size={48} className="mx-auto text-[#D4B560]" strokeWidth={1.5} style={{ filter: "drop-shadow(0 0 18px rgba(212,181,96,0.55))" }} />
+                  </div>
+
                   <div className="relative">
-                    <svg viewBox="0 0 32 32" className="h-10 w-10 mx-auto mb-3">
-                      <path d="M9 4h14v6a7 7 0 0 1-14 0V4Zm-3 1h3v5H6V5Zm17 0h3v5h-3V5ZM12 18h8v3h2v3H10v-3h2v-3Z" fill="#D4B560" />
-                    </svg>
                     {bracket.finals && bracket.finals.high !== "TBD" ? (
                       <>
                         {bracket.finals.winner ? (
                           <>
-                            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#D4B560] mb-2">Champion</p>
-                            <div className="flex items-center justify-center gap-2 mb-1">
+                            <p className="text-[10px] font-black tracking-[0.3em] uppercase text-[#D4B560] mb-3">★ Champion ★</p>
+                            <div className="flex flex-col items-center gap-2 mb-2">
                               {teamFor(teamMap, bracket.finals.winner) && (
-                                <TeamLogo teamId={teamFor(teamMap, bracket.finals.winner)!.id} abbreviation={bracket.finals.winner} size="sm" />
+                                <TeamLogo
+                                  teamId={teamFor(teamMap, bracket.finals.winner)!.id}
+                                  abbreviation={bracket.finals.winner}
+                                  primaryColor={teamFor(teamMap, bracket.finals.winner)!.primaryColor}
+                                  size="lg"
+                                />
                               )}
-                              <p className="font-[family-name:var(--font-barlow)] font-black text-xl text-[#F5F5F7] tracking-tight">
+                              <p className="font-[family-name:var(--font-barlow)] font-black text-2xl lg:text-3xl text-[#F5F5F7] tracking-tight leading-none">
                                 {teamFor(teamMap, bracket.finals.winner)?.name ?? bracket.finals.winner}
                               </p>
                             </div>
-                            <p className="text-[11px] text-[#D4B560] font-semibold">{bracket.finals.score}</p>
+                            <p className="text-xs text-[#D4B560] font-bold tracking-wider tabular-nums">{bracket.finals.score}</p>
                           </>
                         ) : (
                           <>
-                            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#34D399] mb-3 inline-flex items-center gap-1.5">
-                              <span className="h-1.5 w-1.5 rounded-full bg-[#34D399] animate-pulse inline-block" />
-                              Live Series
+                            <p className="text-[10px] font-black tracking-[0.25em] uppercase text-[#34D399] mb-3 inline-flex items-center gap-1.5">
+                              <span className="relative flex h-1.5 w-1.5">
+                                <span className="absolute inline-flex h-full w-full rounded-full bg-[#34D399] opacity-75 animate-pulse" />
+                                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#34D399]" />
+                              </span>
+                              Live · Best of 7
                             </p>
-                            <div className="space-y-2 mb-2">
+                            <div className="space-y-2 mb-3">
                               {[bracket.finals.high, bracket.finals.low].map((abbr, idx) => {
                                 const t = teamFor(teamMap, abbr);
                                 const score = bracket.finals!.score.split("-")[idx] ?? "0";
+                                const isLeading =
+                                  parseInt(score, 10) >
+                                  parseInt(bracket.finals!.score.split("-")[idx === 0 ? 1 : 0] ?? "0", 10);
                                 return (
-                                  <div key={abbr} className="flex items-center justify-between gap-2">
+                                  <div
+                                    key={abbr}
+                                    className={`flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 transition-colors ${
+                                      isLeading ? "bg-white/[0.05]" : ""
+                                    }`}
+                                  >
                                     <div className="flex items-center gap-2">
-                                      {t && <TeamLogo teamId={t.id} abbreviation={abbr} size="xs" />}
-                                      <span className="text-xs font-bold text-[#F5F5F7]">{abbr}</span>
+                                      {t && (
+                                        <TeamLogo
+                                          teamId={t.id}
+                                          abbreviation={abbr}
+                                          primaryColor={t.primaryColor}
+                                          size="sm"
+                                        />
+                                      )}
+                                      <span className={`font-[family-name:var(--font-barlow)] font-black text-sm tracking-tight ${isLeading ? "text-[#F5F5F7]" : "text-[#8A8A93]"}`}>
+                                        {t?.name ?? abbr}
+                                      </span>
                                     </div>
-                                    <span className="font-[family-name:var(--font-barlow)] font-black text-lg text-[#F5F5F7] tabular-nums">{score}</span>
+                                    <span
+                                      className={`font-[family-name:var(--font-barlow)] font-black text-2xl tabular-nums ${
+                                        isLeading ? "text-[#F5F5F7]" : "text-[#6E6E76]"
+                                      }`}
+                                    >
+                                      {score}
+                                    </span>
                                   </div>
                                 );
                               })}
                             </div>
                             {bracket.finals.note && (
-                              <p className="text-[10px] text-[#D4B560] font-semibold tracking-wide">{bracket.finals.note}</p>
+                              <p className="text-[10px] text-[#D4B560] font-bold tracking-[0.15em] uppercase">{bracket.finals.note}</p>
                             )}
                           </>
                         )}
                       </>
                     ) : (
                       <>
-                        <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#D4B560] mb-1">Champion</p>
-                        <p className="font-[family-name:var(--font-barlow)] font-black text-xl text-[#F5F5F7] tracking-tight">TBD</p>
-                        <p className="text-[11px] text-[#6E6E76] mt-1">Conf finals in progress</p>
+                        <p className="text-[10px] font-black tracking-[0.25em] uppercase text-[#D4B560] mb-2">Champion</p>
+                        <p className="font-[family-name:var(--font-barlow)] font-black text-3xl text-[#F5F5F7] tracking-[-0.02em]">TBD</p>
+                        <p className="text-[11px] text-[#6E6E76] mt-2 tracking-wide">Conf finals in progress</p>
                       </>
                     )}
                   </div>

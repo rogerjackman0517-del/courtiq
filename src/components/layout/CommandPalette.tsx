@@ -8,6 +8,13 @@ import { PlayerAvatar } from "@/components/players/PlayerAvatar";
 
 type Player = { id: number; fullName: string; slug: string; teamAbbr: string; teamId?: number; pts: number };
 type Team = { id: number; abbreviation: string; fullName: string; city: string; name: string; slug: string; primaryColor: string };
+type LiveGame = {
+  gameId: string;
+  gameStatus: number; // 1 upcoming, 2 live, 3 final
+  gameStatusText: string;
+  awayTeam: { teamTricode: string; teamCity?: string; teamName?: string; teamId?: number; score: number };
+  homeTeam: { teamTricode: string; teamCity?: string; teamName?: string; teamId?: number; score: number };
+};
 
 type PageRoute = {
   kind: "page";
@@ -35,7 +42,8 @@ const PAGES: PageRoute[] = [
 type Hit =
   | { kind: "page"; key: string; href: string; title: string; icon: React.ComponentType<{ size?: number; className?: string }> }
   | { kind: "player"; key: string; href: string; player: Player }
-  | { kind: "team"; key: string; href: string; team: Team };
+  | { kind: "team"; key: string; href: string; team: Team }
+  | { kind: "game"; key: string; href: string; game: LiveGame };
 
 const RECENT_KEY = "courtiq-recent-jumps";
 
@@ -70,6 +78,7 @@ export function CommandPalette() {
   const [activeIdx, setActiveIdx] = useState(0);
   const [players, setPlayers] = useState<Player[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [games, setGames] = useState<LiveGame[]>([]);
   const [recents, setRecents] = useState<RecentJump[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -105,6 +114,14 @@ export function CommandPalette() {
         .then((d: Team[]) => Array.isArray(d) && setTeams(d))
         .catch(() => {});
     }
+    // Always refresh today's games when the palette opens — scores change fast.
+    fetch("/api/games/today")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        const gs = d?.scoreboard?.games;
+        if (Array.isArray(gs)) setGames(gs);
+      })
+      .catch(() => {});
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -112,6 +129,22 @@ export function CommandPalette() {
   const hits = useMemo<Hit[]>(() => {
     const q = query.trim().toLowerCase();
     const out: Hit[] = [];
+    // Live games always surface first (when empty query OR when query matches a team in the game)
+    const liveGames = games.filter((g) => g.gameStatus === 2);
+    const matchingGames = q
+      ? games.filter(
+          (g) =>
+            g.awayTeam.teamTricode.toLowerCase().includes(q) ||
+            g.homeTeam.teamTricode.toLowerCase().includes(q) ||
+            (g.awayTeam.teamCity ?? "").toLowerCase().includes(q) ||
+            (g.homeTeam.teamCity ?? "").toLowerCase().includes(q)
+        )
+      : liveGames;
+
+    matchingGames.slice(0, q ? 4 : 3).forEach((g) =>
+      out.push({ kind: "game", key: `game:${g.gameId}`, href: `/scores/${g.gameId}`, game: g })
+    );
+
     if (!q) {
       PAGES.slice(0, 6).forEach((p) =>
         out.push({ kind: "page", key: `page:${p.href}`, href: p.href, title: p.title, icon: p.icon })
@@ -135,8 +168,8 @@ export function CommandPalette() {
       .forEach((t) =>
         out.push({ kind: "team", key: `team:${t.id}`, href: `/teams/${t.slug}`, team: t })
       );
-    return out.slice(0, 14);
-  }, [query, players, teams]);
+    return out.slice(0, 16);
+  }, [query, players, teams, games]);
 
   useEffect(() => {
     setActiveIdx(0);
@@ -144,11 +177,16 @@ export function CommandPalette() {
 
   function go(hit: Hit) {
     setOpen(false);
-    const label =
-      hit.kind === "page" ? hit.title :
-      hit.kind === "player" ? hit.player.fullName :
-      `${hit.team.city} ${hit.team.name}`;
-    pushRecent({ kind: hit.kind, href: hit.href, label });
+    let label = "";
+    if (hit.kind === "page") label = hit.title;
+    else if (hit.kind === "player") label = hit.player.fullName;
+    else if (hit.kind === "team") label = `${hit.team.city} ${hit.team.name}`;
+    else label = `${hit.game.awayTeam.teamTricode} @ ${hit.game.homeTeam.teamTricode}`;
+    // RecentJump only allows "player" | "team" | "page" — collapse "game" into "page"
+    // since recent games don't make sense to re-surface after they're over.
+    if (hit.kind !== "game") {
+      pushRecent({ kind: hit.kind, href: hit.href, label });
+    }
     router.push(hit.href);
   }
 
@@ -258,6 +296,42 @@ export function CommandPalette() {
                     <ArrowRight size={13} className="text-[#6E6E76]" />
                   </>
                 )}
+                {hit.kind === "game" && (() => {
+                  const g = hit.game;
+                  const isLive = g.gameStatus === 2;
+                  const isFinal = g.gameStatus === 3;
+                  const awayWin = g.awayTeam.score > g.homeTeam.score;
+                  const homeWin = g.homeTeam.score > g.awayTeam.score;
+                  return (
+                    <>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <TeamLogo teamId={g.awayTeam.teamId} abbreviation={g.awayTeam.teamTricode} size="xs" />
+                      </div>
+                      <div className="flex-1 min-w-0 flex items-center gap-2">
+                        <span className={`text-xs font-bold tabular-nums tracking-wide ${awayWin ? "text-[#F5F5F7]" : "text-[#8A8A93]"}`}>
+                          {g.awayTeam.teamTricode}
+                          {(isLive || isFinal) && <span className="ml-1.5 font-[family-name:var(--font-barlow)] font-black text-sm">{g.awayTeam.score}</span>}
+                        </span>
+                        <span className="text-[#3A3A42] text-[10px]">·</span>
+                        <span className={`text-xs font-bold tabular-nums tracking-wide ${homeWin ? "text-[#F5F5F7]" : "text-[#8A8A93]"}`}>
+                          {g.homeTeam.teamTricode}
+                          {(isLive || isFinal) && <span className="ml-1.5 font-[family-name:var(--font-barlow)] font-black text-sm">{g.homeTeam.score}</span>}
+                        </span>
+                        <TeamLogo teamId={g.homeTeam.teamId} abbreviation={g.homeTeam.teamTricode} size="xs" />
+                      </div>
+                      {isLive ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold tracking-[0.15em] uppercase text-[#34D399] shrink-0">
+                          <span className="h-1.5 w-1.5 rounded-full bg-[#34D399] animate-pulse" />
+                          Live
+                        </span>
+                      ) : isFinal ? (
+                        <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#D4B560] shrink-0">Final</span>
+                      ) : (
+                        <span className="text-[10px] text-[#6E6E76] tracking-wide shrink-0 truncate max-w-[80px]">{g.gameStatusText}</span>
+                      )}
+                    </>
+                  );
+                })()}
               </li>
             );
           })}

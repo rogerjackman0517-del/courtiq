@@ -8,8 +8,163 @@ import { cn } from "@/lib/utils";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { PlayerAvatar } from "@/components/players/PlayerAvatar";
 import { PlayerCard } from "@/components/players/PlayerCard";
-import { ArrowLeft, ArrowUpRight, Star } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Star, Calendar } from "lucide-react";
 import { useFavoriteTeam } from "@/lib/useFavoriteTeam";
+
+type UpcomingGame = {
+  gameId: string;
+  gameDate: string; // YYYY-MM-DD
+  gameStatus: number; // 1 upcoming, 2 live, 3 final
+  gameStatusText: string;
+  awayTeam: { teamTricode: string; teamCity?: string; teamName?: string; teamId?: number; score?: number };
+  homeTeam: { teamTricode: string; teamCity?: string; teamName?: string; teamId?: number; score?: number };
+};
+
+function ScheduleStrip({ teamAbbr, color }: { teamAbbr: string; color: string }) {
+  const [games, setGames] = useState<UpcomingGame[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+
+    // Fetch next 8 days of scoreboards in parallel; filter to this team's games.
+    const dates: string[] = [];
+    for (let i = 0; i < 8; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() + i);
+      dates.push(d.toISOString().slice(0, 10));
+    }
+
+    Promise.all(
+      dates.map((date) =>
+        fetch(`/api/games/today?date=${date}`)
+          .then((r) => (r.ok ? r.json() : null))
+          .then((data) => ({ date, games: (data?.scoreboard?.games ?? []) as UpcomingGame[] }))
+          .catch(() => ({ date, games: [] as UpcomingGame[] }))
+      )
+    ).then((results) => {
+      if (cancelled) return;
+      const out: UpcomingGame[] = [];
+      for (const { date, games: dayGames } of results) {
+        for (const g of dayGames) {
+          if (g.awayTeam?.teamTricode === teamAbbr || g.homeTeam?.teamTricode === teamAbbr) {
+            out.push({ ...g, gameDate: date });
+          }
+        }
+      }
+      setGames(out.slice(0, 6));
+      setLoading(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [teamAbbr]);
+
+  if (!loading && games.length === 0) return null;
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-5">
+        <p className="text-[10px] font-bold tracking-[0.2em] uppercase inline-flex items-center gap-1.5" style={{ color }}>
+          <Calendar size={11} />
+          Upcoming
+        </p>
+        <Link href="/scores" className="text-xs text-[#6E6E76] hover:text-[#F5F5F7] transition-colors">
+          All scores →
+        </Link>
+      </div>
+
+      <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 snap-x">
+        {loading &&
+          Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={`sched-skel-${i}`} className="h-36 w-[180px] rounded-2xl shrink-0" />
+          ))}
+        {!loading &&
+          games.map((g) => {
+            const isHome = g.homeTeam.teamTricode === teamAbbr;
+            const opp = isHome ? g.awayTeam : g.homeTeam;
+            const d = new Date(g.gameDate + "T12:00:00");
+            const dayLabel = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+            const dateLabel = d.toLocaleDateString("en-US", { month: "short", day: "numeric" }).toUpperCase();
+            const isLive = g.gameStatus === 2;
+            const isFinal = g.gameStatus === 3;
+            return (
+              <Link
+                key={g.gameId}
+                href={`/scores/${g.gameId}`}
+                className="floating-card no-jiggle relative shrink-0 w-[180px] snap-start rounded-2xl bg-gradient-to-br from-[#1C1C24] to-[#131318] p-4 flex flex-col gap-3 overflow-hidden group transition-transform hover:scale-[1.02]"
+              >
+                {/* Status accent */}
+                <div
+                  className="absolute top-0 left-0 right-0 h-[2px]"
+                  style={{
+                    background: isLive ? "#34D399" : isFinal ? color : `${color}66`,
+                  }}
+                />
+
+                {/* Date row */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold tracking-[0.15em] text-[#6E6E76]">{dayLabel}</p>
+                    <p className="text-[11px] font-bold tracking-wide text-[#F5F5F7]">{dateLabel}</p>
+                  </div>
+                  {isLive && (
+                    <span className="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.15em] uppercase text-[#34D399]">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#34D399] animate-pulse" />
+                      Live
+                    </span>
+                  )}
+                  {isFinal && (
+                    <span className="text-[9px] font-bold tracking-[0.15em] uppercase text-[#D4B560]">Final</span>
+                  )}
+                </div>
+
+                {/* Matchup */}
+                <div className="flex items-center gap-3">
+                  <span
+                    className="text-[10px] font-bold tracking-[0.15em] uppercase shrink-0"
+                    style={{ color: isHome ? color : "#6E6E76" }}
+                  >
+                    {isHome ? "vs" : "@"}
+                  </span>
+                  <TeamLogo teamId={opp.teamId} abbreviation={opp.teamTricode} size="md" />
+                  <div className="min-w-0">
+                    <p className="font-[family-name:var(--font-barlow)] font-black text-lg tracking-tight text-[#F5F5F7] group-hover:text-[#D4B560] transition-colors leading-none">
+                      {opp.teamTricode}
+                    </p>
+                    {opp.teamCity && (
+                      <p className="text-[10px] text-[#6E6E76] truncate mt-1">{opp.teamCity}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Score or tip time */}
+                <div className="mt-auto">
+                  {(isLive || isFinal) && typeof g.awayTeam.score === "number" && typeof g.homeTeam.score === "number" ? (
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-[family-name:var(--font-barlow)] font-black text-2xl tabular-nums text-[#F5F5F7]">
+                        {isHome ? g.homeTeam.score : g.awayTeam.score}
+                      </span>
+                      <span className="text-[#3A3A42] text-xs">·</span>
+                      <span className="font-[family-name:var(--font-barlow)] font-black text-2xl tabular-nums text-[#6E6E76]">
+                        {isHome ? g.awayTeam.score : g.homeTeam.score}
+                      </span>
+                    </div>
+                  ) : (
+                    <p className="text-[11px] font-semibold text-[#8A8A93] tracking-wide">
+                      {g.gameStatusText}
+                    </p>
+                  )}
+                </div>
+              </Link>
+            );
+          })}
+      </div>
+    </div>
+  );
+}
 
 function PlayerGallery({ players, color }: {
   players: Array<{ id: number; fullName: string; slug: string; teamAbbr: string; pts: number; reb: number; ast: number; blk: number; stl: number; gp: number; min: number }>;
@@ -550,6 +705,11 @@ export default function TeamProfilePage() {
                 }))}
                 color={color}
               />
+            </div>
+
+            {/* Schedule strip */}
+            <div className="mt-10">
+              <ScheduleStrip teamAbbr={team.abbreviation} color={color} />
             </div>
           </div>
         </section>
