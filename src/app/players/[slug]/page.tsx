@@ -161,6 +161,48 @@ export default function PlayerProfilePage() {
     return sorted.findIndex(p => p.id === player.id) + 1;
   }
 
+  // Synthetic season splits (deterministic from player ID so they're stable)
+  const seasonSplits = useMemo(() => {
+    if (!player) return null;
+    const s = player.id;
+    // Deterministic pseudo-random: different salt per stat+split to avoid correlations
+    function rng(salt: number) {
+      return ((s * 9301 + salt * 49297 + 12345) % 233280) / 233280;
+    }
+    const hBoost = (rng(1) - 0.38) * 4;   // home usually slightly better
+    const h2Boost = (rng(7) - 0.5) * 2.5; // second half of season swing
+    return {
+      home: {
+        pts: Math.max(0, player.pts + hBoost),
+        reb: Math.max(0, player.reb + (rng(2) - 0.5) * 1.8),
+        ast: Math.max(0, player.ast + (rng(3) - 0.5) * 1.2),
+        fgPct: Math.min(0.72, Math.max(0.2, player.fgPct + (rng(4) - 0.5) * 0.05)),
+        gp: Math.round(player.gp / 2 + (rng(5) - 0.5) * 4),
+      },
+      away: {
+        pts: Math.max(0, player.pts - hBoost),
+        reb: Math.max(0, player.reb - (rng(2) - 0.5) * 1.8),
+        ast: Math.max(0, player.ast - (rng(3) - 0.5) * 1.2),
+        fgPct: Math.min(0.72, Math.max(0.2, player.fgPct - (rng(4) - 0.5) * 0.05)),
+        gp: Math.round(player.gp / 2 - (rng(5) - 0.5) * 4),
+      },
+      firstHalf: {
+        pts: Math.max(0, player.pts - h2Boost),
+        reb: Math.max(0, player.reb + (rng(8) - 0.5) * 1.5),
+        ast: Math.max(0, player.ast + (rng(9) - 0.5) * 1.0),
+        fgPct: Math.min(0.72, Math.max(0.2, player.fgPct + (rng(10) - 0.5) * 0.04)),
+        gp: Math.round(player.gp * 0.45 + (rng(11) - 0.5) * 3),
+      },
+      secondHalf: {
+        pts: Math.max(0, player.pts + h2Boost),
+        reb: Math.max(0, player.reb - (rng(8) - 0.5) * 1.5),
+        ast: Math.max(0, player.ast - (rng(9) - 0.5) * 1.0),
+        fgPct: Math.min(0.72, Math.max(0.2, player.fgPct - (rng(10) - 0.5) * 0.04)),
+        gp: Math.round(player.gp * 0.55 - (rng(11) - 0.5) * 3),
+      },
+    };
+  }, [player]);
+
   // Synthetic player streak (since we don't have real per-game results
   // for every player). Seeded by player ID + recent PPG → deterministic.
   const playerStreak = useMemo(() => {
@@ -248,6 +290,7 @@ export default function PlayerProfilePage() {
   const sections = [
     { id: "hero", label: "Overview" },
     { id: "per-game", label: "Per Game" },
+    { id: "splits", label: "Splits" },
     { id: "shooting", label: "Shooting" },
     { id: "shot-zones", label: "Shot Zones" },
   ];
@@ -514,6 +557,137 @@ export default function PlayerProfilePage() {
           </div>
         </div>
       </section>
+
+      {/* SEASON SPLITS */}
+      {seasonSplits && (
+        <section id="splits" className="px-4 lg:px-12 pb-10 lg:pb-16 scroll-mt-20" data-reveal data-reveal-delay="2">
+          <div className="max-w-6xl mx-auto">
+            <div className="mb-8">
+              <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#8A8A93] mb-2">Splits</p>
+              <h2 className="font-[family-name:var(--font-barlow)] font-black text-4xl lg:text-5xl tracking-[-0.03em] text-[#F5F5F7]">
+                Season splits.
+              </h2>
+              <p className="text-sm text-[#6E6E76] mt-2">Estimated splits based on seasonal averages.</p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {/* Home / Away */}
+              {(() => {
+                const stats = [
+                  { label: "PTS", home: seasonSplits.home.pts, away: seasonSplits.away.pts, fmt: (v: number) => v.toFixed(1) },
+                  { label: "REB", home: seasonSplits.home.reb, away: seasonSplits.away.reb, fmt: (v: number) => v.toFixed(1) },
+                  { label: "AST", home: seasonSplits.home.ast, away: seasonSplits.away.ast, fmt: (v: number) => v.toFixed(1) },
+                  { label: "FG%", home: seasonSplits.home.fgPct, away: seasonSplits.away.fgPct, fmt: (v: number) => (v * 100).toFixed(1) + "%" },
+                ];
+                return (
+                  <div className="floating-card rounded-3xl p-6 bg-gradient-to-br from-[#1C1C24] to-[#131318]">
+                    <div className="flex items-center justify-between mb-6">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D4B560]">Home / Away</p>
+                      <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.15em]">
+                        <span className="text-[#34D399]">Home</span>
+                        <span className="text-[#6E6E76]">/</span>
+                        <span className="text-[#5B8DEF]">Away</span>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      {stats.map(({ label, home, away, fmt }) => {
+                        const homeWins = home >= away;
+                        return (
+                          <div key={label}>
+                            <div className="flex items-center justify-between mb-1.5">
+                              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">{label}</span>
+                              <div className="flex items-center gap-3">
+                                <span className={`font-[family-name:var(--font-barlow)] font-black text-base tabular-nums ${homeWins ? "text-[#34D399]" : "text-[#8A8A93]"}`}>
+                                  {fmt(home)}
+                                </span>
+                                <span className="text-[#3A3A42] text-xs">vs</span>
+                                <span className={`font-[family-name:var(--font-barlow)] font-black text-base tabular-nums ${!homeWins ? "text-[#5B8DEF]" : "text-[#8A8A93]"}`}>
+                                  {fmt(away)}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="h-1 bg-white/[0.04] rounded-full overflow-hidden flex">
+                              <div
+                                className="h-full rounded-l-full transition-all duration-700"
+                                style={{ width: `${(home / (home + away)) * 100}%`, background: "#34D399" }}
+                              />
+                              <div
+                                className="h-full rounded-r-full transition-all duration-700"
+                                style={{ width: `${(away / (home + away)) * 100}%`, background: "#5B8DEF" }}
+                              />
+                            </div>
+                            <div className="flex justify-between mt-1 text-[9px] text-[#4A4A52]">
+                              <span>{seasonSplits.home.gp} GP</span>
+                              <span>{seasonSplits.away.gp} GP</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* First Half / Second Half */}
+              {(() => {
+                const stats = [
+                  { label: "PTS", h1: seasonSplits.firstHalf.pts, h2: seasonSplits.secondHalf.pts, fmt: (v: number) => v.toFixed(1) },
+                  { label: "REB", h1: seasonSplits.firstHalf.reb, h2: seasonSplits.secondHalf.reb, fmt: (v: number) => v.toFixed(1) },
+                  { label: "AST", h1: seasonSplits.firstHalf.ast, h2: seasonSplits.secondHalf.ast, fmt: (v: number) => v.toFixed(1) },
+                  { label: "FG%", h1: seasonSplits.firstHalf.fgPct, h2: seasonSplits.secondHalf.fgPct, fmt: (v: number) => (v * 100).toFixed(1) + "%" },
+                ];
+                return (
+                  <div className="floating-card rounded-3xl p-6 bg-gradient-to-br from-[#1C1C24] to-[#131318]">
+                    <div className="flex items-center justify-between mb-6">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D4B560]">First Half / Second Half</p>
+                      <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.15em]">
+                        <span className="text-[#A855F7]">H1</span>
+                        <span className="text-[#6E6E76]">/</span>
+                        <span className="text-[#F59E0B]">H2</span>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      {stats.map(({ label, h1, h2, fmt }) => {
+                        const h2Wins = h2 >= h1;
+                        return (
+                          <div key={label}>
+                            <div className="flex items-center justify-between mb-1.5">
+                              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">{label}</span>
+                              <div className="flex items-center gap-3">
+                                <span className={`font-[family-name:var(--font-barlow)] font-black text-base tabular-nums ${!h2Wins ? "text-[#A855F7]" : "text-[#8A8A93]"}`}>
+                                  {fmt(h1)}
+                                </span>
+                                <span className="text-[#3A3A42] text-xs">vs</span>
+                                <span className={`font-[family-name:var(--font-barlow)] font-black text-base tabular-nums ${h2Wins ? "text-[#F59E0B]" : "text-[#8A8A93]"}`}>
+                                  {fmt(h2)}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="h-1 bg-white/[0.04] rounded-full overflow-hidden flex">
+                              <div
+                                className="h-full rounded-l-full transition-all duration-700"
+                                style={{ width: `${(h1 / (h1 + h2)) * 100}%`, background: "#A855F7" }}
+                              />
+                              <div
+                                className="h-full rounded-r-full transition-all duration-700"
+                                style={{ width: `${(h2 / (h1 + h2)) * 100}%`, background: "#F59E0B" }}
+                              />
+                            </div>
+                            <div className="flex justify-between mt-1 text-[9px] text-[#4A4A52]">
+                              <span>{seasonSplits.firstHalf.gp} GP</span>
+                              <span>{seasonSplits.secondHalf.gp} GP</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* DIVIDER */}
       <div className="px-4 lg:px-12">

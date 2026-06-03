@@ -4,10 +4,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { TeamLogo } from "@/components/teams/TeamLogo";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { AnimatedHeading } from "@/components/ui/AnimatedHeading";
 import { useFavoriteTeam } from "@/lib/useFavoriteTeam";
 import { useBracketPicks, seriesKey } from "@/lib/useBracketPicks";
-import { Check, RotateCcw, Share2 } from "lucide-react";
+import { Check, RotateCcw, Share2, Trophy } from "lucide-react";
 import { useCopyToClipboard } from "@/components/ui/Toast";
 
 type Team = {
@@ -105,14 +104,21 @@ function SeriesCard({
   const isLive = series.winner === null && series.score !== PENDING_LABEL;
   const flex = align === "right" ? "flex-row-reverse text-right" : "flex-row";
 
+  // Accent color: winner's team color > high seed's color > fallback
+  const accentColor = series.winner
+    ? (teamFor(teamMap, series.winner)?.primaryColor ?? "#D4B560")
+    : (high?.primaryColor ?? "#3A3A42");
+
   function Row({ team, score, won, teamAbbr }: { team: Team | null; score: string; won: boolean; teamAbbr: string }) {
     const isUserPick = userPick === teamAbbr;
     const interactive = canPick && !!team;
     return (
       <div
-        className={`flex items-center gap-3 ${flex} ${won || isUserPick ? "" : "opacity-60"} ${
-          interactive ? "cursor-pointer rounded-lg -mx-1 px-1 py-0.5 hover:bg-white/[0.03]" : ""
-        } ${isUserPick ? "ring-1 ring-[#D4B560]/40 rounded-lg -mx-1 px-1 py-0.5" : ""}`}
+        className={`flex items-center gap-3 ${flex} rounded-lg transition-colors ${
+          won ? "bg-white/[0.04]" : ""
+        } ${won || isUserPick ? "" : "opacity-50"} ${
+          interactive ? "cursor-pointer -mx-1 px-1 py-1 hover:bg-white/[0.05]" : "px-1 py-0.5"
+        } ${isUserPick ? "ring-1 ring-[#D4B560]/40 -mx-1" : ""}`}
         onClick={
           interactive
             ? (e) => {
@@ -131,16 +137,16 @@ function SeriesCard({
           />
         )}
         <div className="flex-1 min-w-0">
-          <p className="font-[family-name:var(--font-barlow)] font-bold text-sm text-[#F5F5F7] tracking-tight truncate">
-            {team ? team.name : series.high}
+          <p className={`font-[family-name:var(--font-barlow)] font-bold text-sm tracking-tight truncate ${won ? "text-[#F5F5F7]" : "text-[#8A8A93]"}`}>
+            {team ? team.name : teamAbbr}
           </p>
           <p className="text-[10px] tracking-wider text-[#6E6E76]">
             {team?.abbreviation ?? "—"}
           </p>
         </div>
         <span
-          className={`font-[family-name:var(--font-barlow)] font-black text-xl tabular-nums ${
-            won ? "text-[#F5F5F7]" : "text-[#6E6E76]"
+          className={`font-[family-name:var(--font-barlow)] font-black text-2xl tabular-nums ${
+            won ? "text-[#F5F5F7]" : "text-[#4A4A52]"
           }`}
         >
           {score}
@@ -152,47 +158,57 @@ function SeriesCard({
 
   return (
     <div
-      className="floating-card no-jiggle rounded-2xl p-4 bg-gradient-to-br from-[#1C1C24] to-[#131318] w-full relative"
-      style={hasFavorite ? { boxShadow: "0 0 0 1px rgba(212,181,96,0.4), 0 18px 40px -16px rgba(212,181,96,0.45)" } : undefined}
+      className="floating-card no-jiggle rounded-2xl overflow-hidden w-full relative bg-gradient-to-br from-[#1C1C24] to-[#131318]"
+      style={hasFavorite ? { boxShadow: "0 0 0 1px rgba(212,181,96,0.4), 0 18px 40px -16px rgba(212,181,96,0.3)" } : undefined}
     >
+      {/* Left accent bar */}
+      <div
+        className="absolute left-0 top-0 bottom-0 w-[3px]"
+        style={{ background: isLive ? "#34D399" : accentColor, opacity: isLive || series.winner ? 1 : 0.35 }}
+      />
+
       {hasFavorite && (
         <span className="absolute -top-2 -right-2 rounded-full bg-[#D4B560] text-[#0A0A0E] text-[9px] font-bold tracking-[0.15em] uppercase px-2 py-0.5">
           ★ Your team
         </span>
       )}
-      <div className="flex items-center justify-between mb-3">
-        <span
-          className={`text-[10px] font-bold tracking-[0.2em] uppercase ${
-            isLive ? "text-[#34D399]" : series.winner ? "text-[#D4B560]" : "text-[#6E6E76]"
-          }`}
-        >
-          {isLive ? (
-            <span className="inline-flex items-center gap-1.5">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-[#34D399] opacity-75 animate-pulse" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#34D399]" />
+
+      <div className="p-4 pl-5">
+        <div className="flex items-center justify-between mb-3">
+          <span
+            className={`text-[10px] font-bold tracking-[0.2em] uppercase ${
+              isLive ? "text-[#34D399]" : series.winner ? "text-[#D4B560]" : "text-[#6E6E76]"
+            }`}
+          >
+            {isLive ? (
+              <span className="inline-flex items-center gap-1.5">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-[#34D399] opacity-75 animate-pulse" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#34D399]" />
+                </span>
+                Live
               </span>
-              Active
-            </span>
-          ) : series.winner ? (
-            "Final"
-          ) : (
-            "Upcoming"
+            ) : series.winner ? (
+              "Final"
+            ) : (
+              "Upcoming"
+            )}
+          </span>
+          {series.note && (
+            <span className="text-[10px] text-[#6E6E76] tracking-wider truncate max-w-[120px]">{series.note}</span>
           )}
-        </span>
-        {series.note && (
-          <span className="text-[10px] text-[#6E6E76] tracking-wider truncate">{series.note}</span>
+        </div>
+        <div className="space-y-1">
+          <Row team={high} score={score1} won={series.winner === series.high} teamAbbr={series.high} />
+          <div className="h-px bg-white/[0.04] mx-1" />
+          <Row team={low} score={score2} won={series.winner === series.low} teamAbbr={series.low} />
+        </div>
+        {(pickCorrect || pickWrong) && (
+          <p className={`mt-3 text-[10px] font-bold tracking-[0.15em] uppercase ${pickCorrect ? "text-[#34D399]" : "text-[#F87171]"}`}>
+            {pickCorrect ? "✓ Correct pick" : `✗ Your pick: ${userPick}`}
+          </p>
         )}
       </div>
-      <div className="space-y-2">
-        <Row team={high} score={score1} won={series.winner === series.high} teamAbbr={series.high} />
-        <Row team={low} score={score2} won={series.winner === series.low} teamAbbr={series.low} />
-      </div>
-      {(pickCorrect || pickWrong) && (
-        <p className={`mt-3 text-[10px] font-bold tracking-[0.15em] uppercase ${pickCorrect ? "text-[#34D399]" : "text-[#F87171]"}`}>
-          {pickCorrect ? "Your pick · correct" : `Your pick · ${userPick}`}
-        </p>
-      )}
     </div>
   );
 }
@@ -350,31 +366,32 @@ export default function PlayoffsPage() {
 
   return (
     <div className="pb-24 lg:pb-12 premium-fade-in">
-      <section className="brand-glow px-4 lg:px-12 pt-10 lg:pt-20 pb-8" data-reveal>
+      <section className="px-4 lg:px-12 pt-10 lg:pt-20 pb-8" data-reveal>
         <div className="max-w-6xl mx-auto">
-          <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#D4B560] mb-3">
-            Playoffs · 2026
-          </p>
+          <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-[#D4B560]/10 border border-[#D4B560]/20">
+            <Trophy size={12} className="text-[#D4B560]" />
+            <p className="text-xs font-bold tracking-[0.2em] uppercase text-[#D4B560]">
+              Playoffs · 2026
+            </p>
+          </div>
           <h1 className="font-[family-name:var(--font-barlow)] font-black text-5xl lg:text-7xl tracking-[-0.04em] text-[#F5F5F7] mb-4 leading-[0.95]">
-            <AnimatedHeading text="Sixteen teams." />
+            Sixteen teams.
             <br />
-            <span className="text-[#D4B560]">
-              <AnimatedHeading text="One trophy." startDelay={250} />
-            </span>
+            <span className="text-[#D4B560]">One trophy.</span>
           </h1>
           <p className="text-base lg:text-lg text-[#8A8A93] max-w-xl leading-relaxed">
             Live bracket through the 2026 NBA Playoffs. Tap any team to open their page.
           </p>
 
-          <div className="flex flex-wrap items-center gap-4 mt-8">
-            <span className="inline-flex items-center gap-1.5 text-[11px] tracking-wide text-[#8A8A93]">
-              <span className="h-2 w-2 rounded-full bg-[#34D399]" /> Active series
+          <div className="flex flex-wrap items-center gap-3 mt-6">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#34D399]/10 border border-[#34D399]/20 text-[11px] font-semibold text-[#34D399]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#34D399] animate-pulse" /> Live series
             </span>
-            <span className="inline-flex items-center gap-1.5 text-[11px] tracking-wide text-[#8A8A93]">
-              <span className="h-2 w-2 rounded-full bg-[#D4B560]" /> Final
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#D4B560]/10 border border-[#D4B560]/20 text-[11px] font-semibold text-[#D4B560]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#D4B560]" /> Final
             </span>
-            <span className="inline-flex items-center gap-1.5 text-[11px] tracking-wide text-[#8A8A93]">
-              <span className="h-2 w-2 rounded-full bg-[#6E6E76]" /> Upcoming
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-[11px] font-semibold text-[#6E6E76]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#6E6E76]" /> Upcoming
             </span>
           </div>
         </div>

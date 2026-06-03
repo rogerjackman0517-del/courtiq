@@ -28,9 +28,17 @@ type PlayerRow = {
   gp: number;
 };
 
-type ColDef = { key: keyof PlayerRow; label: string; decimals: number; pct?: boolean };
+type ExtendedRow = PlayerRow & {
+  pts36: number; reb36: number; ast36: number; stl36: number; blk36: number;
+  eff: number; stk: number;
+};
 
-const COLS: ColDef[] = [
+// ColDef.key uses string so we can address both PlayerRow and computed fields
+type ColDef = { key: string; label: string; decimals: number; pct?: boolean; tooltip?: string };
+
+type TabMode = "per-game" | "per36" | "advanced";
+
+const PER_GAME_COLS: ColDef[] = [
   { key: "pts",    label: "PPG", decimals: 1 },
   { key: "reb",    label: "RPG", decimals: 1 },
   { key: "ast",    label: "APG", decimals: 1 },
@@ -42,13 +50,36 @@ const COLS: ColDef[] = [
   { key: "ftPct",  label: "FT%", decimals: 3, pct: true },
 ];
 
+const PER36_COLS: ColDef[] = [
+  { key: "pts36", label: "PTS", decimals: 1, tooltip: "Points per 36 min" },
+  { key: "reb36", label: "REB", decimals: 1, tooltip: "Rebounds per 36 min" },
+  { key: "ast36", label: "AST", decimals: 1, tooltip: "Assists per 36 min" },
+  { key: "stl36", label: "STL", decimals: 1, tooltip: "Steals per 36 min" },
+  { key: "blk36", label: "BLK", decimals: 1, tooltip: "Blocks per 36 min" },
+  { key: "min",   label: "MIN", decimals: 1, tooltip: "Actual minutes per game" },
+];
+
+const ADVANCED_COLS: ColDef[] = [
+  { key: "eff",    label: "EFF",  decimals: 1, tooltip: "PTS+REB+AST+STL+BLK (crude efficiency)" },
+  { key: "stk",    label: "STK",  decimals: 1, tooltip: "Stocks: STL + BLK" },
+  { key: "fgPct",  label: "FG%",  decimals: 3, pct: true },
+  { key: "fg3Pct", label: "3P%",  decimals: 3, pct: true },
+  { key: "ftPct",  label: "FT%",  decimals: 3, pct: true },
+  { key: "min",    label: "MIN",  decimals: 1 },
+];
+
+// Back-compat alias so the rest of the file can still reference COLS
+// (sort pills, formatVal, heatmap). Switched at runtime.
+const COLS = PER_GAME_COLS;
+
 export default function StatsPage() {
   const [players, setPlayers] = useState<PlayerRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sortKey, setSortKey] = useState<keyof PlayerRow>("pts");
+  const [sortKey, setSortKey] = useState<string>("pts");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [query, setQuery] = useState("");
+  const [tabMode, setTabMode] = useState<TabMode>("per-game");
 
   useEffect(() => {
     let cancelled = false;
@@ -65,22 +96,52 @@ export default function StatsPage() {
     return () => { cancelled = true; };
   }, []);
 
-  const rows = useMemo(() => {
+  // Derive active cols from tab mode
+  const activeCols: ColDef[] = tabMode === "per36" ? PER36_COLS : tabMode === "advanced" ? ADVANCED_COLS : PER_GAME_COLS;
+
+  // Base filtered + sorted rows (on raw PlayerRow first)
+  const baseRows = useMemo(() => {
     const filtered = query
       ? players.filter(p =>
           p.fullName.toLowerCase().includes(query.toLowerCase()) ||
           p.teamAbbr.toLowerCase().includes(query.toLowerCase()))
       : players;
-    return [...filtered].sort((a, b) => {
-      const av = (a[sortKey] as number) ?? 0;
-      const bv = (b[sortKey] as number) ?? 0;
+    return filtered;
+  }, [players, query]);
+
+  // Extended rows with computed fields
+  const extendedRows = useMemo<ExtendedRow[]>(() =>
+    baseRows.map(p => ({
+      ...p,
+      pts36: p.min > 0 ? (p.pts * 36) / p.min : 0,
+      reb36: p.min > 0 ? (p.reb * 36) / p.min : 0,
+      ast36: p.min > 0 ? (p.ast * 36) / p.min : 0,
+      stl36: p.min > 0 ? (p.stl * 36) / p.min : 0,
+      blk36: p.min > 0 ? (p.blk * 36) / p.min : 0,
+      eff: p.pts + p.reb + p.ast + p.stl + p.blk,
+      stk: p.stl + p.blk,
+    })),
+  [baseRows]);
+
+  const rows = useMemo(() => {
+    return [...extendedRows].sort((a, b) => {
+      const av = ((a as Record<string, unknown>)[sortKey] as number) ?? 0;
+      const bv = ((b as Record<string, unknown>)[sortKey] as number) ?? 0;
       return sortDir === "desc" ? bv - av : av - bv;
     });
-  }, [players, sortKey, sortDir, query]);
+  }, [extendedRows, sortKey, sortDir]);
 
-  function handleSort(key: keyof PlayerRow) {
+  function handleSort(key: string) {
     if (sortKey === key) setSortDir(d => d === "desc" ? "asc" : "desc");
     else { setSortKey(key); setSortDir("desc"); }
+  }
+
+  function handleTabChange(mode: TabMode) {
+    setTabMode(mode);
+    // Reset sort to the first column of the new tab
+    const newCols = mode === "per36" ? PER36_COLS : mode === "advanced" ? ADVANCED_COLS : PER_GAME_COLS;
+    setSortKey(newCols[0].key);
+    setSortDir("desc");
   }
 
   function formatVal(val: number, col: ColDef): string {
@@ -91,26 +152,24 @@ export default function StatsPage() {
   /**
    * Per-column percentile map: for each stat column, rank every visible
    * player so we can tint each cell as a heatmap (top 10% gold, bottom 10%
-   * blue, etc.). All COLS happen to be "higher is better"; if a "lower is
-   * better" col is ever added (e.g. TOV), invert the ranking for that col.
+   * blue, etc.). All COLS happen to be "higher is better".
    */
   const columnPercentiles = useMemo(() => {
     const result: Record<string, Map<number, number>> = {};
     if (rows.length === 0) return result;
-    COLS.forEach((col) => {
+    activeCols.forEach((col) => {
       const sorted = [...rows].sort(
-        (a, b) => ((b[col.key] as number) ?? 0) - ((a[col.key] as number) ?? 0)
+        (a, b) => (((b as Record<string, unknown>)[col.key] as number) ?? 0) - (((a as Record<string, unknown>)[col.key] as number) ?? 0)
       );
       const map = new Map<number, number>();
       const max = Math.max(1, sorted.length - 1);
       sorted.forEach((p, i) => {
-        // 0 = worst, 1 = best
         map.set(p.id, 1 - i / max);
       });
-      result[col.key as string] = map;
+      result[col.key] = map;
     });
     return result;
-  }, [rows]);
+  }, [rows, activeCols]);
 
   function heatmapBg(pctile: number): string {
     if (pctile >= 0.90) return "rgba(212, 181, 96, 0.22)";    // top 10% — gold
@@ -120,7 +179,7 @@ export default function StatsPage() {
     return "transparent";
   }
 
-  const activeCol = COLS.find(c => c.key === sortKey);
+  const activeCol = activeCols.find(c => c.key === sortKey);
 
   return (
     <div className="pb-24 lg:pb-12 premium-fade-in">
@@ -211,14 +270,51 @@ export default function StatsPage() {
       <section className="px-4 lg:px-12 py-8 lg:py-16" data-reveal data-reveal-delay="1">
         <div className="max-w-6xl mx-auto">
 
+          {/* Tab mode switcher */}
+          <div className="mb-8">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76] mb-3">View</p>
+            <div className="inline-flex items-center gap-1 p-1 rounded-2xl bg-[#131318] border border-white/[0.06]">
+              {(["per-game", "per36", "advanced"] as TabMode[]).map((mode) => {
+                const label = mode === "per-game" ? "Per Game" : mode === "per36" ? "Per 36 Min" : "Advanced";
+                const desc = mode === "per-game" ? "Season averages" : mode === "per36" ? "Scaled to 36 min" : "EFF · Stocks · Shooting";
+                return (
+                  <button
+                    key={mode}
+                    onClick={() => handleTabChange(mode)}
+                    className={cn(
+                      "px-4 py-2 rounded-xl text-xs font-semibold tracking-tight transition-all duration-200 flex flex-col items-center",
+                      tabMode === mode
+                        ? "bg-[#F5F5F7] text-[#0A0A0E]"
+                        : "text-[#8A8A93] hover:text-[#F5F5F7]"
+                    )}
+                    title={desc}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+            {tabMode === "per36" && (
+              <p className="mt-3 text-xs text-[#6E6E76] max-w-md">
+                Stats scaled to 36 minutes of play — useful for comparing players with different roles or injury-shortened seasons.
+              </p>
+            )}
+            {tabMode === "advanced" && (
+              <p className="mt-3 text-xs text-[#6E6E76] max-w-md">
+                <strong className="text-[#8A8A93]">EFF</strong> = PTS+REB+AST+STL+BLK per game &nbsp;·&nbsp; <strong className="text-[#8A8A93]">STK</strong> = Stocks (STL+BLK)
+              </p>
+            )}
+          </div>
+
           {/* Sort pills */}
           <div className="mb-6">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E6E76] mb-3">Sort by</p>
             <div className="flex flex-wrap gap-2">
-              {COLS.map(col => (
+              {activeCols.map(col => (
                 <button
-                  key={col.key as string}
+                  key={col.key}
                   onClick={() => { setSortKey(col.key); setSortDir("desc"); }}
+                  title={col.tooltip}
                   className={cn(
                     "px-4 py-1.5 rounded-full text-xs font-semibold tracking-tight transition-all duration-300",
                     sortKey === col.key
@@ -292,10 +388,11 @@ export default function StatsPage() {
                     <th className="text-right px-3 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E6E76]">
                       <StatLabel abbr="GP" />
                     </th>
-                    {COLS.map(col => (
-                      <th key={col.key as string} className={cn("text-right px-3 py-4", COLS[COLS.length - 1].key === col.key && "pr-6")}>
+                    {activeCols.map(col => (
+                      <th key={col.key} className={cn("text-right px-3 py-4", activeCols[activeCols.length - 1].key === col.key && "pr-6")}>
                         <button
                           onClick={() => handleSort(col.key)}
+                          title={col.tooltip}
                           className={cn(
                             "text-[10px] font-bold uppercase tracking-[0.15em] transition-colors",
                             sortKey === col.key ? "text-[#D4B560]" : "text-[#6E6E76] hover:text-[#F5F5F7]"
@@ -311,7 +408,7 @@ export default function StatsPage() {
                   {loading && Array.from({ length: 10 }).map((_, i) => <PlayerRowSkeleton key={"stat-skel-" + i} />)}
                   {!loading && rows.length === 0 && !error && (
                     <tr>
-                      <td colSpan={4 + COLS.length} className="px-5 py-16 text-center">
+                      <td colSpan={4 + activeCols.length} className="px-5 py-16 text-center">
                         <div className="flex flex-col items-center gap-3">
                           <svg viewBox="0 0 24 24" className="h-10 w-10 opacity-30" fill="none" stroke="#D4B560" strokeWidth="1.5" strokeLinecap="round">
                             <circle cx="11" cy="11" r="7" />
@@ -351,20 +448,21 @@ export default function StatsPage() {
                         </Link>
                       </td>
                       <td className="px-3 py-3.5 text-right text-xs text-[#8A8A93] tabular-nums">{p.gp}</td>
-                      {COLS.map(col => {
+                      {activeCols.map(col => {
                         const isActive = sortKey === col.key;
-                        const pctile = columnPercentiles[col.key as string]?.get(p.id) ?? 0.5;
+                        const pctile = columnPercentiles[col.key]?.get(p.id) ?? 0.5;
+                        const val = ((p as Record<string, unknown>)[col.key] as number) ?? 0;
                         return (
                           <td
-                            key={col.key as string}
+                            key={col.key}
                             className={cn(
                               "px-3 py-3.5 text-right font-[family-name:var(--font-barlow)] font-bold tabular-nums transition-colors",
-                              COLS[COLS.length - 1].key === col.key && "pr-6",
+                              activeCols[activeCols.length - 1].key === col.key && "pr-6",
                               isActive ? "text-[#D4B560]" : "text-[#F5F5F7]"
                             )}
                             style={{ background: heatmapBg(pctile) }}
                           >
-                            {formatVal(p[col.key] as number, col)}
+                            {formatVal(val, col)}
                           </td>
                         );
                       })}
